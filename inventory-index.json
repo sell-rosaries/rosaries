@@ -1,0 +1,29 @@
+{
+  "lastUpdated": "2024-10-13T12:00:00Z",
+  "categories": [
+    {
+      "name": "Gems",
+      "path": "/Jularies/Gems/",
+      "objects": [
+        "gb_4,6,8.png",
+        "gg_4,6,8.png",
+        "gh_4,6,8.png",
+        "gk_4,6,8.png",
+        "jg_4,6,8.png",
+        "klg_4,6,8.png",
+        "mg_4,6,8.png"
+      ]
+    },
+    {
+      "name": "Temp",
+      "path": "Jularies/Temp/",
+      "objects": [
+        "bmg_4,6,8.png",
+        "bpg_4,6,8.png",
+        "ppb_4,6,8.png",
+        "ppg_4,6,8.png",
+        "ppp_4,6,8.png"
+      ]
+    }
+  ]
+}

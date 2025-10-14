@@ -1,0 +1,85 @@
+name: Update Inventory Index
+
+# Runs automatically when you push images to the Jularies folder
+on:
+  push:
+    paths:
+      - 'Jularies/**'
+  workflow_dispatch: # Can also run manually
+
+permissions:
+  contents: write  # Grants GITHUB_TOKEN permission to push changes
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Generate inventory index
+        run: |
+          cat > inventory-index.json << 'EOF'
+          {
+            "lastUpdated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "categories": []
+          }
+          EOF
+          
+          # Scan Jularies folder
+          if [ -d "Jularies" ]; then
+            # Start JSON array
+            echo '{' > inventory-index.json
+            echo '  "lastUpdated": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'",' >> inventory-index.json
+            echo '  "categories": [' >> inventory-index.json
+            
+            first_cat=true
+            for category in Jularies/*/; do
+              if [ -d "$category" ]; then
+                cat_name=$(basename "$category")
+                
+                if [ "$first_cat" = false ]; then
+                  echo ',' >> inventory-index.json
+                fi
+                first_cat=false
+                
+                echo '    {' >> inventory-index.json
+                echo '      "name": "'$cat_name'",' >> inventory-index.json
+                echo '      "path": "'$category'",' >> inventory-index.json
+                echo '      "objects": [' >> inventory-index.json
+                
+                first_obj=true
+                for file in "$category"*.{png,jpg,jpeg,webp,gif}; do
+                  if [ -f "$file" ]; then
+                    filename=$(basename "$file")
+                    
+                    if [ "$first_obj" = false ]; then
+                      echo ',' >> inventory-index.json
+                    fi
+                    first_obj=false
+                    
+                    echo '        "'$filename'"' >> inventory-index.json
+                  fi
+                done
+                
+                echo '      ]' >> inventory-index.json
+                echo '    }' >> inventory-index.json
+              fi
+            done
+            
+            echo '  ]' >> inventory-index.json
+            echo '}' >> inventory-index.json
+          fi
+      
+      - name: Commit updated index
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add inventory-index.json
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Auto-update inventory index"
+            git push origin HEAD:main
+          fi

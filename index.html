@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bead Designer - Create Your Rosary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="header">
+        <h1>Bead Designer</h1>
+        <div class="header-buttons">
+            <button id="undo-btn" title="Undo (last 10 steps)">↶ Undo</button>
+            <button id="redo-btn" title="Redo (last 10 steps)">↷ Redo</button>
+            <button id="email-btn">📧 Send Design</button>
+            <button id="reset-button">↻ Reset</button>
+        </div>
+    </header>
+    
+    <div id="email-modal" onclick="closeEmailModalOnBackdrop(event)">
+        <div class="email-modal-content">
+            <button class="close-x-btn" onclick="closeEmailModal()">×</button>
+            <h2>📧 Send Your Design</h2>
+            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">
+                Fill in your information below (all fields are optional). Your design will be sent to us!
+            </p>
+            
+            <div class="form-group">
+                <label for="customer-name">Name</label>
+                <input type="text" id="customer-name" placeholder="Your name (optional)">
+            </div>
+            
+            <div class="form-group">
+                <label for="customer-email">Email Address <span style="color: #e74c3c;">*</span></label>
+                <input type="email" id="customer-email" placeholder="Your email (gmail, outlook, proton, or yahoo)">
+            </div>
+            
+            <div class="form-group">
+                <label for="customer-phone">Phone <span style="color: #e74c3c;">*</span></label>
+                <input type="tel" id="customer-phone" placeholder="Your phone number">
+            </div>
+            
+            <p style="color: var(--text-secondary); font-size: 12px; margin-top: -10px; margin-bottom: 20px;">
+                * At least one contact method (Email or Phone) is required
+            </p>
+            
+            <div class="form-group">
+                <label for="customer-notes">Questions or Notes</label>
+                <textarea id="customer-notes" rows="4" placeholder="Any questions or special requests? (optional)"></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn-primary" id="send-email-btn" style="flex: 1;">Send Design</button>
+                <button class="btn-secondary" onclick="closeEmailModal()" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="reset-menu" onclick="closeResetMenuOnBackdrop(event)">
+        <div class="reset-menu-content">
+            <button class="close-x-btn" onclick="closeResetMenu()">×</button>
+            <h3>Reset Options</h3>
+            <button class="reset-option-btn" id="reset-all-btn">
+                <span class="option-icon">🔄</span>
+                <div class="option-text">
+                    <div class="option-title">Reset All</div>
+                    <div class="option-desc">Delete everything (string and objects)</div>
+                </div>
+            </button>
+            <button class="reset-option-btn" id="delete-objects-btn">
+                <span class="option-icon">🗑️</span>
+                <div class="option-text">
+                    <div class="option-title">Clear Objects</div>
+                    <div class="option-desc">Delete all objects but keep string</div>
+                </div>
+            </button>
+            <button class="reset-option-btn" id="delete-individual-btn">
+                <span class="option-icon">✖️</span>
+                <div class="option-text">
+                    <div class="option-title">Delete Individually</div>
+                    <div class="option-desc">Click X on objects to delete them</div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <main id="main-container">
+        <aside id="sidebar">
+            <div id="sidebar-header">
+                <h2>Tools & Beads</h2>
+                <p>1. Draw a string path, then 2. add beads.</p>
+            </div>
+            <div id="bead-selection"></div>
+        </aside>
+        
+        <div id="canvas-container">
+            <div id="info">
+                <h3>Your Design</h3>
+                <p>Beads: <span id="bead-count">0</span></p>
+            </div>
+            <div id="rotation-slider-container" style="display: none;">
+                <div class="rotation-label">Rotate</div>
+                <input type="range" id="rotation-slider" min="0" max="360" value="0" orient="vertical">
+                <div class="rotation-value">0°</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Application scripts - load in order -->
+    <script src="js/globals.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/scene.js"></script>
+    <script src="js/string.js"></script>
+    <script src="js/beads.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/rotation.js"></script>
+    <script src="js/tools.js"></script>
+    <script src="js/reset.js"></script>
+    <script src="js/email.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/interactions.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
