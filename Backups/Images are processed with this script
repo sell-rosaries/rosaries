@@ -1,0 +1,103 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+# con: Self-installing automate BG removal + trim to tight PNG for images in custom dir, output to same dir
+# On first run: Sets up proot-distro Ubuntu, venv, rembg, ImageMagick, and AU alias.
+# Assumes: Fresh Termux (handles storage too). Run 'con' from base Termux.
+# Usage: Prompts for input dir path (e.g., /storage/emulated/0/Notifications), processes JPG/PNG there (no subdirs),
+# skips files with "processed" in name, outputs *_processed.png in same dir.
+
+# Setup flag file (to skip on future runs)
+SETUP_FLAG="$HOME/.con_setup_done"
+
+# Function to setup everything (runs only if flag missing)
+setup_all() {
+  echo "First-time setup: Installing proot-distro, Ubuntu, rembg, and deps..."
+  
+  # Enable storage access
+  termux-setup-storage
+  
+  # Install proot-distro in base Termux
+  pkg update -y && pkg install proot-distro -y
+  
+  # Install/login to Ubuntu
+  proot-distro install ubuntu || true  # Ignore if already installed
+  proot-distro login ubuntu -- bash -c '
+    # Update apt and install basics
+    apt update && apt upgrade -y
+    apt install python3-full python3-pip python3-venv imagemagick -y
+    
+    # Create/activate venv and install rembg
+    if [ ! -d ~/rembg-env ]; then
+      python3 -m venv ~/rembg-env
+    fi
+    source ~/rembg-env/bin/activate
+    pip install --upgrade pip
+    pip install rembg[cpu,cli]
+    
+    # Set AU alias in .bashrc
+    echo "alias AU=\"proot-distro login ubuntu -- bash -c \\\"source ~/rembg-env/bin/activate && exec bash\\\"\"" >> ~/.bashrc
+    source ~/.bashrc
+    
+    echo "Setup complete! AU now jumps to activated env."
+  '
+  
+  touch "$SETUP_FLAG"
+  echo "Setup done—ready for processing."
+}
+
+# Run setup if needed
+if [ ! -f "$SETUP_FLAG" ]; then
+  setup_all
+fi
+
+# Prompt for input dir (assuming setup done)
+echo "Enter input directory path (e.g., /storage/emulated/0/Notifications):"
+read INPUT_DIR
+if [ -z "$INPUT_DIR" ] || [ ! -d "$INPUT_DIR" ]; then
+  echo "Invalid or empty path. Exiting."
+  exit 1
+fi
+
+# Adjust path for proot bind (/storage/emulated/0 -> /sdcard)
+PROOT_DIR=$(echo "$INPUT_DIR" | sed 's|^/storage/emulated/0|/sdcard|g')
+
+# Now process images (the core workflow)
+proot-distro login ubuntu --isolated \
+  --bind /storage/emulated/0:/sdcard \
+  -- bash -c '
+source ~/rembg-env/bin/activate
+
+INPUT_DIR="$1"
+shift  # Consume the INPUT_DIR arg
+
+# Debug: List files in dir
+echo "Debug: Looking in $INPUT_DIR"
+ls -la "$INPUT_DIR" 2>/dev/null | grep -E "\.(jpg|jpeg|png)$" || echo "No matching files found."
+
+# Get list of image files and process
+ls "$INPUT_DIR"/*.jpg "$INPUT_DIR"/*.jpeg "$INPUT_DIR"/*.png "$INPUT_DIR"/*.JPG "$INPUT_DIR"/*.JPEG "$INPUT_DIR"/*.PNG 2>/dev/null | while read -r f; do
+  base=$(basename "$f")
+  name="${base%.*}"
+  
+  # Skip if "processed" in basename (case-insensitive via grep)
+  if echo "$base" | grep -qi "processed"; then
+    echo "Skipping $base (already processed)"
+    continue
+  fi
+  
+  echo "Processing $base..."
+  
+  # Remove background (intermediate PNG)
+  rembg i "$f" "/tmp/${name}_clean.png"
+  
+  # Trim transparent padding for tight bounds
+  convert "/tmp/${name}_clean.png" -trim "${INPUT_DIR}/${name}_processed.png"
+  
+  # Cleanup temp
+  rm -f "/tmp/${name}_clean.png"
+  
+  echo "Done: ${name}_processed.png saved to $INPUT_DIR"
+done
+
+echo "All done! Check $INPUT_DIR for _processed.png files."
+' _ "$PROOT_DIR"
