@@ -1,0 +1,17 @@
+{
+    "nano_banana": {
+        "api_key": "",
+        "folder_path": "",
+        "default_prompt": ""
+    },
+    "git_push": {
+        "repo_path": "",
+        "repo_url": "",
+        "pat": "",
+        "email": "",
+        "username": ""
+    },
+    "bg_remover": {
+        "folder_path": ""
+    }
+}
