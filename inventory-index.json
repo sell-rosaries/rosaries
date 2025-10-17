@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-10-17T03:17:07Z",
+  "lastUpdated": "2025-10-17T03:48:26Z",
   "categories": [
     {
       "name": "Gems",
@@ -18,30 +18,6 @@
         "klg_4,6,8.png"
 ,
         "mg_4,6,8.png"
-      ]
-    }
-,
-    {
-      "name": "Temp",
-      "path": "Jularies/Temp/",
-      "objects": [
-        "bmg_4,6,8.png"
-,
-        "bpg_4,6,8.png"
-,
-        "ppb_4,6,8.png"
-,
-        "ppg_4,6,8.png"
-,
-        "ppp_4,6,8.png"
-      ]
-    }
-,
-    {
-      "name": "test",
-      "path": "Jularies/test/",
-      "objects": [
-        "bmg_4,6,8.png"
       ]
     }
   ]
