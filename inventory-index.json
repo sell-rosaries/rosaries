@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-10-18T03:11:03Z",
+  "lastUpdated": "2025-10-18T04:06:22Z",
   "categories": [
     {
       "name": "Gems",
@@ -54,8 +54,18 @@
         "gg_4,6,8.png"
 ,
         "gh_4,6,8.png"
+      ]
+    }
 ,
-        "gk_4,6,8.png"
+    {
+      "name": "v88",
+      "path": "Jularies/v88/",
+      "objects": [
+        "gb_4,6,8.png"
+,
+        "gg_4,6,8.png"
+,
+        "gh_4,6,8.png"
       ]
     }
   ]
