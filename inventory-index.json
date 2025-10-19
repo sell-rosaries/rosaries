@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-10-18T04:06:22Z",
+  "lastUpdated": "2025-10-19T11:52:08Z",
   "categories": [
     {
       "name": "Gems",
@@ -22,6 +22,16 @@
     }
 ,
     {
+      "name": "New folder",
+      "path": "Jularies/New folder/",
+      "objects": [
+        "gb_4,6,8.png"
+,
+        "gg_4,6,8.png"
+      ]
+    }
+,
+    {
       "name": "gege",
       "path": "Jularies/gege/",
       "objects": [
@@ -36,36 +46,110 @@
     }
 ,
     {
+      "name": "new",
+      "path": "Jularies/new/",
+      "objects": [
+        "BlueCatEyeBeads_4,6,8.png"
+,
+        "GlossyRedBeads_4,6,8.png"
+,
+        "GoldenConeConnectors_4,6,8.png"
+,
+        "Screenshot_2025-10-18-13-13-21-480.png"
+,
+        "Screenshot_2025-10-18-13-13-26-418.png"
+,
+        "Screenshot_2025-10-18-13-13-47-283.png"
+,
+        "Screenshot_2025-10-18-13-13-51-039.png"
+,
+        "Screenshot_2025-10-18-13-14-07-730.png"
+,
+        "Screenshot_2025-10-18-13-14-12-507.png"
+,
+        "Screenshot_2025-10-18-13-14-16-251.png"
+,
+        "Screenshot_2025-10-18-13-14-28-713.png"
+,
+        "Screenshot_2025-10-18-13-14-32-635.png"
+,
+        "Screenshot_2025-10-18-13-14-56-965.png"
+,
+        "Screenshot_2025-10-18-13-15-14-063.png"
+,
+        "Screenshot_2025-10-18-13-15-25-813.png"
+,
+        "Screenshot_2025-10-18-13-15-29-728.png"
+,
+        "Screenshot_2025-10-18-13-15-37-614.png"
+,
+        "Screenshot_2025-10-18-13-15-47-414.png"
+,
+        "Screenshot_2025-10-18-13-15-59-352.png"
+,
+        "Screenshot_2025-10-18-13-16-05-433.png"
+,
+        "Screenshot_2025-10-18-13-16-11-760.png"
+,
+        "Screenshot_2025-10-18-13-16-33-851.png"
+,
+        "Screenshot_2025-10-18-13-16-43-364.png"
+,
+        "Screenshot_2025-10-18-13-17-07-255.png"
+,
+        "Screenshot_2025-10-18-13-17-28-893.png"
+,
+        "Screenshot_2025-10-18-13-17-35-225.png"
+,
+        "Screenshot_2025-10-18-13-17-40-160.png"
+,
+        "Screenshot_2025-10-18-13-17-47-590.png"
+,
+        "Screenshot_2025-10-18-13-17-51-935.png"
+,
+        "Screenshot_2025-10-18-13-17-59-324.png"
+,
+        "Screenshot_2025-10-18-13-18-11-800.png"
+,
+        "Screenshot_2025-10-18-13-18-17-346.png"
+,
+        "Screenshot_2025-10-18-13-18-23-964.png"
+,
+        "Screenshot_2025-10-18-13-18-31-003.png"
+,
+        "Screenshot_2025-10-18-13-18-40-170.png"
+,
+        "Screenshot_2025-10-18-13-18-43-348.png"
+,
+        "Screenshot_2025-10-18-13-19-02-990.png"
+,
+        "Screenshot_2025-10-18-13-19-07-739.png"
+,
+        "Screenshot_2025-10-18-13-19-12-752.png"
+,
+        "Screenshot_2025-10-18-13-19-17-020.png"
+,
+        "Screenshot_2025-10-18-13-19-27-523.png"
+,
+        "Screenshot_2025-10-18-13-19-33-785.png"
+,
+        "Screenshot_2025-10-18-13-19-41-388.png"
+,
+        "Screenshot_2025-10-18-13-19-55-193.png"
+,
+        "SilverMicrophoneConnectors_4,6,8.png"
+,
+        "TigersEyeBeads_4,6,8.png"
+      ]
+    }
+,
+    {
       "name": "v3",
       "path": "Jularies/v3/",
       "objects": [
         "gb_4,6,8.png"
 ,
         "gg_4,6,8.png"
-      ]
-    }
-,
-    {
-      "name": "v5",
-      "path": "Jularies/v5/",
-      "objects": [
-        "gb_4,6,8.png"
-,
-        "gg_4,6,8.png"
-,
-        "gh_4,6,8.png"
-      ]
-    }
-,
-    {
-      "name": "v88",
-      "path": "Jularies/v88/",
-      "objects": [
-        "gb_4,6,8.png"
-,
-        "gg_4,6,8.png"
-,
-        "gh_4,6,8.png"
       ]
     }
   ]
