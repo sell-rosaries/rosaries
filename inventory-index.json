@@ -1,50 +1,6 @@
 {
-  "lastUpdated": "2025-10-19T11:52:08Z",
+  "lastUpdated": "2025-10-20T06:14:45Z",
   "categories": [
-    {
-      "name": "Gems",
-      "path": "Jularies/Gems/",
-      "objects": [
-        "gb_4,6,8.png"
-,
-        "gg_4,6,8.png"
-,
-        "gh_4,6,8.png"
-,
-        "gk_4,6,8.png"
-,
-        "jg_4,6,8.png"
-,
-        "klg_4,6,8.png"
-,
-        "mg_4,6,8.png"
-      ]
-    }
-,
-    {
-      "name": "New folder",
-      "path": "Jularies/New folder/",
-      "objects": [
-        "gb_4,6,8.png"
-,
-        "gg_4,6,8.png"
-      ]
-    }
-,
-    {
-      "name": "gege",
-      "path": "Jularies/gege/",
-      "objects": [
-        "gb_4,6,8.png"
-,
-        "gg_4,6,8.png"
-,
-        "gh_4,6,8.png"
-,
-        "gk_4,6,8.png"
-      ]
-    }
-,
     {
       "name": "new",
       "path": "Jularies/new/",
@@ -144,12 +100,38 @@
     }
 ,
     {
-      "name": "v3",
-      "path": "Jularies/v3/",
+      "name": "tetete",
+      "path": "Jularies/tetete/",
       "objects": [
-        "gb_4,6,8.png"
+        "Screenshot_2025-10-18-13-17-47-590.png"
 ,
-        "gg_4,6,8.png"
+        "Screenshot_2025-10-18-13-17-51-935.png"
+,
+        "Screenshot_2025-10-18-13-17-59-324.png"
+,
+        "Screenshot_2025-10-18-13-18-11-800.png"
+,
+        "Screenshot_2025-10-18-13-18-17-346.png"
+,
+        "Screenshot_2025-10-18-13-18-23-964.png"
+,
+        "Screenshot_2025-10-18-13-18-31-003.png"
+,
+        "Screenshot_2025-10-18-13-18-40-170.png"
+,
+        "Screenshot_2025-10-18-13-19-17-020.png"
+,
+        "Screenshot_2025-10-18-13-19-27-523.png"
+,
+        "Screenshot_2025-10-18-13-19-33-785.png"
+,
+        "Screenshot_2025-10-18-13-19-41-388.png"
+,
+        "Screenshot_2025-10-18-13-19-55-193.png"
+,
+        "SilverMicrophoneConnectors_4,6,8.png"
+,
+        "TigersEyeBeads_4,6,8.png"
       ]
     }
   ]
