@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-10-21T06:12:28Z",
+  "lastUpdated": "2025-10-21T07:21:29Z",
   "categories": [
     {
       "name": "new",
@@ -96,6 +96,18 @@
         "SilverMicrophoneConnectors_4,6,8.png"
 ,
         "TigersEyeBeads_4,6,8.png"
+      ]
+    }
+,
+    {
+      "name": "processed",
+      "path": "Jularies/processed/",
+      "objects": [
+        "OrnateMetalAccent.png"
+,
+        "PearlyGlow.png"
+,
+        "RubySpheres.png"
       ]
     }
 ,
