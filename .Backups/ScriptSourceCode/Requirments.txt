@@ -1,0 +1,6 @@
+#Compile source code with this "python -m PyInstaller --onefile --windowed --name="ScriptLauncher" launcher.py" in pwsh
+#run "pip install -r requirements.txt" to install requirments on a fresh run.
+
+rembg
+pillow
+google-generativeai
