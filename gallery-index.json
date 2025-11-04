@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-11-04T05:28:47Z",
+  "lastUpdated": "2025-11-04T06:03:41Z",
   "categories": [
     {
       "id": "rosaries",
@@ -59,6 +59,33 @@
           "name": "rosary2",
           "image": "gallery/rosaries/rosary2.jpg",
           "description": "Beautiful rosaries design"
+        }
+      ]
+    }
+,
+    {
+      "id": "tomas",
+      "name": "Tomas",
+      "items": [
+        {
+          "id": "tomas_001",
+          "name": "OrnateMetalAccent",
+          "image": "gallery/tomas/OrnateMetalAccent.png",
+          "description": "Beautiful tomas design"
+        }
+,
+        {
+          "id": "tomas_002",
+          "name": "PearlyGlow",
+          "image": "gallery/tomas/PearlyGlow.png",
+          "description": "Beautiful tomas design"
+        }
+,
+        {
+          "id": "tomas_003",
+          "name": "RubySpheres",
+          "image": "gallery/tomas/RubySpheres.png",
+          "description": "Beautiful tomas design"
         }
       ]
     }
