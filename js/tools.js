@@ -1,6 +1,6 @@
 /*
     TOOL SELECTION
-    String tool (select mode is now automatic)
+    String tool and bead selection
 */
 
 function selectStringTool(event) {
@@ -10,5 +10,15 @@ function selectStringTool(event) {
     selectedObjectId = null;
     selectedSize = null;
     updateToolSelectionUI(event.currentTarget);
-    hideRotationSlider();
+    updateFABIcon();
+    hideRotationControl();
+    
+    // Update FAB to show active state
+    const fab = document.getElementById('fab');
+    if (fab) {
+        fab.classList.add('active');
+    }
+    
+    // Close library after selection
+    closeBeadLibrary();
 }

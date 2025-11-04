@@ -34,3 +34,7 @@ let deleteMarkers = [];
 let history = [];
 let historyIndex = -1;
 const MAX_HISTORY = 10;
+
+// Size preferences - stores user's selected size for each bead image
+let beadSizePreferences = {};
+let pendingSizeSelectionObjectId = null;

@@ -1,0 +1,181 @@
+/*
+    LOCAL STORAGE MANAGEMENT
+    Auto-save, auto-restore, recent beads, and favorites
+*/
+
+// Storage keys
+const STORAGE_KEYS = {
+    AUTOSAVE: 'rosary-autosave',
+    RECENT_BEADS: 'rosary-recent-beads',
+    FAVORITES: 'rosary-favorites'
+};
+
+/**
+ * Auto-saves the current workspace design
+ */
+function autoSaveDesign() {
+    try {
+        const designData = {
+            stringPoints: stringPoints.map(p => ({ x: p.x, y: p.y, z: p.z })),
+            beads: beads.map(bead => ({
+                position: { x: bead.position.x, y: bead.position.y, z: bead.position.z },
+                scale: { x: bead.scale.x, y: bead.scale.y, z: bead.scale.z },
+                rotation: bead.material.rotation || 0,
+                userData: bead.userData,
+                imageUrl: bead.material.map ? bead.material.map.image.src : null
+            })),
+            savedAt: new Date().toISOString()
+        };
+        
+        localStorage.setItem(STORAGE_KEYS.AUTOSAVE, JSON.stringify(designData));
+        console.log('✓ Design auto-saved');
+    } catch (e) {
+        console.warn('Could not auto-save design:', e);
+    }
+}
+
+/**
+ * Restores the saved workspace design
+ */
+async function autoRestoreDesign() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEYS.AUTOSAVE);
+        if (!saved) {
+            console.log('No saved design found');
+            return false;
+        }
+        
+        const designData = JSON.parse(saved);
+        console.log('📂 Restoring saved design from:', designData.savedAt);
+        
+        // Restore string points
+        stringPoints = designData.stringPoints.map(p => new THREE.Vector3(p.x, p.y, p.z));
+        updateStringLine();
+        
+        // Restore beads - wait for all to load
+        const beadPromises = designData.beads.map(beadData => {
+            return new Promise((resolve) => {
+                const obj = getObjectById(beadData.userData.objectId);
+                if (obj) {
+                    createBead(obj, beadData.userData.size, (bead) => {
+                        bead.position.set(beadData.position.x, beadData.position.y, beadData.position.z);
+                        bead.scale.set(beadData.scale.x, beadData.scale.y, beadData.scale.z);
+                        bead.userData = beadData.userData;
+                        
+                        if (beadData.rotation) {
+                            bead.material.rotation = beadData.rotation;
+                        }
+                        
+                        scene.add(bead);
+                        beads.push(bead);
+                        resolve();
+                    });
+                } else {
+                    resolve(); // Skip if object not found
+                }
+            });
+        });
+        
+        // Wait for all beads to load
+        await Promise.all(beadPromises);
+        
+        updateBeadCount();
+        console.log('✅ Design restored successfully');
+        return true;
+        
+    } catch (e) {
+        console.warn('Could not restore design:', e);
+        return false;
+    }
+}
+
+/**
+ * Tracks a bead as recently used
+ */
+function trackRecentBead(objectId) {
+    try {
+        let recentBeads = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_BEADS) || '[]');
+        
+        // Remove if already exists
+        recentBeads = recentBeads.filter(id => id !== objectId);
+        
+        // Add to front
+        recentBeads.unshift(objectId);
+        
+        // Keep only last 3
+        recentBeads = recentBeads.slice(0, 3);
+        
+        localStorage.setItem(STORAGE_KEYS.RECENT_BEADS, JSON.stringify(recentBeads));
+    } catch (e) {
+        console.warn('Could not track recent bead:', e);
+    }
+}
+
+/**
+ * Gets the list of recent bead IDs
+ */
+function getRecentBeads() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_BEADS) || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+
+/**
+ * Toggles a bead as favorite
+ */
+function toggleFavorite(objectId) {
+    try {
+        let favorites = JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITES) || '[]');
+        
+        if (favorites.includes(objectId)) {
+            // Remove from favorites
+            favorites = favorites.filter(id => id !== objectId);
+        } else {
+            // Add to favorites
+            favorites.push(objectId);
+        }
+        
+        localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+        return favorites.includes(objectId);
+    } catch (e) {
+        console.warn('Could not toggle favorite:', e);
+        return false;
+    }
+}
+
+/**
+ * Checks if a bead is favorited
+ */
+function isFavorite(objectId) {
+    try {
+        const favorites = JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITES) || '[]');
+        return favorites.includes(objectId);
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Gets all favorited bead IDs
+ */
+function getFavoriteBeads() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITES) || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+
+/**
+ * Clears the auto-saved design
+ */
+function clearAutoSave() {
+    try {
+        localStorage.removeItem(STORAGE_KEYS.AUTOSAVE);
+        console.log('Auto-save cleared');
+    } catch (e) {
+        console.warn('Could not clear auto-save:', e);
+    }
+}

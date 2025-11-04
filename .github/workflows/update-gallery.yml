@@ -1,0 +1,91 @@
+name: Update Gallery Index
+
+# Runs automatically when you push images to the gallery folder
+on:
+  push:
+    paths:
+      - 'gallery/**'
+  workflow_dispatch: # Can also run manually
+
+permissions:
+  contents: write  # Grants GITHUB_TOKEN permission to push changes
+
+jobs:
+  update-gallery:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Generate gallery index
+        run: |
+          # Start JSON structure
+          echo '{' > gallery-index.json
+          echo '  "lastUpdated": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'",' >> gallery-index.json
+          echo '  "categories": [' >> gallery-index.json
+          
+          # Scan gallery folder
+          if [ -d "gallery" ]; then
+            first_cat=true
+            for category in gallery/*/; do
+              if [ -d "$category" ]; then
+                cat_name=$(basename "$category")
+                cat_id=$(echo "$cat_name" | tr '[:upper:]' '[:lower:]')
+                
+                if [ "$first_cat" = false ]; then
+                  echo ',' >> gallery-index.json
+                fi
+                first_cat=false
+                
+                echo '    {' >> gallery-index.json
+                echo '      "id": "'$cat_id'",' >> gallery-index.json
+                echo '      "name": "'${cat_name^}'",' >> gallery-index.json
+                echo '      "items": [' >> gallery-index.json
+                
+                first_item=true
+                item_counter=1
+                for file in "$category"*.{png,jpg,jpeg,webp,gif}; do
+                  if [ -f "$file" ]; then
+                    filename=$(basename "$file")
+                    # Remove extension for item name
+                    item_name=$(echo "$filename" | sed 's/\.[^.]*$//')
+                    # Create item ID with category prefix and counter
+                    item_id="${cat_id}_$(printf "%03d" $item_counter)"
+                    
+                    if [ "$first_item" = false ]; then
+                      echo ',' >> gallery-index.json
+                    fi
+                    first_item=false
+                    
+                    echo '        {' >> gallery-index.json
+                    echo '          "id": "'$item_id'",' >> gallery-index.json
+                    echo '          "name": "'$item_name'",' >> gallery-index.json
+                    echo '          "image": "'$category$filename'",' >> gallery-index.json
+                    echo '          "description": "Beautiful '$cat_name' design"' >> gallery-index.json
+                    echo '        }' >> gallery-index.json
+                    
+                    item_counter=$((item_counter + 1))
+                  fi
+                done
+                
+                echo '      ]' >> gallery-index.json
+                echo '    }' >> gallery-index.json
+              fi
+            done
+          fi
+          
+          echo '  ]' >> gallery-index.json
+          echo '}' >> gallery-index.json
+      
+      - name: Commit updated gallery index
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add gallery-index.json
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Auto-update gallery index"
+            git push origin HEAD:main
+          fi

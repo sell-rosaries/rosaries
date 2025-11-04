@@ -1,0 +1,63 @@
+{
+  "categories": [
+    {
+      "id": "rosaries",
+      "name": "Rosaries",
+      "items": [
+        {
+          "id": "rosary_001",
+          "name": "Classic Rose Rosary",
+          "image": "gallery/rosaries/1000296993.jpg",
+          "description": "Beautiful traditional rosary design"
+        },
+        {
+          "id": "rosary_002",
+          "name": "Pearl Rosary",
+          "image": "gallery/rosaries/1000296994.jpg",
+          "description": "Elegant pearl bead rosary"
+        },
+        {
+          "id": "rosary_003",
+          "name": "Blue Crystal Rosary",
+          "image": "gallery/rosaries/1000297253.jpg",
+          "description": "Sparkling blue crystal design"
+        },
+        {
+          "id": "rosary_004",
+          "name": "Amber Rosary",
+          "image": "gallery/rosaries/1000297254.jpg",
+          "description": "Warm amber colored beads"
+        },
+        {
+          "id": "rosary_005",
+          "name": "Silver Chain Rosary",
+          "image": "gallery/rosaries/1000297255.jpg",
+          "description": "Silver chain with crystal beads"
+        },
+        {
+          "id": "rosary_006",
+          "name": "Gold Accent Rosary",
+          "image": "gallery/rosaries/1000297367.jpg",
+          "description": "Gold accented design"
+        },
+        {
+          "id": "rosary_007",
+          "name": "Classic Design",
+          "image": "gallery/rosaries/rosary1.jpg",
+          "description": "Traditional rosary style"
+        },
+        {
+          "id": "rosary_008",
+          "name": "Elegant Beads",
+          "image": "gallery/rosaries/rosary2.jpg",
+          "description": "Refined bead design"
+        }
+      ]
+    },
+    {
+      "id": "bracelets",
+      "name": "Bracelets",
+      "items": []
+    }
+  ]
+}

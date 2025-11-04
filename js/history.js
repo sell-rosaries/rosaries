@@ -27,6 +27,9 @@ function saveState() {
     }
     
     updateUndoRedoButtons();
+    
+    // Auto-save the design after each state change
+    autoSaveDesign();
 }
 
 function restoreState(state) {

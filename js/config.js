@@ -34,21 +34,26 @@ async function loadConfig() {
             console.log(`📂 Category: ${cat.name} (${cat.objects.length} objects)`);
             
             for (const filename of cat.objects) {
-                const match = filename.match(/^(.+?)_(.+)\.(png|jpg|jpeg|webp|gif)$/i);
+                // Try to parse filename with sizes (e.g., "gem_2,4,6.png")
+                const matchWithSizes = filename.match(/^(.+?)_([0-9,]+)\.(png|jpg|jpeg|webp|gif)$/i);
                 
-                if (!match) {
-                    console.warn(`⚠️ Skipping invalid filename: ${filename}`);
-                    continue;
+                let objectName, sizes;
+                
+                if (matchWithSizes) {
+                    // Has sizes in filename
+                    objectName = matchWithSizes[1].replace(/_/g, ' ').trim();
+                } else {
+                    // No sizes - just extract name without extension
+                    const matchNoSizes = filename.match(/^(.+)\.(png|jpg|jpeg|webp|gif)$/i);
+                    if (!matchNoSizes) {
+                        console.warn(`⚠️ Skipping invalid filename: ${filename}`);
+                        continue;
+                    }
+                    objectName = matchNoSizes[1].replace(/_/g, ' ').trim();
                 }
                 
-                const objectName = match[1].replace(/_/g, ' ').trim();
-                const sizesStr = match[2];
-                const sizes = sizesStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-                
-                if (sizes.length === 0) {
-                    console.warn(`⚠️ No valid sizes for: ${filename}`);
-                    continue;
-                }
+                // All beads get standard sizes 4, 6, 8, 10, 12, 14
+                sizes = [4, 6, 8, 10, 12, 14];
                 
                 const imagePath = `${cat.path}${filename}`;
                 const objectId = `obj-${cat.name.toLowerCase()}-${objectName.toLowerCase().replace(/\s+/g, '-')}`;

@@ -26,7 +26,7 @@ function resetAll() {
     }
     stringPoints = [];
     updateBeadCount();
-    hideRotationSlider();
+    hideRotationControl();
     exitDeleteMode();
     closeResetMenu();
     saveState();
@@ -36,7 +36,7 @@ function deleteAllObjects() {
     beads.forEach(bead => scene.remove(bead));
     beads = [];
     updateBeadCount();
-    hideRotationSlider();
+    hideRotationControl();
     exitDeleteMode();
     closeResetMenu();
     saveState();
@@ -105,7 +105,7 @@ function enterDeleteMode() {
     isDeleteMode = true;
     document.body.classList.add('delete-mode');
     closeResetMenu();
-    hideRotationSlider();
+    hideRotationControl();
     
     showDeleteMarkers();
     
@@ -116,6 +116,7 @@ function enterDeleteMode() {
         controls.enabled = true;
         selectedObjectId = null;
         selectedSize = null;
+        updateSelectedBeadPreview(); // Clear preview
     }
 }
 

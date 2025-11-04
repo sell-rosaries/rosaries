@@ -75,6 +75,7 @@ function onCanvasMouseDown(event) {
                     selectedObjectId = null;
                     selectedSize = null;
                     createBeadSelection(); // Refresh UI to remove selection highlight
+                    updateSelectedBeadPreview(); // Clear preview
                 }
             }
         }

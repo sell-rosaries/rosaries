@@ -2,67 +2,233 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bead Designer - Create Your Rosary</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Design custom rosaries with our mobile-first bead designer tool">
+    <meta name="theme-color" content="#667EEA">
+    <title>Rosary Bead Designer</title>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Header -->
     <header id="header">
-        <h1>Bead Designer</h1>
-        <div class="header-buttons">
-            <button id="undo-btn" title="Undo (last 10 steps)">↶ Undo</button>
-            <button id="redo-btn" title="Redo (last 10 steps)">↷ Redo</button>
-            <button id="email-btn">📧 Send Design</button>
-            <button id="reset-button">↻ Reset</button>
+        <h1>Rosary Designer</h1>
+        <div class="header-info">
+            <button class="lang-toggle" id="lang-toggle" aria-label="Language">
+                <span class="lang-label">EN</span>
+            </button>
+            <span class="bead-count-badge">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span id="header-bead-count">0</span>
+            </span>
         </div>
     </header>
     
-    <div id="email-modal" onclick="closeEmailModalOnBackdrop(event)">
-        <div class="email-modal-content">
-            <button class="close-x-btn" onclick="closeEmailModal()">×</button>
-            <h2>📧 Send Your Design</h2>
-            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">
-                Fill in your information below (all fields are optional). Your design will be sent to us!
-            </p>
-            
-            <div class="form-group">
-                <label for="customer-name">Name</label>
-                <input type="text" id="customer-name" placeholder="Your name (optional)">
+    <!-- Main Canvas Container -->
+    <div id="canvas-container">
+        <!-- Canvas info overlay -->
+        <div id="canvas-info">
+            <div class="selected-bead-preview" id="selected-bead-preview">
+                <img id="selected-bead-img" src="" alt="Selected bead">
+            </div>
+        </div>
+        
+        <!-- Rotation Control (shown when bead selected) -->
+        <div id="rotation-control" style="display: none;">
+            <div class="rotation-dial">
+                <div class="rotation-track"></div>
+                <div class="rotation-handle" id="rotation-handle"></div>
+                <div class="rotation-value" id="rotation-value">0°</div>
+            </div>
+            <button class="btn-close-rotation" id="close-rotation-btn">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Floating Action Button (FAB) - Tool Selector -->
+    <button id="fab" class="fab" aria-label="Select tool">
+        <svg id="fab-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M12 3v18"/>
+        </svg>
+    </button>
+    
+    <!-- Bottom Toolbar -->
+    <nav id="bottom-toolbar" class="bottom-toolbar">
+        <button class="toolbar-btn" id="undo-btn" aria-label="Undo" disabled>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 7v6h6M3 13a9 9 0 1 0 3-6.3"/>
+            </svg>
+            <span class="toolbar-label">Undo</span>
+        </button>
+        
+        <button class="toolbar-btn" id="redo-btn" aria-label="Redo" disabled>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 7v6h-6M21 13a9 9 0 1 1-3-6.3"/>
+            </svg>
+            <span class="toolbar-label">Redo</span>
+        </button>
+        
+        <button class="toolbar-btn" id="reset-button" aria-label="Reset">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 4v6h6M23 20v-6h-6"/>
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+            </svg>
+            <span class="toolbar-label">Reset</span>
+        </button>
+        
+        <button class="toolbar-btn" id="draw-string-btn" aria-label="Draw String">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                <path d="M2 2l7.586 7.586"/>
+                <circle cx="11" cy="11" r="2"/>
+            </svg>
+            <span class="toolbar-label">Draw</span>
+        </button>
+        
+        <button class="toolbar-btn" id="library-btn" aria-label="Design Library">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            <span class="toolbar-label">Library</span>
+        </button>
+        
+        <button class="toolbar-btn" id="email-btn" aria-label="Send Design">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+            <span class="toolbar-label">Send</span>
+        </button>
+    </nav>
+    
+    <!-- Bead Library Panel (Bottom Sheet) -->
+    <div id="bead-library-panel" class="bead-library-panel">
+        <div class="panel-backdrop" id="panel-backdrop"></div>
+        <div class="panel-content">
+            <div class="panel-handle"></div>
+            <div class="panel-header">
+                <h2>Bead Library</h2>
+                <button class="btn-close-panel" id="close-library-btn" aria-label="Close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
             
-            <div class="form-group">
-                <label for="customer-email">Email Address <span style="color: #e74c3c;">*</span></label>
-                <input type="email" id="customer-email" placeholder="Your email (gmail, outlook, proton, or yahoo)">
+            <!-- Tool Card -->
+            <div class="tool-section">
+                <div class="tool-card" id="string-tool">
+                    <div class="tool-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9-4.03 9-9 9-9-4.03-9-9z" stroke-dasharray="2 4"/>
+                        </svg>
+                    </div>
+                    <div class="tool-info">
+                        <div class="tool-name">Draw String</div>
+                        <div class="tool-desc">Click and drag to draw a path</div>
+                    </div>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label for="customer-phone">Phone <span style="color: #e74c3c;">*</span></label>
-                <input type="tel" id="customer-phone" placeholder="Your phone number">
+            <!-- Category Tabs -->
+            <div class="category-tabs" id="category-tabs">
+                <!-- Dynamically populated -->
             </div>
             
-            <p style="color: var(--text-secondary); font-size: 12px; margin-top: -10px; margin-bottom: 20px;">
-                * At least one contact method (Email or Phone) is required
-            </p>
-            
-            <div class="form-group">
-                <label for="customer-notes">Questions or Notes</label>
-                <textarea id="customer-notes" rows="4" placeholder="Any questions or special requests? (optional)"></textarea>
-            </div>
-            
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button class="btn-primary" id="send-email-btn" style="flex: 1;">Send Design</button>
-                <button class="btn-secondary" onclick="closeEmailModal()" style="flex: 1;">Cancel</button>
+            <!-- Bead Grid -->
+            <div class="bead-grid" id="bead-selection">
+                <!-- Dynamically populated -->
             </div>
         </div>
     </div>
     
-    <div id="reset-menu" onclick="closeResetMenuOnBackdrop(event)">
-        <div class="reset-menu-content">
-            <button class="close-x-btn" onclick="closeResetMenu()">×</button>
+    <!-- Email Modal -->
+    <div id="email-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeEmailModal()"></div>
+        <div class="modal-content">
+            <button class="btn-close-modal" onclick="closeEmailModal()" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="modal-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+            </div>
+            
+            <h2>Send Your Design</h2>
+            <p class="modal-subtitle">Fill in your information below. Your design will be sent to us!</p>
+            
+            <form id="email-form">
+                <div class="form-group">
+                    <label for="customer-name">Name</label>
+                    <input type="text" id="customer-name" placeholder="Your name (optional)" autocomplete="name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="customer-email">
+                        Email Address 
+                        <span class="required">*</span>
+                    </label>
+                    <input type="email" id="customer-email" placeholder="your@email.com" autocomplete="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="customer-phone">
+                        Phone 
+                        <span class="required">*</span>
+                    </label>
+                    <input type="tel" id="customer-phone" placeholder="+1 (555) 123-4567" autocomplete="tel" required>
+                </div>
+                
+                <p class="form-note">* At least one contact method (Email or Phone) is required</p>
+                
+                <div class="form-group">
+                    <label for="customer-notes">Questions or Notes</label>
+                    <textarea id="customer-notes" rows="4" placeholder="Any questions or special requests? (optional)"></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary" id="send-email-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                        Send Design
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeEmailModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Reset Menu Modal -->
+    <div id="reset-menu" class="modal">
+        <div class="modal-backdrop" onclick="closeResetMenu()"></div>
+        <div class="modal-content modal-compact">
+            <button class="btn-close-modal" onclick="closeResetMenu()" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            
             <h3>Reset Options</h3>
+            
             <button class="reset-option-btn" id="reset-all-btn">
                 <span class="option-icon">🔄</span>
                 <div class="option-text">
@@ -70,6 +236,7 @@
                     <div class="option-desc">Delete everything (string and objects)</div>
                 </div>
             </button>
+            
             <button class="reset-option-btn" id="delete-objects-btn">
                 <span class="option-icon">🗑️</span>
                 <div class="option-text">
@@ -77,6 +244,7 @@
                     <div class="option-desc">Delete all objects but keep string</div>
                 </div>
             </button>
+            
             <button class="reset-option-btn" id="delete-individual-btn">
                 <span class="option-icon">✖️</span>
                 <div class="option-text">
@@ -86,34 +254,171 @@
             </button>
         </div>
     </div>
-
-    <main id="main-container">
-        <aside id="sidebar">
-            <div id="sidebar-header">
-                <h2>Tools & Beads</h2>
-                <p>1. Draw a string path, then 2. add beads.</p>
-            </div>
-            <div id="bead-selection"></div>
-        </aside>
-        
-        <div id="canvas-container">
-            <div id="info">
-                <h3>Your Design</h3>
-                <p>Beads: <span id="bead-count">0</span></p>
-            </div>
-            <div id="rotation-slider-container" style="display: none;">
-                <div class="rotation-label">Rotate</div>
-                <input type="range" id="rotation-slider" min="0" max="360" value="0" orient="vertical">
-                <div class="rotation-value">0°</div>
+    
+    <!-- Size Selection Modal -->
+    <div id="size-selection-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeSizeSelectionModal()"></div>
+        <div class="modal-content modal-compact">
+            <button class="btn-close-modal" onclick="closeSizeSelectionModal()" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <h3>Select Bead Size</h3>
+            <p class="modal-subtitle" id="size-modal-bead-name"></p>
+            
+            <div class="size-selection-grid" id="size-selection-grid">
+                <!-- Sizes 4, 6, 8, 10, 12, 14 -->
             </div>
         </div>
-    </main>
+    </div>
 
+    <!-- Library Modal -->
+    <div id="library-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeLibraryModal()"></div>
+        <div class="modal-content modal-compact">
+            <button class="btn-close-modal" onclick="closeLibraryModal()" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <h3>Design Library</h3>
+            <p class="modal-subtitle">Choose an option below</p>
+            
+            <button class="library-option-btn" id="import-design-btn">
+                <span class="option-icon">📥</span>
+                <div class="option-text">
+                    <div class="option-title">Import Design</div>
+                    <div class="option-desc">Load a pre-designed sandbox (Coming Soon)</div>
+                </div>
+            </button>
+            
+            <button class="library-option-btn" id="open-gallery-btn">
+                <span class="option-icon">🖼️</span>
+                <div class="option-text">
+                    <div class="option-title">Browse Gallery</div>
+                    <div class="option-desc">View finished designs and send via email</div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="gallery-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeGalleryModal()"></div>
+        <div class="modal-content modal-gallery">
+            <div class="gallery-header">
+                <button class="btn-close-modal" onclick="closeGalleryModal()" aria-label="Close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+                
+                <h3>Design Gallery</h3>
+                
+                <button class="btn-send-selected" id="send-selected-btn" style="display: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                    </svg>
+                    Send Selected
+                </button>
+            </div>
+            
+            <!-- Gallery Category Tabs -->
+            <div class="gallery-category-tabs" id="gallery-category-tabs">
+                <!-- Dynamically populated -->
+            </div>
+            
+            <!-- Gallery Grid -->
+            <div class="gallery-grid" id="gallery-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Modal -->
+    <div id="fullscreen-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeFullscreenModal()"></div>
+        <div class="modal-content modal-fullscreen">
+            <button class="btn-close-modal" onclick="closeFullscreenModal()" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            <img id="fullscreen-image" src="" alt="Fullscreen view">
+        </div>
+    </div>
+
+    <!-- Gallery Email Modal -->
+    <div id="gallery-email-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeGalleryEmailModal()"></div>
+        <div class="modal-content">
+            <button class="btn-close-modal" onclick="closeGalleryEmailModal()" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="modal-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+            </div>
+            
+            <h2>Send Selected Designs</h2>
+            <p class="modal-subtitle">Fill in your information below. Selected designs will be sent!</p>
+            
+            <form id="gallery-email-form">
+                <div class="form-group">
+                    <label for="gallery-customer-name">Name</label>
+                    <input type="text" id="gallery-customer-name" placeholder="Your name (optional)" autocomplete="name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="gallery-customer-email">
+                        Email Address 
+                        <span class="required">*</span>
+                    </label>
+                    <input type="email" id="gallery-customer-email" placeholder="your@email.com" autocomplete="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gallery-customer-phone">
+                        Phone 
+                        <span class="required">*</span>
+                    </label>
+                    <input type="tel" id="gallery-customer-phone" placeholder="+1 (555) 123-4567" autocomplete="tel" required>
+                </div>
+                
+                <p class="form-note">* At least one contact method (Email or Phone) is required</p>
+                
+                <div class="form-group">
+                    <label for="gallery-customer-notes">Questions or Notes</label>
+                    <textarea id="gallery-customer-notes" rows="4" placeholder="Any questions or special requests? (optional)"></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary" id="send-gallery-email-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                        Send Selected
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeGalleryEmailModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     
     <!-- Application scripts - load in order -->
     <script src="js/globals.js"></script>
+    <script src="js/storage.js"></script>
     <script src="js/config.js"></script>
     <script src="js/scene.js"></script>
     <script src="js/string.js"></script>
@@ -123,6 +428,7 @@
     <script src="js/tools.js"></script>
     <script src="js/reset.js"></script>
     <script src="js/email.js"></script>
+    <script src="js/gallery.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/interactions.js"></script>
     <script src="js/utils.js"></script>

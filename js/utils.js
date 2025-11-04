@@ -4,7 +4,7 @@
 */
 
 function updateBeadCount() {
-    document.getElementById('bead-count').textContent = beads.length;
+    document.getElementById('header-bead-count').textContent = beads.length;
 }
 
 function updateSelectionIndicator() {

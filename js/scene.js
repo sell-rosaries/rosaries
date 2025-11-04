@@ -8,7 +8,7 @@
  */
 function init3DScene() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--bg-canvas').trim());
+    scene.background = new THREE.Color('#F4F5F7'); // Use design token canvas color
 
     const container = document.getElementById('canvas-container');
     const aspect = container.clientWidth / container.clientHeight;
@@ -18,6 +18,7 @@ function init3DScene() {
 
     renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize for mobile
     container.appendChild(renderer.domElement);
 
     // Lighting
