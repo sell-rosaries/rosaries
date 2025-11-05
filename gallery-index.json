@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-11-05T13:18:20Z",
+  "lastUpdated": "2025-11-05T13:51:56Z",
   "categories": [
     {
       "id": "rosaries",
@@ -194,33 +194,6 @@
           "name": "RubySpheres",
           "image": "gallery/test (6)/RubySpheres.png",
           "description": "Beautiful test (6) design"
-        }
-      ]
-    }
-,
-    {
-      "id": "test (7)",
-      "name": "Test (7)",
-      "items": [
-        {
-          "id": "test (7)_001",
-          "name": "OrnateMetalAccent",
-          "image": "gallery/test (7)/OrnateMetalAccent.png",
-          "description": "Beautiful test (7) design"
-        }
-,
-        {
-          "id": "test (7)_002",
-          "name": "PearlyGlow",
-          "image": "gallery/test (7)/PearlyGlow.png",
-          "description": "Beautiful test (7) design"
-        }
-,
-        {
-          "id": "test (7)_003",
-          "name": "RubySpheres",
-          "image": "gallery/test (7)/RubySpheres.png",
-          "description": "Beautiful test (7) design"
         }
       ]
     }
