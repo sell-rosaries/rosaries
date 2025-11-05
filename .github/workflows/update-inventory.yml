@@ -20,24 +20,18 @@ jobs:
       
       - name: Generate inventory index
         run: |
-          cat > inventory-index.json << 'EOF'
-          {
-            "lastUpdated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-            "categories": []
-          }
-          EOF
+          # Start JSON structure
+          echo '{' > inventory-index.json
+          echo '  "lastUpdated": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'",' >> inventory-index.json
+          echo '  "categories": [' >> inventory-index.json
           
           # Scan Jularies folder
           if [ -d "Jularies" ]; then
-            # Start JSON array
-            echo '{' > inventory-index.json
-            echo '  "lastUpdated": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'",' >> inventory-index.json
-            echo '  "categories": [' >> inventory-index.json
-            
             first_cat=true
             for category in Jularies/*/; do
               if [ -d "$category" ]; then
                 cat_name=$(basename "$category")
+                cat_id=$(echo "$cat_name" | tr '[:upper:]' '[:lower:]')
                 
                 if [ "$first_cat" = false ]; then
                   echo ',' >> inventory-index.json
@@ -45,21 +39,32 @@ jobs:
                 first_cat=false
                 
                 echo '    {' >> inventory-index.json
+                echo '      "id": "'$cat_id'",' >> inventory-index.json
                 echo '      "name": "'$cat_name'",' >> inventory-index.json
-                echo '      "path": "'$category'",' >> inventory-index.json
                 echo '      "objects": [' >> inventory-index.json
                 
                 first_obj=true
+                obj_counter=1
                 for file in "$category"*.{png,jpg,jpeg,webp,gif}; do
                   if [ -f "$file" ]; then
                     filename=$(basename "$file")
+                    # Remove extension for object name
+                    obj_name=$(echo "$filename" | sed 's/\.[^.]*$//')
+                    # Create object ID with category prefix and counter
+                    obj_id="${cat_id}_$(printf "%03d" $obj_counter)"
                     
                     if [ "$first_obj" = false ]; then
                       echo ',' >> inventory-index.json
                     fi
                     first_obj=false
                     
-                    echo '        "'$filename'"' >> inventory-index.json
+                    echo '        {' >> inventory-index.json
+                    echo '          "id": "'$obj_id'",' >> inventory-index.json
+                    echo '          "name": "'$obj_name'",' >> inventory-index.json
+                    echo '          "filename": "'$filename'"' >> inventory-index.json
+                    echo '        }' >> inventory-index.json
+                    
+                    obj_counter=$((obj_counter + 1))
                   fi
                 done
                 
@@ -67,10 +72,10 @@ jobs:
                 echo '    }' >> inventory-index.json
               fi
             done
-            
-            echo '  ]' >> inventory-index.json
-            echo '}' >> inventory-index.json
           fi
+          
+          echo '  ]' >> inventory-index.json
+          echo '}' >> inventory-index.json
       
       - name: Commit updated index
         run: |
