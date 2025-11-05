@@ -312,28 +312,28 @@
 
 
     <!-- Gallery Modal -->
-    <div id="gallery-modal" class="modal">
-        <div class="modal-backdrop" onclick="closeGalleryModal()"></div>
-        <div class="modal-content modal-gallery">
-            <div class="gallery-header">
-                <button class="btn-close-modal" onclick="closeGalleryModal()" aria-label="Close">
+    <div id="gallery-panel" class="gallery-panel">
+        <div class="panel-backdrop" id="gallery-panel-backdrop"></div>
+        <div class="panel-content">
+            <div class="panel-handle"></div>
+            <div class="panel-header">
+                <h2>Design Gallery</h2>
+                <button class="btn-close-panel" id="close-gallery-btn" aria-label="Close">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 6L6 18M6 6l12 12"/>
                     </svg>
                 </button>
-                
-                <h3>Design Gallery</h3>
-                
-                <button class="btn-send-selected" id="send-selected-btn" style="display: none;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-                    </svg>
-                    Send Selected
-                </button>
             </div>
             
-            <!-- Gallery Category Tabs -->
-            <div class="gallery-category-tabs" id="gallery-category-tabs">
+            <button class="btn-send-selected" id="send-selected-btn" style="display: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+                Send Selected
+            </button>
+            
+            <!-- Gallery Category Grid -->
+            <div class="gallery-category-grid" id="gallery-category-grid">
                 <!-- Dynamically populated -->
             </div>
             

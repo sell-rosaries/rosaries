@@ -10,7 +10,7 @@
 // Get it from: script.google.com after deploying your script
 // It should look like: https://script.google.com/macros/s/ABC...xyz/exec
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfrPuxPOCPbdSax9qdClCkrNK6mDxgsQNHzKyn9YN5j4H_WU0dMzgPnnCcDL5unOxO/exec';  // ← PASTE YOUR WEB APP URL HERE
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-j67eSwkEAIvclOQV6q9icOv-zalf1w-7i0L8dhmLq9dWWguuAQQ-9ZX_PQZjXX74/exec';  // Fresh Email System URL
 
 // ============================================
 
@@ -426,8 +426,6 @@ function generateDesignHTML() {
  * Returns {valid: boolean, message: string, fieldsToHighlight: array}
  */
 function validateContactInfo(email, phone) {
-    const allowedDomains = ['gmail.com', 'proton.me', 'yahoo.com', 'outlook.com'];
-    
     // Check if at least one field is filled
     if (!email && !phone) {
         return {
@@ -437,15 +435,15 @@ function validateContactInfo(email, phone) {
         };
     }
     
-    // If email is provided, validate domain
-    if (email) {
+    // If email is provided, validate basic email format (domain-agnostic)
+    if (email && email !== 'Not provided') {
         const emailLower = email.toLowerCase().trim();
-        const hasValidDomain = allowedDomains.some(domain => emailLower.includes(domain));
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         
-        if (!hasValidDomain) {
+        if (!emailRegex.test(emailLower)) {
             return {
                 valid: false,
-                message: '⚠️ Invalid Email Domain\n\nPlease use one of these email providers:\n• Gmail (gmail.com)\n• Outlook (outlook.com)\n• Proton Mail (proton.me)\n• Yahoo (yahoo.com)',
+                message: '⚠️ Invalid Email Format\n\nPlease enter a valid email address.',
                 fieldsToHighlight: ['customer-email']
             };
         }
@@ -587,17 +585,15 @@ async function sendDesignEmail() {
     sendBtn.textContent = 'Sending...';
     
     try {
-        // Prepare data for Google Apps Script
+        // Prepare data for FRESH Google Apps Script
         const emailData = {
-            customer_name: customerName,
-            customer_email: customerEmail || 'Not provided',
-            customer_phone: customerPhone || 'Not provided',
-            customer_notes: customerNotes,
-            design_image: designImage,
-            design_html: designHTML,
-            total_objects: objectStats.total,
-            object_breakdown: objectStats.breakdown,
-            timestamp: new Date().toLocaleString()
+            name: customerName,
+            email: customerEmail || 'Not provided',
+            phone: customerPhone || 'Not provided',
+            notes: customerNotes + '\n\nDesign Details:\n' + 
+                   `Total Objects: ${objectStats.total}\n` +
+                   `Breakdown: ${objectStats.breakdown}`,
+            design_image: designImage
         };
         
         // Send to Google Apps Script
