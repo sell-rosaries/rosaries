@@ -23,28 +23,11 @@ async function loadGalleryConfig() {
 }
 
 /**
- * Open library modal
- */
-function openLibraryModal() {
-    const modal = document.getElementById('library-modal');
-    modal.classList.add('active');
-}
-
-/**
- * Close library modal
- */
-function closeLibraryModal() {
-    const modal = document.getElementById('library-modal');
-    modal.classList.remove('active');
-}
-
-/**
  * Open gallery modal
  */
 function openGalleryModal() {
     const modal = document.getElementById('gallery-modal');
     modal.classList.add('active');
-    closeLibraryModal();
     createGalleryView();
 }
 
@@ -353,24 +336,16 @@ async function sendGalleryEmail(event) {
  * Initialize gallery event listeners
  */
 function initGalleryEventListeners() {
-    // Library button
+    // Library button - now directly opens gallery (no modal)
     const libraryBtn = document.getElementById('library-btn');
     if (libraryBtn) {
-        libraryBtn.addEventListener('click', openLibraryModal);
+        libraryBtn.addEventListener('click', openGalleryModal);
     }
     
-    // Import design button (placeholder)
-    const importBtn = document.getElementById('import-design-btn');
-    if (importBtn) {
-        importBtn.addEventListener('click', () => {
-            alert('📥 Import Design feature coming soon!');
-        });
-    }
-    
-    // Open gallery button
-    const openGalleryBtn = document.getElementById('open-gallery-btn');
-    if (openGalleryBtn) {
-        openGalleryBtn.addEventListener('click', openGalleryModal);
+    // Import presets button (shown only in string mode)
+    const importPresetsBtn = document.getElementById('import-presets-btn');
+    if (importPresetsBtn) {
+        importPresetsBtn.addEventListener('click', openImportPresetsModal);
     }
     
     // Send selected button
@@ -383,5 +358,27 @@ function initGalleryEventListeners() {
     const galleryEmailForm = document.getElementById('gallery-email-form');
     if (galleryEmailForm) {
         galleryEmailForm.addEventListener('submit', sendGalleryEmail);
+    }
+}
+
+/**
+ * Open Import Presets Modal (empty for now)
+ */
+function openImportPresetsModal() {
+    const modal = document.getElementById('import-presets-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Close Import Presets Modal
+ */
+function closeImportPresetsModal() {
+    const modal = document.getElementById('import-presets-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
     }
 }

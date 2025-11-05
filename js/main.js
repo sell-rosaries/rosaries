@@ -125,6 +125,34 @@ function addEventListeners() {
             }
         });
     }
+    
+    // Zoom controls
+    const zoomInBtn = document.getElementById('zoom-in-btn');
+    const zoomOutBtn = document.getElementById('zoom-out-btn');
+    
+    if (zoomInBtn) {
+        console.log('Zoom in button found, setting up event listener');
+        zoomInBtn.addEventListener('click', (e) => {
+            console.log('Zoom in button clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            zoomIn();
+        });
+    } else {
+        console.error('Zoom in button not found!');
+    }
+    
+    if (zoomOutBtn) {
+        console.log('Zoom out button found, setting up event listener');
+        zoomOutBtn.addEventListener('click', (e) => {
+            console.log('Zoom out button clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            zoomOut();
+        });
+    } else {
+        console.error('Zoom out button not found!');
+    }
 }
 
 /**
@@ -160,22 +188,18 @@ function selectStringTool(event) {
 }
 
 /**
- * Activate draw string tool from toolbar button
+ * Activate draw string tool from toolbar button (toggle on/off)
  */
 function activateDrawStringTool() {
     const drawBtn = document.getElementById('draw-string-btn');
     
-    // Toggle off if already active
     if (isStringMode) {
-        isStringMode = false;
-        controls.enabled = true;
-        drawBtn.classList.remove('active');
-        document.getElementById('fab').classList.remove('active');
-        updateFABIcon();
+        // If already in string mode, turn it off
+        exitStringMode();
         return;
     }
     
-    // Toggle on
+    // Turn on string mode (auto-turns off after drawing gesture)
     isStringMode = true;
     isSelectMode = false;
     controls.enabled = false;
@@ -191,6 +215,12 @@ function activateDrawStringTool() {
     
     // Update FAB to show active state
     document.getElementById('fab').classList.add('active');
+    
+    // Show import presets button when string mode is active
+    const importPresetsBtn = document.getElementById('import-presets-btn');
+    if (importPresetsBtn) {
+        importPresetsBtn.style.display = 'flex';
+    }
 }
 
 /**
@@ -199,14 +229,98 @@ function activateDrawStringTool() {
 function onWindowResize() {
     const container = document.getElementById('canvas-container');
     const aspect = container.clientWidth / container.clientHeight;
+    const currentZoom = camera.zoom; // Preserve zoom level
     
     camera.left = -10 * aspect;
     camera.right = 10 * aspect;
     camera.top = 10;
     camera.bottom = -10;
+    camera.zoom = currentZoom; // Restore zoom level
     camera.updateProjectionMatrix();
     
     renderer.setSize(container.clientWidth, container.clientHeight);
+}
+
+/**
+ * Zoom in - moves camera closer to the scene
+ */
+function zoomIn() {
+    console.log('Zoom in function called');
+    
+    if (typeof camera === 'undefined' || camera === null) {
+        console.error('Camera not available');
+        return;
+    }
+    
+    if (typeof controls === 'undefined' || controls === null) {
+        console.error('Controls not available');
+        return;
+    }
+    
+    try {
+        // Enable controls temporarily for zoom operation
+        const wasEnabled = controls.enabled;
+        controls.enabled = true;
+        
+        // Method 1: Try dollyIn if available
+        if (typeof controls.dollyIn === 'function') {
+            console.log('Using dollyIn method');
+            controls.dollyIn(1.2);
+        } else {
+            // Method 2: Direct camera zoom modification for OrthographicCamera
+            console.log('Using direct camera zoom modification');
+            camera.zoom = Math.min(camera.zoom * 1.2, 5); // Zoom in by 20%, max zoom 5x
+            camera.updateProjectionMatrix();
+        }
+        
+        controls.update();
+        controls.enabled = wasEnabled; // Restore original state
+        
+        console.log('Zoom in completed successfully, camera.zoom:', camera.zoom);
+    } catch (error) {
+        console.error('Zoom in error:', error);
+    }
+}
+
+/**
+ * Zoom out - moves camera farther from the scene  
+ */
+function zoomOut() {
+    console.log('Zoom out function called');
+    
+    if (typeof camera === 'undefined' || camera === null) {
+        console.error('Camera not available');
+        return;
+    }
+    
+    if (typeof controls === 'undefined' || controls === null) {
+        console.error('Controls not available');
+        return;
+    }
+    
+    try {
+        // Enable controls temporarily for zoom operation
+        const wasEnabled = controls.enabled;
+        controls.enabled = true;
+        
+        // Method 1: Try dollyOut if available
+        if (typeof controls.dollyOut === 'function') {
+            console.log('Using dollyOut method');
+            controls.dollyOut(1.2);
+        } else {
+            // Method 2: Direct camera zoom modification for OrthographicCamera
+            console.log('Using direct camera zoom modification');
+            camera.zoom = Math.max(camera.zoom / 1.2, 0.5); // Zoom out by 20%, min zoom 0.5x
+            camera.updateProjectionMatrix();
+        }
+        
+        controls.update();
+        controls.enabled = wasEnabled; // Restore original state
+        
+        console.log('Zoom out completed successfully, camera.zoom:', camera.zoom);
+    } catch (error) {
+        console.error('Zoom out error:', error);
+    }
 }
 
 // Start the application

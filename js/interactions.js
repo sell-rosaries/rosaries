@@ -165,6 +165,8 @@ function onCanvasMouseUp(event) {
     
     if (isDrawingString && stringPoints.length > 0) {
         shouldSave = true;
+        // Automatically exit string mode after completing a drawing gesture
+        exitStringMode();
     }
     
     if (isDragging && hasDragged && draggedBead) {

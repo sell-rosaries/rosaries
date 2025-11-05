@@ -15,6 +15,8 @@ function init3DScene() {
     camera = new THREE.OrthographicCamera(-10 * aspect, 10 * aspect, 10, -10, 0.1, 1000);
     camera.position.set(0, 100, 0);
     camera.lookAt(0, 0, 0);
+    camera.zoom = 1; // Initialize zoom level for OrthographicCamera
+    camera.updateProjectionMatrix();
 
     renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(container.clientWidth, container.clientHeight);

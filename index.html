@@ -19,6 +19,13 @@
     <!-- Header -->
     <header id="header">
         <h1>Rosary Designer</h1>
+        
+        <!-- Import Presets Button (shown underneath title when string mode is active) -->
+        <button class="import-presets-btn" id="import-presets-btn" style="display: none;" aria-label="Import Presets">
+            <span class="import-text">import</span>
+            <span class="presets-text">presets</span>
+        </button>
+        
         <div class="header-info">
             <button class="lang-toggle" id="lang-toggle" aria-label="Language">
                 <span class="lang-label">EN</span>
@@ -31,6 +38,16 @@
             </span>
         </div>
     </header>
+    
+    <!-- Zoom Controls (floating in canvas) -->
+    <div class="canvas-zoom-controls" id="canvas-zoom-controls">
+        <button class="canvas-zoom-btn" id="zoom-in-btn" aria-label="Zoom In">
+            <span style="font-size: 18px; font-weight: bold; color: inherit;">+</span>
+        </button>
+        <button class="canvas-zoom-btn" id="zoom-out-btn" aria-label="Zoom Out">
+            <span style="font-size: 18px; font-weight: bold; color: inherit;">−</span>
+        </button>
+    </div>
     
     <!-- Main Canvas Container -->
     <div id="canvas-container">
@@ -97,14 +114,13 @@
             <span class="toolbar-label">Draw</span>
         </button>
         
-        <button class="toolbar-btn" id="library-btn" aria-label="Design Library">
+        <button class="toolbar-btn" id="library-btn" aria-label="Design Gallery">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="7" height="7"/>
-                <rect x="14" y="3" width="7" height="7"/>
-                <rect x="14" y="14" width="7" height="7"/>
-                <rect x="3" y="14" width="7" height="7"/>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21,15 16,10 5,21"/>
             </svg>
-            <span class="toolbar-label">Library</span>
+            <span class="toolbar-label">Gallery</span>
         </button>
         
         <button class="toolbar-btn" id="email-btn" aria-label="Send Design">
@@ -274,36 +290,26 @@
         </div>
     </div>
 
-    <!-- Library Modal -->
-    <div id="library-modal" class="modal">
-        <div class="modal-backdrop" onclick="closeLibraryModal()"></div>
+    <!-- Import Presets Modal -->
+    <div id="import-presets-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeImportPresetsModal()"></div>
         <div class="modal-content modal-compact">
-            <button class="btn-close-modal" onclick="closeLibraryModal()" aria-label="Close">
+            <button class="btn-close-modal" onclick="closeImportPresetsModal()" aria-label="Close">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>
             </button>
             
-            <h3>Design Library</h3>
-            <p class="modal-subtitle">Choose an option below</p>
+            <h3>Import Presets</h3>
+            <p class="modal-subtitle">Coming Soon</p>
             
-            <button class="library-option-btn" id="import-design-btn">
-                <span class="option-icon">📥</span>
-                <div class="option-text">
-                    <div class="option-title">Import Design</div>
-                    <div class="option-desc">Load a pre-designed sandbox (Coming Soon)</div>
-                </div>
-            </button>
-            
-            <button class="library-option-btn" id="open-gallery-btn">
-                <span class="option-icon">🖼️</span>
-                <div class="option-text">
-                    <div class="option-title">Browse Gallery</div>
-                    <div class="option-desc">View finished designs and send via email</div>
-                </div>
-            </button>
+            <!-- Empty content for now -->
+            <div class="empty-state">
+                <p>This feature will be available soon</p>
+            </div>
         </div>
     </div>
+
 
     <!-- Gallery Modal -->
     <div id="gallery-modal" class="modal">
