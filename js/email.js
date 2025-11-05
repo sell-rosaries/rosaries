@@ -10,7 +10,7 @@
 // Get it from: script.google.com after deploying your script
 // It should look like: https://script.google.com/macros/s/ABC...xyz/exec
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-j67eSwkEAIvclOQV6q9icOv-zalf1w-7i0L8dhmLq9dWWguuAQQ-9ZX_PQZjXX74/exec';  // Fresh Email System URL
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3nWmLCReAoEz22tCzmPdpXkYfjB2oW7hCyapdFLI8VQsKkoOZMhS9PLFCk1y1duzp/exec';  // Fresh Email System URL
 
 // ============================================
 
