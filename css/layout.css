@@ -1,0 +1,308 @@
+/* ==================== HEADER ==================== */
+#header {
+    height: var(--header-height);
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0 var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 100;
+    flex-shrink: 0;
+}
+
+#header h1 {
+    font-size: var(--font-size-heading-sm);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.01em;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.bead-count-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-body-sm);
+    font-weight: var(--font-weight-semibold);
+    backdrop-filter: blur(10px);
+}
+
+/* Import Presets Button (shown underneath title when string mode is active) */
+.import-presets-btn {
+    position: absolute;
+    top: 70px; /* Position underneath the header title */
+    left: 16px; /* Top left, opposite side from zoom controls */
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all var(--duration-base) var(--easing-smooth);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 15;
+}
+
+.import-presets-btn:hover {
+    background: linear-gradient(135deg, #5B52F0 0%, #8B5CF6 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+
+.import-presets-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.import-text, .presets-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    line-height: 1;
+    letter-spacing: 0.02em;
+}
+
+/* Canvas Zoom Controls (floating in canvas area, opposite side from import presets) */
+.canvas-zoom-controls {
+    position: absolute;
+    top: 70px; /* Exact match with import presets button positioning */
+    right: 16px; /* Right side, opposite from import presets button */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    z-index: 10;
+}
+
+.canvas-zoom-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-weight: var(--font-weight-bold);
+    font-size: 18px;
+    transition: all var(--duration-base) var(--easing-smooth);
+    box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+    cursor: pointer;
+    user-select: none;
+}
+
+.canvas-zoom-btn span {
+    font-weight: var(--font-weight-bold);
+    font-size: 18px;
+    color: inherit;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.canvas-zoom-btn:hover {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(79, 70, 229, 0.4);
+}
+
+.canvas-zoom-btn:active {
+    transform: translateY(0) scale(0.95);
+    box-shadow: 0 2px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 360px) {
+    .import-presets-btn {
+        top: 65px;
+        left: 12px;
+        width: 55px;
+        height: 55px;
+    }
+    
+    .import-text, .presets-text {
+        font-size: 10px;
+    }
+    
+    .canvas-zoom-controls {
+        top: 65px; /* Match import presets button on small screens */
+        right: 12px;
+    }
+    
+    .canvas-zoom-btn {
+        width: 55px;
+        height: 55px;
+        font-size: 16px;
+    }
+}
+
+/* ==================== CANVAS CONTAINER ==================== */
+#canvas-container {
+    flex: 1;
+    position: relative;
+    background-color: var(--bg-canvas);
+    overflow: hidden;
+}
+
+#canvas-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+/* Canvas Info Overlay */
+#canvas-info {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-4);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.info-badge {
+    background: var(--glass-light);
+    backdrop-filter: var(--backdrop-light);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    box-shadow: var(--shadow-glass);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--neutral-600);
+}
+
+.info-value {
+    font-size: var(--font-size-heading-md);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-500);
+}
+
+/* ==================== FLOATING ACTION BUTTON (FAB) ==================== */
+.fab {
+    position: fixed;
+    bottom: calc(var(--toolbar-height) + var(--space-6));
+    right: var(--space-6);
+    width: var(--fab-size);
+    height: var(--fab-size);
+    border-radius: var(--radius-full);
+    background: var(--gradient-primary);
+    border: none;
+    box-shadow: var(--shadow-lg), var(--shadow-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 90;
+    transition: transform var(--duration-base) var(--easing-smooth),
+                box-shadow var(--duration-base) var(--easing-smooth);
+}
+
+.fab:active {
+    transform: scale(0.95);
+}
+
+.fab svg {
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.fab.active {
+    animation: fab-pulse 2s ease-in-out infinite;
+}
+
+@keyframes fab-pulse {
+    0%, 100% {
+        box-shadow: var(--shadow-lg), 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    50% {
+        box-shadow: var(--shadow-xl), 0 0 0 12px rgba(102, 126, 234, 0);
+    }
+}
+
+/* ==================== BOTTOM TOOLBAR ==================== */
+.bottom-toolbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--toolbar-height);
+    background: var(--glass-light);
+    backdrop-filter: var(--backdrop-light);
+    border-top: 1px solid var(--glass-border);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: var(--space-3) var(--space-4);
+    z-index: 95;
+    gap: var(--space-2);
+}
+
+.toolbar-btn {
+    flex: 1;
+    max-width: var(--toolbar-btn-size);
+    height: var(--toolbar-btn-size);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    color: var(--neutral-600);
+    transition: all var(--duration-fast) var(--easing-smooth);
+    padding: var(--space-2);
+}
+
+.toolbar-btn:active {
+    transform: scale(0.95);
+}
+
+.toolbar-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.toolbar-btn:not(:disabled):active {
+    background: var(--glass-subtle);
+}
+
+.toolbar-btn.active {
+    color: var(--primary-500);
+    background: var(--glass-subtle);
+}
+
+.toolbar-label {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    display: block;
+    text-align: center;
+    margin-top: var(--space-1);
+}
+
