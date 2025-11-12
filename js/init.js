@@ -23,6 +23,27 @@ async function main() {
         createBeadSelection();
         addEventListeners();
         initGalleryEventListeners(); // Initialize gallery event listeners
+        
+        // Wait for language manager to be initialized before initializing import presets
+        if (typeof languageManager !== 'undefined') {
+            initImportPresets(); // Initialize import presets functionality
+        } else {
+            // Wait for language manager to be available
+            const checkLanguageManager = setInterval(() => {
+                if (typeof languageManager !== 'undefined') {
+                    clearInterval(checkLanguageManager);
+                    initImportPresets();
+                }
+            }, 100);
+            
+            // Timeout after 5 seconds
+            setTimeout(() => {
+                clearInterval(checkLanguageManager);
+                console.warn('Language manager not available, initializing import presets anyway');
+                initImportPresets();
+            }, 5000);
+        }
+        
         updateBeadCount();
         
         // Auto-restore saved design (must be after config is loaded, BEFORE saveState)

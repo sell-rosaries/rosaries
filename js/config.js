@@ -10,7 +10,10 @@ async function loadConfig() {
     console.log('🔍 Loading inventory...');
     
     try {
-        const response = await fetch('inventory-index.json?t=' + Date.now());
+        const url = 'inventory-index.json?t=' + Date.now();
+        console.log('Fetching from:', url);
+        
+        const response = await fetch(url);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);

@@ -66,11 +66,17 @@
     cursor: pointer;
     color: var(--neutral-600);
     transition: all var(--duration-fast);
+    flex-shrink: 0;
 }
 
 .btn-close-modal:active {
     transform: scale(0.95);
     background: var(--neutral-200);
+}
+
+/* Close buttons stay on right side in both LTR and RTL */
+.btn-close-modal {
+    right: var(--space-4);
 }
 
 .modal-icon {
@@ -250,6 +256,18 @@
 .option-icon {
     font-size: 28px;
     flex-shrink: 0;
+}
+
+.option-icon svg {
+    display: block;
+    width: 32px;
+    height: 32px;
+    color: var(--primary-500);
+}
+
+.reset-option-btn:hover .option-icon svg,
+.preset-option-btn:hover .option-icon svg {
+    color: var(--primary-600);
 }
 
 .option-text {
