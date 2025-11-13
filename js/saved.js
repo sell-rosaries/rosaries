@@ -45,7 +45,7 @@ function closeSavedModal() {
                     <polyline points="3,6 5,6 21,6"/>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 </svg>
-                <span class="btn-text">Delete Design</span>
+                <span class="btn-text">${window.getTranslation('delete-design') || 'Delete Design'}</span>
             `;
         }
     }
@@ -65,7 +65,7 @@ function closeSavedModal() {
                     <polyline points="7,10 12,15 17,10"/>
                     <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                <span class="btn-text">Import Design</span>
+                <span class="btn-text">${window.getTranslation('import-design') || 'Import Design'}</span>
             `;
         }
     }
@@ -143,20 +143,20 @@ function captureCanvasScreenshot() {
 function saveCurrentDesign() {
     // Check if design has content
     if (!hasDesignContent()) {
-        showSaveError('Nothing to save - add some beads or draw a string first!');
+        showSaveError(window.getTranslation('save-error-nothing') || 'Nothing to save - add some beads or draw a string first!');
         return;
     }
     
     // Check if we have less than 6 saves
     const existingSaves = getSavedDesigns();
     if (existingSaves.length >= 6) {
-        showSaveError('Maximum 6 saves allowed. Please delete some saves first.');
+        showSaveError(window.getTranslation('save-error-max') || 'Maximum 6 saves allowed. Please delete some saves first.');
         return;
     }
     
     try {
         // Capture screenshot first
-        showSaveSuccess('📸 Auto-fitting + capturing preview...');
+        showSaveSuccess(window.getTranslation('save-success-screenshot') || '📸 Auto-fitting + capturing preview...');
         
         setTimeout(() => {
             console.log('🔍 Save: Starting capture process...');
@@ -166,7 +166,7 @@ function saveCurrentDesign() {
             const screenshot = captureCanvasScreenshot();
             
             if (!screenshot) {
-                showSaveError('Failed to capture screenshot. Please try again.');
+                showSaveError(window.getTranslation('save-error-screenshot') || 'Failed to capture screenshot. Please try again.');
                 return;
             }
             
@@ -198,7 +198,7 @@ function saveCurrentDesign() {
             localStorage.setItem(SAVED_DESIGNS_KEY, JSON.stringify(existingSaves));
             
             // Show success feedback
-            showSaveSuccess('Design saved successfully!');
+            showSaveSuccess(window.getTranslation('save-success-saved') || 'Design saved successfully!');
             
             // Refresh the modal
             populateSavedModal();
@@ -209,7 +209,7 @@ function saveCurrentDesign() {
         
     } catch (e) {
         console.warn('Could not save design:', e);
-        showSaveError('Failed to save design. Please try again.');
+        showSaveError(window.getTranslation('save-error-failed') || 'Failed to save design. Please try again.');
     }
 }
 
@@ -257,7 +257,7 @@ function populateSavedModal() {
     // Update modal content with new layout
     modalContent.innerHTML = `
         <div class="saved-modal-header">
-            <h3>Saved Designs</h3>
+            <h3>${window.getTranslation('saved-designs') || 'Saved Designs'}</h3>
             <button class="btn-close-modal" onclick="closeSavedModal()" aria-label="Close">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 6L6 18M6 6l12 12"/>
@@ -265,7 +265,7 @@ function populateSavedModal() {
             </button>
         </div>
         
-        <p class="modal-subtitle">Save, import, or delete your rosary designs</p>
+        <p class="modal-subtitle">${window.getTranslation('saved-designs-subtitle') || 'Save, import, or delete your rosary designs'}</p>
         
         <!-- Saved Designs Grid -->
         <div class="saved-designs-grid" id="saved-designs-grid">
@@ -278,7 +278,7 @@ function populateSavedModal() {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                 </svg>
-                <span class="btn-text">Save Design</span>
+                <span class="btn-text">${window.getTranslation('save-design') || 'Save Design'}</span>
             </button>
             
             <button class="saved-action-btn" id="import-design-btn">
@@ -287,7 +287,7 @@ function populateSavedModal() {
                     <polyline points="7,10 12,15 17,10"/>
                     <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                <span class="btn-text">Import Design</span>
+                <span class="btn-text">${window.getTranslation('import-design') || 'Import Design'}</span>
             </button>
             
             <button class="saved-action-btn" id="delete-design-btn" data-disabled="true">
@@ -295,7 +295,7 @@ function populateSavedModal() {
                     <polyline points="3,6 5,6 21,6"/>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 </svg>
-                <span class="btn-text">Delete Design</span>
+                <span class="btn-text">${window.getTranslation('delete-design') || 'Delete Design'}</span>
             </button>
         </div>
     `;
@@ -375,7 +375,7 @@ function generateEmptySlotHTML(slotNumber) {
             <div class="saved-design-preview">
                 <div class="empty-slot-content">
                     <div class="empty-slot-icon">+</div>
-                    <div class="empty-slot-text">Slot ${slotNumber}</div>
+                    <div class="empty-slot-text">${window.getTranslation ? window.getTranslation('slot-text') || 'Slot ' + slotNumber : 'Slot ' + slotNumber}</div>
                 </div>
             </div>
         </div>
@@ -522,7 +522,7 @@ function toggleDeleteMode() {
     
     // Check if there are designs to delete when activating delete mode
     if (!deleteModeActive && savedDesigns.length === 0) {
-        showSaveError('No designs to delete!');
+        showSaveError(window.getTranslation('delete-error-no-designs') || 'No designs to delete!');
         return;
     }
     
@@ -540,7 +540,7 @@ function toggleDeleteMode() {
             deleteBtn.style.color = 'white';
         }
         
-        showSaveSuccess('Delete mode: Click designs to select, then click "Delete" again to delete.');
+        showSaveSuccess(window.getTranslation('delete-mode-instruction') || 'Delete mode: Click designs to select, then click "Delete" again to delete.');
         setupDeleteSelectionMode();
         
     } else {
@@ -1064,17 +1064,17 @@ function showBulkDeleteConfirmation() {
         <div class="delete-confirm-backdrop"></div>
         <div class="delete-confirm-modal">
             <div class="delete-confirm-header">
-                <h4 style="color: var(--error); margin: 0;">⚠️ Warning</h4>
+                <h4 style="color: var(--error); margin: 0;">${window.getTranslation('warning-title') || '⚠️ Warning'}</h4>
             </div>
             <div class="delete-confirm-content">
-                <p>Are you sure you want to delete ${count} selected design${count > 1 ? 's' : ''}?</p>
+                <p>${window.getTranslation('confirm-delete-bulk') || 'Are you sure you want to delete these designs?'}</p>
                 <p style="font-size: var(--font-size-body-sm); color: var(--neutral-600); margin-top: var(--space-2);">
-                    This action cannot be undone.
+                    ${window.getTranslation('confirm-delete-single-desc') || 'This action cannot be undone.'}
                 </p>
             </div>
             <div class="delete-confirm-actions">
-                <button class="btn-cancel-delete" onclick="cancelDeleteConfirm()">No, Cancel</button>
-                <button class="btn-confirm-delete" onclick="confirmBulkDelete()">Yes, Delete ${count}</button>
+                <button class="btn-cancel-delete" onclick="cancelDeleteConfirm()">${window.getTranslation('confirm-cancel') || 'No, Cancel'}</button>
+                <button class="btn-confirm-delete" onclick="confirmBulkDelete()">${window.getTranslation('confirm-delete-yes') || 'Yes, Delete'}</button>
             </div>
         </div>
     `;
@@ -1122,14 +1122,23 @@ function confirmBulkDelete() {
         populateSavedModal();
         
         // Show success message
-        showSaveSuccess(`${count} design${count > 1 ? 's' : ''} deleted successfully!`);
+        const successText = window.getTranslation('delete-success-bulk');
+        let message = successText ? successText : '${count} design${count > 1 ? \'s\' : \'\'} deleted successfully!';
+        // Replace the variables manually for backward compatibility
+        if (message.includes('${count}')) {
+            message = message.replace('${count}', count);
+        }
+        if (message.includes('${count > 1 ? \'s\' : \'\'}')) {
+            message = message.replace('${count > 1 ? \'s\' : \'\'}', count > 1 ? 's' : '');
+        }
+        showSaveSuccess(message);
         
         console.log('✅ Bulk delete completed:', count, 'designs');
         window.bulkDeleteIds = null;
         
     } catch (e) {
         console.warn('Could not delete designs:', e);
-        showSaveError('Failed to delete designs. Please try again.');
+        showSaveError(window.getTranslation('delete-error-failed') || 'Failed to delete designs. Please try again.');
         cancelDeleteConfirm();
     }
 }
@@ -1145,17 +1154,17 @@ function confirmDeleteDesign(designId, cardElement) {
         <div class="delete-confirm-backdrop"></div>
         <div class="delete-confirm-modal">
             <div class="delete-confirm-header">
-                <h4 style="color: var(--error); margin: 0;">⚠️ Warning</h4>
+                <h4 style="color: var(--error); margin: 0;">${window.getTranslation('warning-title') || '⚠️ Warning'}</h4>
             </div>
             <div class="delete-confirm-content">
-                <p>Are you sure you want to delete this design?</p>
+                <p>${window.getTranslation('confirm-delete-single') || 'Are you sure you want to delete this design?'}</p>
                 <p style="font-size: var(--font-size-body-sm); color: var(--neutral-600); margin-top: var(--space-2);">
-                    This action cannot be undone.
+                    ${window.getTranslation('confirm-delete-single-desc') || 'This action cannot be undone.'}
                 </p>
             </div>
             <div class="delete-confirm-actions">
-                <button class="btn-cancel-delete" onclick="cancelDeleteConfirm()">No, Cancel</button>
-                <button class="btn-confirm-delete" onclick="confirmDelete('${designId}')">Yes, Delete</button>
+                <button class="btn-cancel-delete" onclick="cancelDeleteConfirm()">${window.getTranslation('confirm-cancel') || 'No, Cancel'}</button>
+                <button class="btn-confirm-delete" onclick="confirmDelete('${designId}')">${window.getTranslation('confirm-delete-yes') || 'Yes, Delete'}</button>
             </div>
         </div>
     `;
@@ -1331,7 +1340,7 @@ function confirmDelete(designId) {
         localStorage.setItem(SAVED_DESIGNS_KEY, JSON.stringify(updatedDesigns));
         
         // Show success message
-        showSaveSuccess('Design deleted successfully!');
+        showSaveSuccess(window.getTranslation('delete-success-single') || 'Design deleted successfully!');
         
         // Close confirmation dialog
         cancelDeleteConfirm();
@@ -1343,7 +1352,7 @@ function confirmDelete(designId) {
         
     } catch (e) {
         console.warn('Could not delete design:', e);
-        showSaveError('Failed to delete design. Please try again.');
+        showSaveError(window.getTranslation('delete-error-failed') || 'Failed to delete design. Please try again.');
         cancelDeleteConfirm();
     }
 }
@@ -1506,7 +1515,7 @@ function performBasicSmartFraming() {
     
     if (!hasDesign) {
         console.log('⚠️ No design elements to fit');
-        alert('No design to fit! Add some beads or draw a string first.');
+        alert(window.getTranslation('import-error-empty') || 'No design to fit! Add some beads or draw a string first.');
         return;
     }
     
@@ -1578,7 +1587,7 @@ function toggleImportMode() {
             `;
         }
         
-        showSaveSuccess('Import mode deactivated');
+        showSaveSuccess(window.getTranslation('import-success-activated') || 'Import mode deactivated');
     } else {
         // Enter import mode
         importModeActive = true;
@@ -1600,7 +1609,7 @@ function toggleImportMode() {
             `;
         }
         
-        showSaveSuccess('Click on any saved design to import it!');
+        showSaveSuccess(window.getTranslation('import-success-instruction') || 'Click on any saved design to import it!');
     }
 }
 
@@ -1635,10 +1644,9 @@ function showImportConfirmation(designId, designName) {
             text-align: center;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         ">
-            <h3 style="margin: 0 0 15px 0; color: #333;">Import Design</h3>
+            <h3 style="margin: 0 0 15px 0; color: #333;">${window.getTranslation('confirm-import-title') || 'Import Design?'}</h3>
             <p style="margin: 0 0 20px 0; color: #666; line-height: 1.5;">
-                Import "<strong>${designName}</strong>"?<br>
-                This will replace everything currently in your sandbox.
+                ${window.getTranslation('confirm-import-desc') || 'This will replace everything in your sandbox. This action cannot be undone.'}
             </p>
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button id="confirm-import-btn" style="
@@ -1650,7 +1658,7 @@ function showImportConfirmation(designId, designName) {
                     cursor: pointer;
                     font-weight: 600;
                     transition: background 0.2s;
-                ">Yes, Import</button>
+                ">${window.getTranslation('confirm-import-yes') || 'Yes, Import'}</button>
                 <button id="cancel-import-btn" style="
                     background: #f3f4f6;
                     color: #374151;
@@ -1725,7 +1733,7 @@ function showDesignPreviewModal(designId, designName) {
     
     if (!design) {
         console.error('❌ Design not found:', designId);
-        showSaveError('Design not found or may have been deleted.');
+        showSaveError(window.getTranslation('import-error-not-found') || 'Design not found or may have been deleted.');
         return;
     }
     
@@ -1747,12 +1755,12 @@ function showDesignPreviewModal(designId, designName) {
                     <div class="preview-image-container">
                         ${design.thumbnail ? 
                             `<img src="${design.thumbnail}" alt="Design preview" class="preview-image" />` :
-                            `<div class="no-preview">No preview available</div>`
+                            `<div class="no-preview">${window.getTranslation('no-preview-available') || 'No preview available'}</div>`
                         }
                     </div>
                     
                     <div class="preview-info">
-                        <p><strong>Created:</strong> ${new Date(design.timestamp).toLocaleString()}</p>
+                        <p><strong>${window.getTranslation('preview-created') || 'Created: '}</strong> ${new Date(design.timestamp).toLocaleString()}</p>
                         <p><strong>Beads:</strong> ${design.beads ? design.beads.length : 0}</p>
                         <p><strong>String Points:</strong> ${design.stringPoints ? design.stringPoints.length : 0}</p>
                     </div>
@@ -1764,7 +1772,7 @@ function showDesignPreviewModal(designId, designName) {
                             <polyline points="3,6 5,6 21,6"/>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                         </svg>
-                        <span>Delete</span>
+                        <span>${window.getTranslation('preview-delete') || 'Delete'}</span>
                     </button>
                     
                     <button class="preview-btn preview-btn-import" onclick="importFromPreview('${designId}')">
@@ -1773,7 +1781,7 @@ function showDesignPreviewModal(designId, designName) {
                             <polyline points="7,10 12,15 17,10"/>
                             <line x1="12" y1="15" x2="12" y2="3"/>
                         </svg>
-                        <span>Import</span>
+                        <span>${window.getTranslation('import-design') || 'Import'}</span>
                     </button>
                 </div>
             </div>
@@ -2039,7 +2047,7 @@ function importFromPreview(designId) {
         // Show import confirmation
         showImportConfirmation(designId, design.name);
     } else {
-        showSaveError('Design not found or may have been deleted.');
+        showSaveError(window.getTranslation('import-error-not-found') || 'Design not found or may have been deleted.');
         closeDesignPreviewModal();
     }
 }
@@ -2055,7 +2063,7 @@ function importDesign(designId) {
     
     if (!design) {
         console.error('❌ Design not found:', designId);
-        showSaveError('Design not found or may have been deleted.');
+        showSaveError(window.getTranslation('import-error-not-found') || 'Design not found or may have been deleted.');
         return;
     }
     
@@ -2175,7 +2183,8 @@ function importDesign(designId) {
             closeSavedModal();
             
             // Show success message
-            showSaveSuccess(`Design "${design.name}" imported successfully!`);
+            const importSuccessText = window.getTranslation('import-success-imported') || 'Design "${designName}" imported successfully!';
+            showSaveSuccess(importSuccessText.replace('${designName}', design.name));
             
             console.log('✅ Design imported and saved successfully:', design.name);
         }
@@ -2191,7 +2200,7 @@ function importDesign(designId) {
         
     } catch (error) {
         console.error('❌ Failed to import design:', error);
-        showSaveError('Failed to import design. Please try again.');
+        showSaveError(window.getTranslation('import-error-failed') || 'Failed to import design. Please try again.');
     }
 }
 

@@ -66,20 +66,7 @@ function addEventListeners() {
         });
     }
     
-    // Language toggle (placeholder)
-    const langToggle = document.getElementById('lang-toggle');
-    if (langToggle) {
-        langToggle.addEventListener('click', () => {
-            const label = langToggle.querySelector('.lang-label');
-            if (label.textContent === 'EN') {
-                label.textContent = 'AR';
-                console.log('🌐 Language changed to Arabic (functionality to be implemented)');
-            } else {
-                label.textContent = 'EN';
-                console.log('🌐 Language changed to English (functionality to be implemented)');
-            }
-        });
-    }
+    // Language toggle is handled by language.js
     
     // Saved toggle
     const savedToggle = document.getElementById('saved-toggle');

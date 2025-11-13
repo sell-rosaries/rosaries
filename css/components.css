@@ -562,3 +562,37 @@ body.rtl {
 }
 
 /* ==================== MODALS ==================== */
+
+/* Fix RTL modal header - use margins instead of absolute positioning */
+.rtl .modal-compact {
+    /* Keep natural document flow - no position changes */
+}
+
+.rtl .modal-compact h3 {
+    /* Use margin to position next to close button without breaking flow */
+    margin-right: 4rem; /* Push title away from right edge to make space for close button */
+    margin-top: 0;
+    margin-bottom: 0.5rem; /* Small gap from subtitle */
+    text-align: right;
+    line-height: 1.2;
+}
+
+/* Handle Saved Action Buttons in RTL - make import button text even smaller */
+.rtl .saved-actions .btn-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip; /* Use clip instead of ellipsis for Arabic */
+    text-align: center;
+    line-height: 1.2;
+    /* Standard font size for most buttons */
+    font-size: 12px;
+}
+
+/* Specifically make import button (2nd child) smaller */
+.rtl .saved-action-btn:nth-child(2) .btn-text {
+    font-size: 10px; /* Much smaller for 'استيراد' */
+}
+
+.rtl .saved-action-btn {
+    min-height: 48px; /* Keep same height as English mode */
+}
