@@ -81,6 +81,20 @@ function addEventListeners() {
         });
     }
     
+    // Saved toggle
+    const savedToggle = document.getElementById('saved-toggle');
+    if (savedToggle) {
+        savedToggle.addEventListener('click', () => {
+            console.log('💾 Saved button clicked - opening saved modal');
+            openSavedModal();
+            // Add visual feedback
+            savedToggle.style.background = 'rgba(255, 255, 255, 0.4)';
+            setTimeout(() => {
+                savedToggle.style.background = 'rgba(255, 255, 255, 0.2)';
+            }, 200);
+        });
+    }
+    
     // Zoom controls
     const zoomInBtn = document.getElementById('zoom-in-btn');
     const zoomOutBtn = document.getElementById('zoom-out-btn');
@@ -175,6 +189,11 @@ function activateDrawStringTool() {
     const importPresetsBtn = document.getElementById('import-presets-btn');
     if (importPresetsBtn) {
         importPresetsBtn.style.display = 'flex';
+        // Add event listener for import presets button
+        importPresetsBtn.addEventListener('click', () => {
+            console.log('🎨 Import presets button clicked');
+            openImportPresetsModal();
+        });
     }
 }
 

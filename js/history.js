@@ -5,7 +5,15 @@
 
 function captureState() {
     return {
-        stringPoints: stringPoints.map(p => p.clone()),
+        stringPoints: stringPoints.map(p => {
+            // Handle both THREE.Vector3 objects and plain objects
+            if (p.clone && typeof p.clone === 'function') {
+                return p.clone();
+            } else {
+                // For plain objects, create a new object with the same properties
+                return { x: p.x || 0, y: p.y || 0, z: p.z || 0 };
+            }
+        }),
         beads: beads.map(bead => ({
             position: bead.position.clone(),
             scale: bead.scale.clone(),
@@ -36,7 +44,15 @@ function restoreState(state) {
     beads.forEach(bead => scene.remove(bead));
     beads = [];
     
-    stringPoints = state.stringPoints.map(p => p.clone());
+    stringPoints = state.stringPoints.map(p => {
+        // Handle both THREE.Vector3 objects and plain objects
+        if (p.clone && typeof p.clone === 'function') {
+            return p.clone();
+        } else {
+            // For plain objects, create a new object with the same properties
+            return { x: p.x || 0, y: p.y || 0, z: p.z || 0 };
+        }
+    });
     updateStringLine();
     
     state.beads.forEach(beadData => {

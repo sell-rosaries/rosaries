@@ -105,19 +105,19 @@ function importPreset(presetKey) {
     }
     
     // Show confirmation dialog
-    showImportConfirmation(preset);
+    showPresetImportConfirmation(preset);
 }
 
 /**
  * Show confirmation dialog before importing
  */
-function showImportConfirmation(preset) {
+function showPresetImportConfirmation(preset) {
     // Create confirmation modal dynamically
     const confirmModal = document.createElement('div');
     confirmModal.className = 'modal active';
     confirmModal.id = 'import-confirm-modal';
     confirmModal.innerHTML = `
-        <div class="modal-backdrop" onclick="closeImportConfirmation()"></div>
+        <div class="modal-backdrop" onclick="closePresetImportConfirmation()"></div>
         <div class="modal-content modal-compact">
             <button class="btn-close-modal" onclick="closeImportConfirmation()" aria-label="Close">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -132,7 +132,7 @@ function showImportConfirmation(preset) {
                 <button class="btn-primary" id="confirm-import-btn">
                     ${getTranslation('import-confirm-btn')}
                 </button>
-                <button class="btn-secondary" onclick="closeImportConfirmation()">
+                <button class="btn-secondary" onclick="closePresetImportConfirmation()">
                     ${getTranslation('cancel')}
                 </button>
             </div>
@@ -144,14 +144,14 @@ function showImportConfirmation(preset) {
     // Add event listener to confirm button
     document.getElementById('confirm-import-btn').addEventListener('click', () => {
         performImport(preset);
-        closeImportConfirmation();
+        closePresetImportConfirmation();
     });
 }
 
 /**
  * Close import confirmation dialog
  */
-function closeImportConfirmation() {
+function closePresetImportConfirmation() {
     const confirmModal = document.getElementById('import-confirm-modal');
     if (confirmModal) {
         confirmModal.remove();
@@ -185,6 +185,12 @@ function performImport(preset) {
     
     // Exit string mode
     exitStringMode();
+    
+    // Automatically center the imported design in current viewport
+    if (typeof window.performBasicSmartFraming === 'function') {
+        console.log('🎯 Auto-fitting imported preset to current view...');
+        window.performBasicSmartFraming();
+    }
     
     console.log(`✓ Imported ${preset.name} preset with ${newPoints.length} points`);
 }
@@ -299,4 +305,4 @@ function populateImportPresetsModal() {
 // Make functions globally accessible
 window.openImportPresetsModal = openImportPresetsModal;
 window.closeImportPresetsModal = closeImportPresetsModal;
-window.closeImportConfirmation = closeImportConfirmation;
+window.closePresetImportConfirmation = closePresetImportConfirmation;

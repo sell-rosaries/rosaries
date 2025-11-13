@@ -42,11 +42,10 @@ function init3DScene() {
 
     // Controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableRotate = false;
-    controls.enablePan = true;
-    controls.enableZoom = true;
-    controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
-    controls.enabled = false;
+    controls.enableRotate = false;  // Disable rotation - mobile doesn't need it
+    controls.enablePan = true;      // Enable pan for finger drag
+    controls.enableZoom = true;     // Enable zoom for pinch gestures
+    controls.enabled = true;        // Start with controls enabled
 }
 
 /**

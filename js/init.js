@@ -44,6 +44,11 @@ async function main() {
             }, 5000);
         }
         
+        // Initialize custom size control (new feature)
+        if (typeof initCustomSize === 'function') {
+            initCustomSize();
+        }
+        
         updateBeadCount();
         
         // Auto-restore saved design (must be after config is loaded, BEFORE saveState)

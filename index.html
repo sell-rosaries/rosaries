@@ -32,6 +32,12 @@
         </button>
         
         <div class="header-info">
+            <button class="saved-toggle" id="saved-toggle" aria-label="Saved Designs">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span class="saved-label">Saved</span>
+            </button>
             <button class="lang-toggle" id="lang-toggle" aria-label="Language">
                 <span class="lang-label">EN</span>
             </button>
@@ -299,22 +305,59 @@
     <div id="import-presets-modal" class="modal">
         <div class="modal-backdrop" onclick="closeImportPresetsModal()"></div>
         <div class="modal-content modal-compact">
-            <button class="btn-close-modal" onclick="closeImportPresetsModal()" aria-label="Close">
+            <!-- Content will be populated by populateImportPresetsModal() -->
+            <div style="text-align: center; padding: 2rem; color: var(--neutral-400);">
+                Loading presets...
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Designs Modal -->
+    <div id="saved-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeSavedModal()"></div>
+        <div class="modal-content modal-compact">
+            <button class="btn-close-modal" onclick="closeSavedModal()" aria-label="Close">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>
             </button>
             
-            <h3>Import Presets</h3>
-            <p class="modal-subtitle">Coming Soon</p>
+            <h3>Saved Designs</h3>
+            <p class="modal-subtitle">Save, import, or delete your rosary designs</p>
             
-            <!-- Empty content for now -->
-            <div class="empty-state">
-                <p>This feature will be available soon</p>
+            <!-- Action Buttons -->
+            <div class="saved-actions">
+                <button class="saved-action-btn" id="save-design-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span class="btn-text">Save Design</span>
+                </button>
+                
+                <button class="saved-action-btn" id="import-design-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span class="btn-text">Import Design</span>
+                </button>
+                
+                <button class="saved-action-btn" id="delete-design-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3,6 5,6 21,6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    <span class="btn-text">Delete Design</span>
+                </button>
+            </div>
+            
+            <!-- Saved Designs Grid -->
+            <div class="saved-designs-grid" id="saved-designs-grid">
+                <!-- Dynamically populated -->
             </div>
         </div>
     </div>
-
 
     <!-- Gallery Modal -->
     <div id="gallery-panel" class="gallery-panel">
@@ -455,6 +498,8 @@
     <script src="js/utils.js"></script>
     <script src="js/language.js"></script>
     <script src="js/importPresets.js"></script>
+    <script src="js/saved.js"></script>
+    <script src="js/customSize.js"></script>
     <script src="js/init.js"></script>
     <script src="js/events.js"></script>
 </body>
