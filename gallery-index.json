@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-11-05T13:51:56Z",
+  "lastUpdated": "2025-11-13T07:43:15Z",
   "categories": [
     {
       "id": "rosaries",
@@ -21,233 +21,37 @@
 ,
         {
           "id": "rosaries_003",
-          "name": "1000297253",
-          "image": "gallery/rosaries/1000297253.jpg",
-          "description": "Beautiful rosaries design"
-        }
-,
-        {
-          "id": "rosaries_004",
           "name": "1000297254",
           "image": "gallery/rosaries/1000297254.jpg",
           "description": "Beautiful rosaries design"
         }
 ,
         {
-          "id": "rosaries_005",
+          "id": "rosaries_004",
           "name": "1000297255",
           "image": "gallery/rosaries/1000297255.jpg",
           "description": "Beautiful rosaries design"
         }
 ,
         {
-          "id": "rosaries_006",
+          "id": "rosaries_005",
           "name": "1000297367",
           "image": "gallery/rosaries/1000297367.jpg",
           "description": "Beautiful rosaries design"
         }
 ,
         {
-          "id": "rosaries_007",
+          "id": "rosaries_006",
           "name": "rosary1",
           "image": "gallery/rosaries/rosary1.jpg",
           "description": "Beautiful rosaries design"
         }
 ,
         {
-          "id": "rosaries_008",
+          "id": "rosaries_007",
           "name": "rosary2",
           "image": "gallery/rosaries/rosary2.jpg",
           "description": "Beautiful rosaries design"
-        }
-      ]
-    }
-,
-    {
-      "id": "test (2)",
-      "name": "Test (2)",
-      "items": [
-        {
-          "id": "test (2)_001",
-          "name": "OrnateMetalAccent",
-          "image": "gallery/test (2)/OrnateMetalAccent.png",
-          "description": "Beautiful test (2) design"
-        }
-,
-        {
-          "id": "test (2)_002",
-          "name": "PearlyGlow",
-          "image": "gallery/test (2)/PearlyGlow.png",
-          "description": "Beautiful test (2) design"
-        }
-,
-        {
-          "id": "test (2)_003",
-          "name": "RubySpheres",
-          "image": "gallery/test (2)/RubySpheres.png",
-          "description": "Beautiful test (2) design"
-        }
-      ]
-    }
-,
-    {
-      "id": "test (3)",
-      "name": "Test (3)",
-      "items": [
-        {
-          "id": "test (3)_001",
-          "name": "OrnateMetalAccent",
-          "image": "gallery/test (3)/OrnateMetalAccent.png",
-          "description": "Beautiful test (3) design"
-        }
-,
-        {
-          "id": "test (3)_002",
-          "name": "PearlyGlow",
-          "image": "gallery/test (3)/PearlyGlow.png",
-          "description": "Beautiful test (3) design"
-        }
-,
-        {
-          "id": "test (3)_003",
-          "name": "RubySpheres",
-          "image": "gallery/test (3)/RubySpheres.png",
-          "description": "Beautiful test (3) design"
-        }
-      ]
-    }
-,
-    {
-      "id": "test (4)",
-      "name": "Test (4)",
-      "items": [
-        {
-          "id": "test (4)_001",
-          "name": "OrnateMetalAccent",
-          "image": "gallery/test (4)/OrnateMetalAccent.png",
-          "description": "Beautiful test (4) design"
-        }
-,
-        {
-          "id": "test (4)_002",
-          "name": "PearlyGlow",
-          "image": "gallery/test (4)/PearlyGlow.png",
-          "description": "Beautiful test (4) design"
-        }
-,
-        {
-          "id": "test (4)_003",
-          "name": "RubySpheres",
-          "image": "gallery/test (4)/RubySpheres.png",
-          "description": "Beautiful test (4) design"
-        }
-      ]
-    }
-,
-    {
-      "id": "test (5)",
-      "name": "Test (5)",
-      "items": [
-        {
-          "id": "test (5)_001",
-          "name": "OrnateMetalAccent",
-          "image": "gallery/test (5)/OrnateMetalAccent.png",
-          "description": "Beautiful test (5) design"
-        }
-,
-        {
-          "id": "test (5)_002",
-          "name": "PearlyGlow",
-          "image": "gallery/test (5)/PearlyGlow.png",
-          "description": "Beautiful test (5) design"
-        }
-,
-        {
-          "id": "test (5)_003",
-          "name": "RubySpheres",
-          "image": "gallery/test (5)/RubySpheres.png",
-          "description": "Beautiful test (5) design"
-        }
-      ]
-    }
-,
-    {
-      "id": "test (6)",
-      "name": "Test (6)",
-      "items": [
-        {
-          "id": "test (6)_001",
-          "name": "OrnateMetalAccent",
-          "image": "gallery/test (6)/OrnateMetalAccent.png",
-          "description": "Beautiful test (6) design"
-        }
-,
-        {
-          "id": "test (6)_002",
-          "name": "PearlyGlow",
-          "image": "gallery/test (6)/PearlyGlow.png",
-          "description": "Beautiful test (6) design"
-        }
-,
-        {
-          "id": "test (6)_003",
-          "name": "RubySpheres",
-          "image": "gallery/test (6)/RubySpheres.png",
-          "description": "Beautiful test (6) design"
-        }
-      ]
-    }
-,
-    {
-      "id": "test (8)",
-      "name": "Test (8)",
-      "items": [
-        {
-          "id": "test (8)_001",
-          "name": "OrnateMetalAccent",
-          "image": "gallery/test (8)/OrnateMetalAccent.png",
-          "description": "Beautiful test (8) design"
-        }
-,
-        {
-          "id": "test (8)_002",
-          "name": "PearlyGlow",
-          "image": "gallery/test (8)/PearlyGlow.png",
-          "description": "Beautiful test (8) design"
-        }
-,
-        {
-          "id": "test (8)_003",
-          "name": "RubySpheres",
-          "image": "gallery/test (8)/RubySpheres.png",
-          "description": "Beautiful test (8) design"
-        }
-      ]
-    }
-,
-    {
-      "id": "test (9)",
-      "name": "Test (9)",
-      "items": [
-        {
-          "id": "test (9)_001",
-          "name": "OrnateMetalAccent",
-          "image": "gallery/test (9)/OrnateMetalAccent.png",
-          "description": "Beautiful test (9) design"
-        }
-,
-        {
-          "id": "test (9)_002",
-          "name": "PearlyGlow",
-          "image": "gallery/test (9)/PearlyGlow.png",
-          "description": "Beautiful test (9) design"
-        }
-,
-        {
-          "id": "test (9)_003",
-          "name": "RubySpheres",
-          "image": "gallery/test (9)/RubySpheres.png",
-          "description": "Beautiful test (9) design"
         }
       ]
     }
