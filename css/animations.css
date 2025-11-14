@@ -170,7 +170,6 @@
 
 .rtl .saved-modal-header h3 {
     margin-right: calc(var(--space-6) * 1.50);
-    margin-top: var(--space-4);
     text-align: right;
     margin-left: 0;
 }
