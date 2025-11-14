@@ -163,6 +163,25 @@
     color: var(--neutral-900);
 }
 
+/* RTL-specific positioning for Arabic title */
+.rtl .saved-modal-header {
+    position: relative;
+}
+
+.rtl .saved-modal-header h3 {
+    margin-right: calc(var(--space-6) * 1.50);
+    margin-top: var(--space-4);
+    text-align: right;
+    margin-left: 0;
+}
+
+.rtl .btn-close-modal {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
 .saved-actions {
     display: flex;
     flex-direction: column;
@@ -673,7 +692,7 @@
     cursor: pointer;
 }
 
-.gallery-checkbox {
+#gallery-panel .gallery-checkbox {
     position: absolute;
     top: 4px;
     left: 4px;
@@ -684,7 +703,7 @@
     cursor: pointer;
 }
 
-.gallery-checkbox-label {
+#gallery-panel .gallery-checkbox-label {
     position: absolute;
     top: 4px;
     left: 4px;
@@ -699,7 +718,7 @@
     transition: all 0.2s ease;
 }
 
-.gallery-checkbox-label::after {
+#gallery-panel .gallery-checkbox-label::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -712,12 +731,12 @@
     transition: transform 0.2s ease;
 }
 
-.gallery-checkbox:checked + .gallery-checkbox-label {
+#gallery-panel .gallery-checkbox:checked + .gallery-checkbox-label {
     border-color: #10b981;
     background: #10b981;
 }
 
-.gallery-checkbox:checked + .gallery-checkbox-label::after {
+#gallery-panel .gallery-checkbox:checked + .gallery-checkbox-label::after {
     transform: translate(-50%, -50%) scale(1);
 }
 
@@ -731,13 +750,13 @@
 }
 
 /* Gallery Checkbox */
-.gallery-checkbox {
+#gallery-panel .gallery-checkbox {
     position: absolute;
     opacity: 0;
     pointer-events: none;
 }
 
-.gallery-checkbox-label {
+#gallery-panel .gallery-checkbox-label {
     position: absolute;
     top: 8px;
     left: 8px;
@@ -755,17 +774,17 @@
     box-shadow: var(--shadow-sm);
 }
 
-.gallery-checkbox-label:hover {
+#gallery-panel .gallery-checkbox-label:hover {
     border-color: var(--primary-500);
     transform: scale(1.1);
 }
 
-.gallery-checkbox:checked + .gallery-checkbox-label {
+#gallery-panel .gallery-checkbox:checked + .gallery-checkbox-label {
     background: var(--gradient-primary);
     border-color: var(--primary-500);
 }
 
-.gallery-checkbox:checked + .gallery-checkbox-label::after {
+#gallery-panel .gallery-checkbox:checked + .gallery-checkbox-label::after {
     content: '✓';
     color: white;
     font-size: 16px;

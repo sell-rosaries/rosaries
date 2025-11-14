@@ -99,6 +99,7 @@ const translations = {
         'save-design': 'Save Design',
         'import-design': 'Import Design',
         'delete-design': 'Delete Design',
+        'design-singular': 'Design',
         'saved-designs-subtitle': 'Save, import, or delete your rosary designs',
         'no-saved-designs': 'No designs saved yet',
         'saved-designs-placeholder': 'Saved designs will appear here',
@@ -132,6 +133,7 @@ const translations = {
         'confirm-bulk-desc': 'This action cannot be undone.',
         'confirm-cancel': 'No, Cancel',
         'confirm-delete-yes': 'Yes, Delete',
+        'confirm-delete-title': 'Delete Design?',
         'confirm-import-title': 'Import Design?',
         'confirm-import-desc': 'This will replace everything in your sandbox. This action cannot be undone.',
         'confirm-import-yes': 'Yes, Import',
@@ -153,6 +155,7 @@ const translations = {
         // Grid & Placeholder Elements
         'no-preview-available': 'No preview available',
         'slot-text': 'Slot ${slotNumber}',
+        'empty-slot': 'Empty Slot',
         'saved-designs-empty': 'No saved designs found',
         
         // Dynamic Text with Variables
@@ -252,6 +255,7 @@ const translations = {
         'save-design': 'حفظ',
         'import-design': 'استيراد',
         'delete-design': 'حذف',
+        'design-singular': 'تصميم',
         'saved-designs-subtitle': 'احفظ، استورد أو احذف تصاميم السبحة الخاصة بك',
         'no-saved-designs': 'لم يتم حفظ أي تصاميم بعد',
         'saved-designs-placeholder': 'ستظهر التصاميم المحفوظة هنا',
@@ -285,6 +289,7 @@ const translations = {
         'confirm-bulk-desc': 'لا يمكن التراجع عن هذا الإجراء.',
         'confirm-cancel': 'لا، إلغاء',
         'confirm-delete-yes': 'نعم، احذف',
+        'confirm-delete-title': 'حذف التصميم؟',
         'confirm-import-title': 'استيراد التصميم؟',
         'confirm-import-desc': 'سيتم استبدال كل شيء في صندوق الرمل الخاص بك. هذا الإجراء لا يمكن التراجع عنه.',
         'confirm-import-yes': 'نعم، استيراد',
@@ -306,6 +311,7 @@ const translations = {
         // Grid & Placeholder Elements
         'no-preview-available': 'لا توجد معاينة متاحة',
         'slot-text': 'فتحة ${slotNumber}',
+        'empty-slot': 'الخانة الفارغة',
         'saved-designs-empty': 'لم يتم العثور على تصاميم محفوظة',
         
         // Dynamic Text with Variables
@@ -322,6 +328,7 @@ let currentLanguage = 'en';
 class LanguageManager {
     constructor() {
         this.currentLanguage = 'en';
+        currentLanguage = 'en'; // Initialize global variable too
         this.rtlLanguages = ['ar']; // Arabic and other RTL languages
         this.init();
     }
@@ -355,8 +362,15 @@ class LanguageManager {
         }
         
         this.currentLanguage = lang;
+        currentLanguage = lang; // Update global variable too!
+        
         this.updateUI();
         this.updateLanguageToggle();
+        
+        // Update import button text if it exists (managed by saved.js)
+        if (typeof window.updateImportButtonText === 'function') {
+            window.updateImportButtonText();
+        }
     }
     
     updateUI() {
@@ -442,7 +456,7 @@ class LanguageManager {
             
             // Action Buttons
             '#save-design-btn .btn-text': langData['save-design'],
-            '#import-design-btn .btn-text': langData['import-design'],
+            // '#import-design-btn .btn-text': langData['import-design'], // Managed dynamically by saved.js
             '#delete-design-btn .btn-text': langData['delete-design'],
             
             // Placeholders and Empty States

@@ -23,6 +23,8 @@ async function main() {
         createBeadSelection();
         addEventListeners();
         initGalleryEventListeners(); // Initialize gallery event listeners
+        injectSavedStyles(); // Inject styles for saved designs delete mode
+
         
         // Wait for language manager to be initialized before initializing import presets
         if (typeof languageManager !== 'undefined') {
