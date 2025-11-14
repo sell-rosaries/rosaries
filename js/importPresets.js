@@ -92,6 +92,11 @@ function closeImportPresetsModal() {
     if (modal) {
         modal.classList.remove('active');
     }
+    
+    // Also exit string mode and deselect the pen button when closing presets modal
+    if (typeof exitStringMode === 'function') {
+        exitStringMode();
+    }
 }
 
 /**

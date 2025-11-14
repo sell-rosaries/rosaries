@@ -77,7 +77,31 @@
     background: var(--neutral-200);
 }
 
-/* Close buttons stay on right side in both LTR and RTL */
+/* RTL-specific close button positioning for all modals */
+.rtl .btn-close-modal,
+.rtl #size-selection-modal .btn-close-modal,
+.rtl #gallery-email-modal .btn-close-modal {
+    right: auto !important;
+    left: var(--space-4);
+}
+
+/* English mode positioning for specific menus - put X on left */
+#email-modal .btn-close-modal,
+#reset-menu .btn-close-modal,
+#import-presets-modal .btn-close-modal {
+    left: var(--space-4) !important;
+    right: auto !important;
+}
+
+/* RTL-specific positioning for specific menus - put X on right (keep default) */
+.rtl #email-modal .btn-close-modal,
+.rtl #reset-menu .btn-close-modal,
+.rtl #import-presets-modal .btn-close-modal {
+    left: auto !important;
+    right: var(--space-4) !important;
+}
+
+/* Default close button positioning */
 .btn-close-modal {
     right: var(--space-4);
 }

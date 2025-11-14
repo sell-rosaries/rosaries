@@ -63,7 +63,8 @@
     margin-left: 0;
 }
 
-.rtl .btn-close-modal {
+/* RTL-specific close button for saved modal only */
+.rtl #saved-modal .btn-close-modal {
     position: absolute;
     top: 50%;
     right: 0;
