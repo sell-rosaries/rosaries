@@ -2221,6 +2221,8 @@ function cleanConfirmBulkDelete() {
             return;
         }
         
+        const count = window.cleanDeleteIds.length; // Store the count here
+        
         // Get current saved designs
         const savedDesigns = getSavedDesigns();
         
@@ -2239,7 +2241,6 @@ function cleanConfirmBulkDelete() {
         // Refresh modal
         populateSavedModal();
         
-        const count = window.cleanDeleteIds.length;
         showSaveSuccess(`Successfully deleted ${count} design${count > 1 ? 's' : ''}.`);
         
         console.log('✅ Bulk delete completed:', count, 'designs');
