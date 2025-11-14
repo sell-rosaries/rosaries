@@ -21,7 +21,14 @@ const translations = {
         'reset': 'Reset',
         'draw': 'Draw',
         'gallery': 'Gallery',
-        'send': 'Send'
+        'send': 'Send',
+        
+        // Reset Confirmation Dialog
+        'reset-all-confirm-title': 'Reset Everything?',
+        'reset-all-confirm-message-1': 'This will delete all beads and string.',
+        'reset-all-confirm-message-2': 'This action cannot be undone.',
+        'confirm-reset': 'Reset All',
+        'cancel': 'Cancel'
     },
     ar: {
         // Header
@@ -39,7 +46,14 @@ const translations = {
         'reset': 'إعادة تعيين',
         'draw': 'رسم',
         'gallery': 'المعرض',
-        'send': 'إرسال'
+        'send': 'إرسال',
+        
+        // Reset Confirmation Dialog
+        'reset-all-confirm-title': 'إعادة تعيين كل شيء؟',
+        'reset-all-confirm-message-1': 'سيتم حذف جميع الخرزات والخيط.',
+        'reset-all-confirm-message-2': 'لا يمكن التراجع عن هذا الإجراء.',
+        'confirm-reset': 'إعادة تعيين الكل',
+        'cancel': 'إلغاء'
     }
 };
 

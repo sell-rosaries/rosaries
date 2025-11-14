@@ -18,6 +18,64 @@ function closeResetMenuOnBackdrop(event) {
 }
 
 function resetAll() {
+    // Show confirmation dialog before reset
+    showResetConfirmation();
+}
+
+function showResetConfirmation() {
+    // Create confirmation modal dynamically
+    const confirmModal = document.createElement('div');
+    confirmModal.className = 'modal active';
+    confirmModal.id = 'reset-confirm-modal';
+    
+    confirmModal.innerHTML = `
+        <div class="modal-backdrop" onclick="closeResetConfirmation()"></div>
+        <div class="modal-content modal-compact">
+            <div class="modal-header-flex">
+                <button class="btn-close-modal-flex" onclick="closeResetConfirmation()" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-icon" style="text-align: center; margin-bottom: var(--space-4);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--error);">
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            
+            <h3 style="text-align: center; color: var(--error);">${getTranslation('reset-all-confirm-title')}</h3>
+            <p class="modal-subtitle">${getTranslation('reset-all-confirm-message-1')}<br>${getTranslation('reset-all-confirm-message-2')}</p>
+            
+            <div class="modal-actions">
+                <button class="btn-primary" id="confirm-reset-btn" style="background: var(--error);">
+                    ${getTranslation('confirm-reset')}
+                </button>
+                <button class="btn-secondary" onclick="closeResetConfirmation()">
+                    ${getTranslation('cancel')}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(confirmModal);
+    
+    // Add event listener to confirm button
+    document.getElementById('confirm-reset-btn').addEventListener('click', () => {
+        performResetAll();
+        closeResetConfirmation();
+    });
+}
+
+function closeResetConfirmation() {
+    const confirmModal = document.getElementById('reset-confirm-modal');
+    if (confirmModal) {
+        confirmModal.remove();
+    }
+}
+
+function performResetAll() {
     beads.forEach(bead => scene.remove(bead));
     beads = [];
     if (stringLine) {

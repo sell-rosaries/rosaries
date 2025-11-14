@@ -368,8 +368,8 @@ function cleanShowBulkDeleteConfirmation() {
                     ${window.getTranslation('confirm-delete-bulk') || `Are you sure you want to delete ${count} design${count > 1 ? 's' : ''}?`}
                 </p>
                 <div class="clean-delete-actions">
-                    <button class="clean-btn-cancel" onclick="cleanCancelDeleteConfirm()">Cancel</button>
-                    <button class="clean-btn-confirm" onclick="cleanConfirmBulkDelete()">Delete</button>
+                    <button class="clean-btn-cancel" onclick="cleanCancelDeleteConfirm()">${window.getTranslation('cancel') || 'Cancel'}</button>
+                    <button class="clean-btn-confirm" onclick="cleanConfirmBulkDelete()">${window.getTranslation('confirm-delete-yes') || 'Delete'}</button>
                 </div>
             </div>
         </div>

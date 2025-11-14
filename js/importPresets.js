@@ -121,14 +121,17 @@ function showPresetImportConfirmation(preset) {
     const confirmModal = document.createElement('div');
     confirmModal.className = 'modal active';
     confirmModal.id = 'import-confirm-modal';
+    
     confirmModal.innerHTML = `
         <div class="modal-backdrop" onclick="closePresetImportConfirmation()"></div>
         <div class="modal-content modal-compact">
-            <button class="btn-close-modal" onclick="closeImportConfirmation()" aria-label="Close">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-            </button>
+            <div class="modal-header-flex">
+                <button class="btn-close-modal-flex" onclick="closePresetImportConfirmation()" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
             
             <h3>${getTranslation('import-confirm-title').replace('${preset}', getTranslation('preset-' + preset.name.toLowerCase()))}</h3>
             <p class="modal-subtitle">${getTranslation('import-confirm-message')}</p>
@@ -284,13 +287,15 @@ function populateImportPresetsModal() {
         `;
     }).join('');
     
-    // Replace the "Coming Soon" content
+    // Use the flexbox-based close button for RTL compatibility
     modalContent.innerHTML = `
-        <button class="btn-close-modal" onclick="closeImportPresetsModal()" aria-label="Close">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
-        </button>
+        <div class="modal-header-flex">
+            <button class="btn-close-modal-flex" onclick="closeImportPresetsModal()" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
         
         <h3>${getTranslation('import-presets-title')}</h3>
         <p class="modal-subtitle">${getTranslation('import-presets-subtitle')}</p>

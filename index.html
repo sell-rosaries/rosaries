@@ -16,7 +16,10 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/beads.css">
+    <link rel="stylesheet" href="css/rotation.css">
+    <link rel="stylesheet" href="css/rtl.css">
+    <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/responsive.css">
     <!-- Animation CSS Modules -->
     <link rel="stylesheet" href="css/animations/animations-utility.css">
@@ -205,7 +208,7 @@
             </div>
             
             <h2>Send Your Design</h2>
-            <p class="modal-subtitle">Fill in your information below. Your design will be sent to us!</p>
+            <p class="modal-subtitle">Fill in your information below.<br>Your design will be sent to us!</p>
             
             <form id="email-form">
                 <div class="form-group">
@@ -253,11 +256,13 @@
     <div id="reset-menu" class="modal">
         <div class="modal-backdrop" onclick="closeResetMenu()"></div>
         <div class="modal-content modal-compact">
-            <button class="btn-close-modal" onclick="closeResetMenu()" aria-label="Close">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-            </button>
+            <div class="modal-header-flex">
+                <button class="btn-close-modal-flex" onclick="closeResetMenu()" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
             
             <h3>Reset Options</h3>
             
@@ -321,11 +326,13 @@
     <div id="saved-modal" class="modal">
         <div class="modal-backdrop" onclick="closeSavedModal()"></div>
         <div class="modal-content modal-compact">
-            <button class="btn-close-modal" onclick="closeSavedModal()" aria-label="Close">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-            </button>
+            <div class="modal-header-flex">
+                <button class="btn-close-modal-flex" onclick="closeSavedModal()" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
             
             <h3>Saved Designs</h3>
             <p class="modal-subtitle">Save, import, or delete your rosary designs</p>
@@ -427,7 +434,7 @@
             </div>
             
             <h2>Send Selected Designs</h2>
-            <p class="modal-subtitle">Fill in your information below. Selected designs will be sent!</p>
+            <p class="modal-subtitle">Fill in your information below.<br>Selected designs will be sent!</p>
             
             <form id="gallery-email-form">
                 <div class="form-group">

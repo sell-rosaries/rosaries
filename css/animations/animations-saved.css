@@ -6,14 +6,24 @@
     margin-bottom: var(--space-3);
 }
 
+/* Fix title centering in both English and Arabic modes */
+#saved-modal h3 {
+    text-align: center !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    position: relative !important;
+}
+
 /* Saved Modal Specific Styles - No Scrolling */
 #saved-modal .modal-content {
-    /* Ensure proper structure */
+    /* Ensure proper structure and prevent overflow */
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    max-height: 650px; /* Slightly less than modal max-height to account for padding */
-    overflow: hidden; /* No scrolling in content */
+    max-height: 700px; /* Increased to prevent bottom cutoff */
+    height: auto; /* Allow natural height calculation */
+    overflow: visible; /* Ensure bottom buttons are visible */
+    padding-bottom: var(--space-6); /* Extra bottom padding */
 }
 
 #saved-modal .modal-subtitle {
@@ -52,23 +62,16 @@
     color: var(--neutral-900);
 }
 
-/* RTL-specific positioning for Arabic title */
+/* RTL-specific positioning - now works with centered title */
 .rtl .saved-modal-header {
     position: relative;
 }
 
-.rtl .saved-modal-header h3 {
-    margin-right: calc(var(--space-6) * 1.50);
-    text-align: right;
-    margin-left: 0;
-}
-
-/* RTL-specific close button for saved modal only */
-.rtl #saved-modal .btn-close-modal {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
+.rtl #saved-modal h3 {
+    /* Keep center alignment in RTL mode too */
+    text-align: center !important;
+    margin: 0 auto !important;
+    width: 100% !important;
 }
 
 .saved-actions {

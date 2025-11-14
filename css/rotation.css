@@ -1,0 +1,78 @@
+/* ==================== ROTATION CONTROL ==================== */
+#rotation-control {
+    position: absolute;
+    right: var(--space-6);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.rotation-dial {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    background: var(--glass-light);
+    backdrop-filter: var(--backdrop-light);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-glass);
+}
+
+.rotation-track {
+    position: absolute;
+    inset: 8px;
+    border-radius: var(--radius-full);
+    border: 2px dashed var(--neutral-300);
+}
+
+.rotation-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--gradient-primary);
+    border: 2px solid white;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-md);
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: grab;
+}
+
+.rotation-handle:active {
+    cursor: grabbing;
+}
+
+.rotation-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-500);
+}
+
+.btn-close-rotation {
+    width: 40px;
+    height: 40px;
+    background: var(--glass-light);
+    backdrop-filter: var(--backdrop-light);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--neutral-600);
+    box-shadow: var(--shadow-md);
+    transition: all var(--duration-fast);
+}
+
+.btn-close-rotation:active {
+    transform: scale(0.95);
+}
