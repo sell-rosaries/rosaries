@@ -953,6 +953,89 @@ function showImportConfirmation(designId, designName) {
 }
 
 /**
+ * Show confirmation dialog for deleting a design
+ */
+function showDeleteConfirmation(designId, designName) {
+    console.log('🗑️ Show delete confirmation for:', designName);
+    
+    // Create confirmation dialog
+    const dialog = document.createElement('div');
+    dialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    `;
+    
+    dialog.innerHTML = `
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        ">
+            <h3 style="margin: 0 0 15px 0; color: #333;">${window.getTranslation('confirm-delete-title') || 'Delete Design?'}</h3>
+            <p style="margin: 0 0 20px 0; color: #666; line-height: 1.5;">
+                ${window.getTranslation('confirm-delete-single-desc') || 'This action cannot be undone.'}
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="confirm-delete-btn" style="
+                    background: #dc2626;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: background 0.2s;
+                ">${window.getTranslation('confirm-delete-yes') || 'Yes, Delete'}</button>
+                <button id="cancel-delete-btn" style="
+                    background: #f3f4f6;
+                    color: #374151;
+                    border: 1px solid #d1d5db;
+                    padding: 12px 24px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                ">${window.getTranslation('confirm-cancel') || 'Cancel'}</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    
+    // Handle button clicks
+    dialog.querySelector('#confirm-delete-btn').addEventListener('click', () => {
+        console.log('✅ Confirmed delete of design:', designName);
+        document.body.removeChild(dialog);
+        confirmDelete(designId);
+    });
+    
+    dialog.querySelector('#cancel-delete-btn').addEventListener('click', () => {
+        console.log('❌ Cancelled delete of design:', designName);
+        document.body.removeChild(dialog);
+    });
+    
+    // Close on backdrop click
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            console.log('❌ Cancelled delete (backdrop click)');
+            document.body.removeChild(dialog);
+        }
+    });
+}
+
+/**
  * Setup click listeners for saved design cards
  */
 function setupDesignCardClickListeners() {
@@ -1276,11 +1359,20 @@ function closeDesignPreviewModal() {
 function deleteFromPreview(designId) {
     console.log('🗑️ Delete from preview:', designId);
     
-    // Close preview modal first
-    closeDesignPreviewModal();
+    // Get design info for confirmation
+    const savedDesigns = getSavedDesigns();
+    const design = savedDesigns.find(d => d.id === designId);
     
-    // Use existing confirmDelete function with single parameter
-    confirmDelete(designId);
+    if (design) {
+        // Close the preview modal first
+        closeDesignPreviewModal();
+        
+        // Show delete confirmation
+        showDeleteConfirmation(designId, design.name);
+    } else {
+        showSaveError(window.getTranslation('import-error-not-found') || 'Design not found or may have been deleted.');
+        closeDesignPreviewModal();
+    }
 }
 
 /**
