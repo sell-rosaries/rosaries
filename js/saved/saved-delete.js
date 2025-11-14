@@ -1,0 +1,509 @@
+/*
+    SAVED DESIGNS DELETE MODULE
+    Delete operations, clean delete mode, and bulk delete functionality
+*/
+
+/**
+ * Toggle delete mode on/off
+ */
+function toggleDeleteMode() {
+    cleanDeleteModeActive = !cleanDeleteModeActive;
+    if (cleanDeleteModeActive) {
+        // Entering delete mode
+        console.log('🗑️ Clean delete button clicked! cleanDeleteModeActive:', cleanDeleteModeActive);
+        setTimeout(() => {
+            if (cleanDeleteModeActive) {
+                console.log('✅ Activating delete mode...');
+                setupDeleteMode();
+            }
+        }, 50);
+    } else {
+        // Exiting delete mode
+        console.log('🔄 Exiting delete mode...');
+        exitDeleteMode();
+    }
+}
+
+/**
+ * Toggle design selection for deletion (like gallery system)
+ */
+function toggleDesignSelection(checkboxId, cardId) {
+    const checkbox = document.getElementById(checkboxId);
+    if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+        updateDeleteButtonText();
+        
+        const card = document.getElementById(cardId);
+        if (card) {
+            if (checkbox.checked) {
+                card.classList.add('selected-for-deletion');
+            } else {
+                card.classList.remove('selected-for-deletion');
+            }
+        }
+    }
+}
+
+/**
+ * Show bulk delete confirmation dialog
+ */
+function confirmBulkDelete() {
+    const selectedCards = document.querySelectorAll('.clean-design-checkbox:checked');
+    const count = selectedCards.length;
+    
+    if (count === 0) {
+        showAlert('No designs selected for deletion', 'warning');
+        return;
+    }
+    
+    const message = `Are you sure you want to delete ${count} design${count > 1 ? 's' : ''}? This action cannot be undone.`;
+    
+    if (confirm(message)) {
+        selectedCards.forEach(checkbox => {
+            const cardId = checkbox.dataset.cardId;
+            const card = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (card) {
+                card.remove();
+            }
+            
+            // Also remove from storage
+            if (typeof window.removeSavedDesign === 'function') {
+                window.removeSavedDesign(cardId);
+            }
+        });
+        
+        showAlert(`${count} design${count > 1 ? 's' : ''} deleted successfully`, 'success');
+        
+        // Exit delete mode
+        if (cleanDeleteModeActive) {
+            toggleDeleteMode();
+        }
+    }
+}
+
+/**
+ * Update delete button text with selection count
+ */
+function updateDeleteButtonText() {
+    const deleteBtn = document.getElementById('delete-design-btn');
+    if (deleteBtn) {
+        deleteBtn.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3,6 5,6 21,6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            <span class="btn-text">${window.getTranslation('delete-design') || 'Delete Design'}</span>
+        `;
+    }
+}
+
+/**
+ * CLEAN: Toggle delete mode on/off
+ */
+function cleanToggleDeleteMode() {
+    console.log('🗑️ Clean delete button clicked! cleanDeleteModeActive:', cleanDeleteModeActive);
+    
+    const savedDesigns = getSavedDesigns();
+    
+    if (!cleanDeleteModeActive && savedDesigns.length === 0) {
+        showSaveError(window.getTranslation('delete-error-no-designs') || 'No designs to delete!');
+        return;
+    }
+    
+    if (!cleanDeleteModeActive) {
+        // First click: Enter delete mode
+        console.log('✅ Activating delete mode...');
+        cleanDeleteModeActive = true;
+        cleanSelectedDesigns.clear();
+        
+        const deleteBtn = document.getElementById('delete-design-btn');
+        if (deleteBtn) {
+            deleteBtn.style.background = 'var(--error)';
+            deleteBtn.style.color = 'white';
+            console.log('🟢 Delete button styled to active state');
+        }
+        
+        showSaveSuccess(window.getTranslation('delete-mode-instruction') || 'Delete mode: Click designs to select, then click "Delete" again to delete.');
+        console.log('🔄 Setting up delete mode with checkboxes...');
+        cleanSetupDeleteMode();
+    } else {
+        // Second click: Check selections and show confirmation
+        console.log('🔄 Second click - checking selections...');
+        if (cleanSelectedDesigns.size === 0) {
+            // No designs selected - just exit delete mode
+            console.log('🔄 No designs selected, exiting delete mode');
+            cleanExitDeleteMode();
+        } else {
+            // Show confirmation for bulk delete
+            console.log('🗑️ Deleting', cleanSelectedDesigns.size, 'designs');
+            cleanShowBulkDeleteConfirmation();
+        }
+    }
+}
+
+/**
+ * CLEAN: Setup delete mode - add checkboxes dynamically
+ */
+function cleanSetupDeleteMode() {
+    console.log('🔄 Setting up delete mode - adding checkboxes...');
+    
+    // TEMPORARY FIX: Disable gallery checkbox styles if they might be causing fake squares
+    console.log('🎨 TEMPORARY CSS FIX: Disabling gallery checkbox styles...');
+    const galleryCheckboxCSS = Array.from(document.styleSheets).flatMap(sheet => {
+        try {
+            return Array.from(sheet.cssRules || []);
+        } catch (e) {
+            return [];
+        }
+    }).filter(rule => rule.selectorText && rule.selectorText.includes('.gallery-checkbox'));
+    
+    galleryCheckboxCSS.forEach(rule => {
+        console.log('📋 Found gallery checkbox CSS rule:', rule.selectorText);
+        rule.disabled = true; // Temporarily disable
+    });
+    
+    // ENHANCED FIX: Check for any remaining gallery elements
+    const allGalleryElements = document.querySelectorAll('[class*="gallery"], [class*="checkbox"], [class*="square"], [class*="check"]');
+    console.log('🎯 COMPREHENSIVE CHECK: Found', allGalleryElements.length, 'elements with gallery/checkbox-related classes');
+    
+    allGalleryElements.forEach((element, index) => {
+        const className = element.className || '';
+        console.log(`🎯 POTENTIAL ARTIFACT ${index + 1}:`, {
+            tagName: element.tagName,
+            className: className,
+            position: window.getComputedStyle(element).position,
+            top: window.getComputedStyle(element).top,
+            left: window.getComputedStyle(element).left,
+            width: window.getComputedStyle(element).width,
+            height: window.getComputedStyle(element).height,
+            isVisible: element.offsetWidth > 0 && element.offsetHeight > 0
+        });
+        
+        // Remove gallery-related elements EXCEPT clean design elements
+        if (className.includes('gallery') && !className.includes('clean-')) {
+            console.log('🧹 REMOVING GALLERY ARTIFACT:', className);
+            element.remove();
+        }
+    });
+    
+    // Add body class to enable checkbox visibility
+    document.body.classList.add('clean-delete-mode-active');
+    
+    // FIX: Hide design info overlays that create fake squares
+    console.log('🧹 FIX: Hiding design info overlays that create fake squares...');
+    const designInfoOverlays = document.querySelectorAll('.design-info-overlay');
+    designInfoOverlays.forEach(overlay => {
+        console.log('🧹 Hiding design info overlay:', overlay.className);
+        overlay.style.display = 'none';
+    });
+    
+    // Add checkboxes to all populated design cards
+    const populatedCards = document.querySelectorAll('.saved-design-populated[data-design-id]');
+    
+    console.log('🔍 Found', populatedCards.length, 'populated design cards');
+    
+    populatedCards.forEach(card => {
+        const designId = card.getAttribute('data-design-id');
+        
+        console.log('🔍 DEBUGGING CARD:', designId);
+        
+        // COMPREHENSIVE CLEANUP: Remove ALL checkbox-related elements first
+        const allInputs = card.querySelectorAll('input');
+        const allLabels = card.querySelectorAll('label');
+        const checkboxRelated = card.querySelectorAll('[class*="checkbox"], [class*="gallery"], [class*="clean"]');
+        
+        // Remove ALL inputs first
+        allInputs.forEach((input, index) => {
+            console.log('🧹 Removing input', index, ':', {
+                type: input.type,
+                className: input.className,
+                id: input.id || 'no-id'
+            });
+            input.remove();
+        });
+        
+        // SPECIFIC FIX: Remove any leftover gallery checkbox elements
+        const oldGalleryCheckboxes = card.querySelectorAll('.gallery-checkbox, .gallery-checkbox-label');
+        if (oldGalleryCheckboxes.length > 0) {
+            console.log('🎯 SPECIFIC FIX: Found', oldGalleryCheckboxes.length, 'leftover gallery checkbox elements');
+            oldGalleryCheckboxes.forEach((element, index) => {
+                console.log('🧹 Removing leftover gallery element', index, ':', {
+                    tagName: element.tagName,
+                    className: element.className,
+                    id: element.id || 'no-id'
+                });
+                element.remove();
+            });
+        }
+        
+        // Add fresh checkbox HTML
+        if (!card.querySelector('.clean-design-checkbox')) {
+            const checkboxHTML = `
+                <input type="checkbox" 
+                       class="clean-design-checkbox" 
+                       id="clean-checkbox-${designId}" 
+                       data-design-id="${designId}">
+                <label for="clean-checkbox-${designId}" class="clean-checkbox-label"></label>
+            `;
+            
+            console.log('✅ Adding clean checkbox to card', designId);
+            
+            card.insertAdjacentHTML('afterbegin', checkboxHTML);
+        }
+        
+        // Add event listener
+        const label = card.querySelector('.clean-checkbox-label');
+        if (label) {
+            label.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const checkbox = card.querySelector('.clean-design-checkbox');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    const designId = checkbox.getAttribute('data-design-id');
+                    if (checkbox.checked) {
+                        cleanSelectedDesigns.add(designId);
+                    } else {
+                        cleanSelectedDesigns.delete(designId);
+                    }
+                    console.log('✅ Selected designs:', Array.from(cleanSelectedDesigns));
+                }
+            });
+        }
+    });
+    
+    console.log('✅ Clean delete mode setup complete - all old elements cleaned, fresh checkboxes added');
+}
+
+/**
+ * CLEAN: Exit delete mode - remove all checkboxes
+ */
+function cleanExitDeleteMode() {
+    console.log('🔄 Exiting delete mode...');
+    cleanDeleteModeActive = false;
+    cleanSelectedDesigns.clear();
+    
+    // Remove body class to hide checkboxes
+    document.body.classList.remove('clean-delete-mode-active');
+    
+    // Reset delete button
+    const deleteBtn = document.getElementById('delete-design-btn');
+    if (deleteBtn) {
+        deleteBtn.style.background = '';
+        deleteBtn.style.color = '';
+        deleteBtn.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3,6 5,6 21,6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            <span class="btn-text">${window.getTranslation('delete-design') || 'Delete Design'}</span>
+        `;
+    }
+    
+    // COMPREHENSIVE CLEANUP: Remove ALL checkbox elements from saved designs
+    const populatedCards = document.querySelectorAll('.saved-design-populated[data-design-id]');
+    console.log('🧹 Cleaning up', populatedCards.length, 'saved design cards');
+    
+    populatedCards.forEach(card => {
+        // Remove ALL input elements
+        const allInputs = card.querySelectorAll('input');
+        allInputs.forEach(input => {
+            console.log('🧹 Removing input:', input.className, input.type, input.id || 'no-id');
+            input.remove();
+        });
+        
+        // Remove ALL label elements that might be related to checkboxes
+        const allLabels = card.querySelectorAll('label');
+        allLabels.forEach(label => {
+            // Only remove labels that look like checkboxes
+            if (label.className.includes('checkbox') || label.className.includes('gallery') || label.className.includes('clean')) {
+                console.log('🧹 Removing checkbox label:', label.className, label.htmlFor || 'no-for');
+                label.remove();
+            }
+        });
+    });
+    
+    // RESTORE: Re-enable gallery checkbox styles after cleanup
+    console.log('🎨 RESTORING: Re-enabling gallery checkbox styles...');
+    const allCSS = Array.from(document.styleSheets).flatMap(sheet => {
+        try {
+            return Array.from(sheet.cssRules || []);
+        } catch (e) {
+            return [];
+        }
+    }).filter(rule => rule.selectorText && rule.selectorText.includes('.gallery-checkbox'));
+    
+    allCSS.forEach(rule => {
+        if (rule.disabled) {
+            console.log('📋 Restoring gallery checkbox CSS rule:', rule.selectorText);
+            rule.disabled = false; // Re-enable
+        }
+    });
+    
+    // FIX: Restore design info overlays after delete mode cleanup
+    console.log('🔄 FIX: Restoring design info overlays...');
+    const designInfoOverlays = document.querySelectorAll('.design-info-overlay');
+    designInfoOverlays.forEach(overlay => {
+        console.log('🔄 Restoring design info overlay:', overlay.className);
+        overlay.style.display = '';
+        overlay.style.opacity = '';
+    });
+    
+    console.log('✅ Clean delete mode exited - comprehensive cleanup complete');
+    showSaveSuccess('Delete mode deactivated.');
+}
+
+/**
+ * CLEAN: Show bulk delete confirmation
+ */
+function cleanShowBulkDeleteConfirmation() {
+    const count = cleanSelectedDesigns.size;
+    
+    const confirmDialog = document.createElement('div');
+    confirmDialog.innerHTML = `
+        <div class="clean-delete-backdrop" onclick="cleanCancelDeleteConfirm(event)">
+            <div class="clean-delete-modal" onclick="event.stopPropagation()">
+                <h3 style="margin: 0 0 15px 0; color: #333;">${window.getTranslation('confirm-delete-title') || 'Delete Design?'}</h3>
+                <p style="margin: 0 0 20px 0; color: #666; line-height: 1.5;">
+                    ${window.getTranslation('confirm-delete-bulk') || `Are you sure you want to delete ${count} design${count > 1 ? 's' : ''}?`}
+                </p>
+                <div class="clean-delete-actions">
+                    <button class="clean-btn-cancel" onclick="cleanCancelDeleteConfirm()">Cancel</button>
+                    <button class="clean-btn-confirm" onclick="cleanConfirmBulkDelete()">Delete</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Store references
+    window.currentCleanDeleteDialog = confirmDialog;
+    window.cleanDeleteIds = Array.from(cleanSelectedDesigns);
+    
+    document.body.appendChild(confirmDialog);
+}
+
+/**
+ * CLEAN: Cancel delete confirmation
+ */
+function cleanCancelDeleteConfirm() {
+    if (window.currentCleanDeleteDialog) {
+        window.currentCleanDeleteDialog.remove();
+        window.currentCleanDeleteDialog = null;
+    }
+    if (window.cleanDeleteIds) {
+        window.cleanDeleteIds = null;
+    }
+}
+
+/**
+ * CLEAN: Confirm and execute bulk delete
+ */
+function cleanConfirmBulkDelete() {
+    try {
+        if (!window.cleanDeleteIds || window.cleanDeleteIds.length === 0) {
+            showSaveError('No designs selected for deletion.');
+            cleanCancelDeleteConfirm();
+            return;
+        }
+        
+        const count = window.cleanDeleteIds.length; // Store the count here
+        
+        // Get current saved designs
+        const savedDesigns = getSavedDesigns();
+        
+        // Remove selected designs from localStorage
+        const updatedDesigns = savedDesigns.filter(design => !window.cleanDeleteIds.includes(design.id));
+        localStorage.setItem(SAVED_DESIGNS_KEY, JSON.stringify(updatedDesigns));
+        
+        console.log('🗑️ Deleted designs:', window.cleanDeleteIds);
+        
+        // Close confirmation dialog
+        cleanCancelDeleteConfirm();
+        
+        // Exit delete mode first
+        cleanExitDeleteMode();
+        
+        // Refresh modal
+        populateSavedModal();
+        
+        showSaveSuccess(`Successfully deleted ${count} design${count > 1 ? 's' : ''}.`);
+        
+        console.log('✅ Bulk delete completed:', count, 'designs');
+        
+    } catch (error) {
+        console.warn('Could not delete designs:', error);
+        showSaveError(window.getTranslation('delete-error-failed') || 'Failed to delete designs. Please try again.');
+        cleanCancelDeleteConfirm();
+    }
+}
+
+/**
+ * Confirm delete function for individual designs
+ */
+function confirmDelete(designId) {
+    console.log('🗑️ Confirming delete for design:', designId);
+    
+    try {
+        // Get current saved designs
+        const savedDesigns = getSavedDesigns();
+        
+        // Find the design to delete
+        const designToDelete = savedDesigns.find(design => design.id === designId);
+        
+        if (!designToDelete) {
+            showSaveError('Design not found or may have been deleted.');
+            return;
+        }
+        
+        // Remove the design from the array
+        const updatedDesigns = savedDesigns.filter(design => design.id !== designId);
+        localStorage.setItem(SAVED_DESIGNS_KEY, JSON.stringify(updatedDesigns));
+        
+        console.log('🗑️ Deleted design:', designToDelete.name);
+        
+        // Refresh modal
+        populateSavedModal();
+        
+        showSaveSuccess(`${designToDelete.name} deleted successfully.`);
+        
+    } catch (error) {
+        console.error('❌ Failed to delete design:', error);
+        showSaveError('Failed to delete design. Please try again.');
+    }
+}
+
+/**
+ * Delete design from preview modal
+ */
+function deleteFromPreview(designId) {
+    console.log('🗑️ Delete from preview:', designId);
+    
+    // Get design info for confirmation
+    const savedDesigns = getSavedDesigns();
+    const design = savedDesigns.find(d => d.id === designId);
+    
+    if (design) {
+        // Close the preview modal first
+        closeDesignPreviewModal();
+        
+        // Show delete confirmation
+        showDeleteConfirmation(designId, design.name);
+    } else {
+        showSaveError(window.getTranslation('import-error-not-found') || 'Design not found or may have been deleted.');
+        closeDesignPreviewModal();
+    }
+}
+
+// Global function exports
+window.toggleDeleteMode = toggleDeleteMode;
+window.toggleDesignSelection = toggleDesignSelection;
+window.confirmBulkDelete = confirmBulkDelete;
+window.updateDeleteButtonText = updateDeleteButtonText;
+window.cleanToggleDeleteMode = cleanToggleDeleteMode;
+window.cleanSetupDeleteMode = cleanSetupDeleteMode;
+window.cleanExitDeleteMode = cleanExitDeleteMode;
+window.cleanShowBulkDeleteConfirmation = cleanShowBulkDeleteConfirmation;
+window.cleanCancelDeleteConfirm = cleanCancelDeleteConfirm;
+window.cleanConfirmBulkDelete = cleanConfirmBulkDelete;
+window.confirmDelete = confirmDelete;
+window.deleteFromPreview = deleteFromPreview;
