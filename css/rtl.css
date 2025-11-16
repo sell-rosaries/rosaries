@@ -326,4 +326,51 @@
 /* EXCEPTION: Saved modal stays on the right even in Arabic */
 .rtl #saved-modal .modal-header-flex {
     justify-content: flex-end !important;
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+/* Force the close button inside saved modal to stay on right */
+.rtl #saved-modal .modal-header-flex .btn-close-modal-flex {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    align-self: flex-start !important;
+}
+
+/* Alternative approach: absolute positioning as backup */
+.rtl #saved-modal .modal-content .modal-header-flex {
+    position: relative !important;
+}
+
+.rtl #saved-modal .modal-content .modal-header-flex .btn-close-modal-flex {
+    position: absolute !important;
+    top: var(--space-4) !important;
+    right: var(--space-4) !important;
+    left: auto !important;
+    margin: 0 !important;
+}
+
+/* Force close button to stay on the right for saved modal in Arabic mode */
+.rtl #saved-modal .btn-close-modal-flex {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+}
+
+/* NEW: RTL positioning for the actual saved modal structure (JavaScript-generated) */
+.rtl #saved-modal .saved-modal-header .btn-close-modal {
+    left: auto !important;
+    right: var(--space-4) !important;
+    top: var(--space-4) !important;
+}
+    position: relative !important;
+    right: auto !important;
+    left: auto !important;
+    top: var(--space-4) !important;
+    margin: 0 !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
 }

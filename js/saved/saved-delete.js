@@ -145,10 +145,7 @@ function cleanToggleDeleteMode() {
  * CLEAN: Setup delete mode - add checkboxes dynamically
  */
 function cleanSetupDeleteMode() {
-    console.log('🔄 Setting up delete mode - adding checkboxes...');
-    
     // TEMPORARY FIX: Disable gallery checkbox styles if they might be causing fake squares
-    console.log('🎨 TEMPORARY CSS FIX: Disabling gallery checkbox styles...');
     const galleryCheckboxCSS = Array.from(document.styleSheets).flatMap(sheet => {
         try {
             return Array.from(sheet.cssRules || []);
@@ -205,7 +202,7 @@ function cleanSetupDeleteMode() {
     populatedCards.forEach(card => {
         const designId = card.getAttribute('data-design-id');
         
-        console.log('🔍 DEBUGGING CARD:', designId);
+    // DEBUGGING: Log individual design object for inspection
         
         // COMPREHENSIVE CLEANUP: Remove ALL checkbox-related elements first
         const allInputs = card.querySelectorAll('input');

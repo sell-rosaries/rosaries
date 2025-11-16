@@ -30,6 +30,7 @@ function onCanvasMouseDown(event) {
     if (isStringMode) {
         // String drawing mode
         isDrawingString = true;
+        
         const intersects = raycaster.intersectObject(plane);
         if (intersects.length > 0) {
             const clickPoint = intersects[0].point.clone();
@@ -49,6 +50,15 @@ function onCanvasMouseDown(event) {
             }
             
             stringPoints.push(clickPoint);
+            
+            // Track that pen drawing has started AFTER adding the point
+            if (typeof hasPenDrawing !== 'undefined') {
+                hasPenDrawing = true;
+                console.log('✏️ Pen drawing started - tracking as pen activity');
+                if (typeof updateStringType === 'function') {
+                    updateStringType();
+                }
+            }
         }
     } else if (selectedObjectId && selectedSize) {
         // Placement mode - but check if clicking on existing bead first
@@ -168,7 +178,48 @@ function onCanvasMouseUp(event) {
             }
         } else {
             if (isDeleteMode) {
-                exitDeleteMode();
+                // Check if this is a canvas-only click (not UI elements)
+                const eventTarget = event.target;
+                const canvas = renderer?.domElement;
+                
+                // If click was NOT on canvas, let document handlers handle it
+                if (eventTarget !== canvas) {
+                    console.log('❌ Click was not on canvas - letting document handlers handle it');
+                    return;
+                }
+                
+                console.log('🧠 No bead clicked in delete mode - checking if should deactivate...');
+                
+                // Don't deactivate during active 2-finger gestures OR recently ended gestures
+                if (typeof touchGestureActive !== 'undefined' && touchGestureActive) {
+                    console.log('❌ No deactivation - touch gesture active (pinch/zoom)');
+                    return;
+                }
+                
+                // Additional protection: don't deactivate if a 2-finger gesture recently ended
+                if (typeof twoFingerGestureTimestamp !== 'undefined') {
+                    const timeSinceTwoFingerGesture = Date.now() - twoFingerGestureTimestamp;
+                    const twoFingerGestureCooldown = 30; // 30ms cooldown
+                    
+                    if (timeSinceTwoFingerGesture < twoFingerGestureCooldown) {
+                        console.log('❌ No deactivation - recent 2-finger gesture ended ' + timeSinceTwoFingerGesture + 'ms ago');
+                        return;
+                    }
+                }
+                
+                // Raycast to check if click was on empty canvas space
+                const planeIntersects = raycaster.intersectObject(plane);
+                console.log('Canvas empty space check - plane intersects:', planeIntersects.length);
+                
+                if (planeIntersects.length > 0) {
+                    // Clicked on empty canvas space - should deactivate
+                    console.log('✅ CLICKED ON EMPTY CANVAS - DEACTIVATING DELETE MODE');
+                    exitDeleteMode();
+                    showDeleteModeDeactivatedToast();
+                    console.log('🎉 Delete mode deactivated via canvas click');
+                } else {
+                    console.log('❌ Clicked outside canvas view - no action');
+                }
             } else {
                 hideRotationSlider();
             }
@@ -179,6 +230,11 @@ function onCanvasMouseUp(event) {
         shouldSave = true;
         // Automatically exit string mode after completing a drawing gesture
         exitStringMode();
+        
+        // Ensure string type is updated after drawing complete
+        if (typeof updateStringType === 'function') {
+            updateStringType();
+        }
     }
     
     if (isDragging && hasDragged && draggedBead) {

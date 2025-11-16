@@ -26,7 +26,17 @@ async function main() {
         updateBeadCount();
         
         // Auto-restore saved design (must be after config is loaded, BEFORE saveState)
-        await autoRestoreDesign();
+        const restored = await autoRestoreDesign();
+        
+        // Auto-fit design if one was restored
+        if (restored && typeof window.performBasicSmartFraming === 'function') {
+            console.log('🎯 Auto-fitting restored design to viewport...');
+            setTimeout(() => {
+                const stringType = window.getCurrentStringType ? window.getCurrentStringType() : 'preset';
+                const mode = stringType === 'pen' ? 'pen-mode' : 'preset';
+                window.performBasicSmartFraming({mode});
+            }, 100); // Small delay to ensure all elements are loaded
+        }
         
         // Save initial state (or restored state if exists)
         saveState();

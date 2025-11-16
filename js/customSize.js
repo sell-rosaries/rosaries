@@ -218,8 +218,13 @@ function setupCustomSizeEvents() {
         
         // Call the actual fit function that works with all features
         if (typeof window.performBasicSmartFraming === 'function') {
-            window.performBasicSmartFraming();
-            console.log('✅ Design fitted successfully via custom size button');
+            if (typeof window.updateStringType === 'function') {
+                window.updateStringType();
+            }
+            const stringType = window.getCurrentStringType ? window.getCurrentStringType() : 'preset';
+            const mode = stringType === 'pen' ? 'pen-mode' : 'preset';
+            window.performBasicSmartFraming({mode});
+            console.log('✅ Design fitted successfully via custom size button, type:', stringType);
         } else {
             console.error('❌ performBasicSmartFraming function not found');
         }

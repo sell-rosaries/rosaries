@@ -234,7 +234,34 @@
 .rtl #saved-modal .btn-close-modal-flex {
     /* Override RTL behavior for saved modal specifically - keep on right */
     position: relative !important;
+    right: auto !important;
+    left: auto !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    top: var(--space-4) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
+
+/* Fix saved modal RTL positioning - keep close button on right side */
+.rtl #saved-modal .saved-modal-header {
+    position: relative;
+}
+
+.rtl #saved-modal .saved-modal-header .btn-close-modal {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    left: auto !important;
+    background: var(--neutral-100) !important;
+    border: none !important;
+    color: var(--neutral-600) !important;
+    width: 32px;
+    height: 32px;
+}
+
+/* Remove old styling - no longer needed */
 
 /* Ensure SVG is perfectly centered in RTL specific menus */
 .rtl #email-modal .btn-close-modal svg,

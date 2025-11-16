@@ -71,5 +71,10 @@ function updateStringLine() {
         stringLine = new THREE.Line(geometry, material);
         stringLine.position.y = 0.05;
         scene.add(stringLine);
+        
+        // Trigger string type update if we have pen drawing
+        if (typeof updateStringType === 'function') {
+            updateStringType();
+        }
     }
 }

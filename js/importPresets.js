@@ -175,6 +175,12 @@ function performImport(preset) {
     // Clear everything first
     clearAllBeads();
     
+    // Track that preset import has occurred
+    if (typeof hasPresetImport !== 'undefined') {
+        hasPresetImport = true;
+        console.log('🎯 Preset import started - tracking as preset activity');
+    }
+    
     // Parse the SVG path and convert to 3D points
     const newPoints = parseSVGPath(preset.path, preset.viewBox);
     
@@ -184,6 +190,11 @@ function performImport(preset) {
     
     // Update the visual string line
     updateStringLine();
+    
+    // Update string type tracking
+    if (typeof updateStringType === 'function') {
+        updateStringType();
+    }
     
     // Save state for undo/redo
     saveState();
@@ -221,6 +232,11 @@ function clearAllBeads() {
     
     // Clear string points
     stringPoints.length = 0;
+    
+    // Reset tracking when everything is cleared
+    if (typeof resetStringTracking === 'function') {
+        resetStringTracking();
+    }
     
     // Update bead count display
     updateBeadCount();

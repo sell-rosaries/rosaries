@@ -30,6 +30,11 @@ let hasDragged = false;
 let isDeleteMode = false;
 let deleteMarkers = [];
 
+// Touch gesture tracking for delete mode
+let touchGestureActive = false;
+let touchCount = 0;
+let twoFingerGestureTimestamp = 0;
+
 // History for undo/redo
 let history = [];
 let historyIndex = -1;

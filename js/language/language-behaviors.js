@@ -40,7 +40,12 @@ if (typeof window.translations !== 'undefined') {
         'preset-bracelet-desc': 'Import bracelet pattern',
         'preset-circle-desc': 'Import circle pattern',
         'preset-heart-desc': 'Import heart pattern',
-        'preset-rosary-desc': 'Import rosary pattern'
+        'preset-rosary-desc': 'Import rosary pattern',
+        
+        // Delete Mode Toast
+        'delete-mode-click-space': 'Click on an empty space',
+        'delete-mode-to-deactivate': 'to deactivate!',
+        'delete-mode-deactivated': 'Delete mode deactivated'
     };
     
     window.translations.ar = {
@@ -78,7 +83,12 @@ if (typeof window.translations !== 'undefined') {
         'preset-bracelet-desc': 'استيراد نمط السوار',
         'preset-circle-desc': 'استيراد نمط الدائرة',
         'preset-heart-desc': 'استيراد نمط القلب',
-        'preset-rosary-desc': 'استيراد نمط سلسلة الصلاة'
+        'preset-rosary-desc': 'استيراد نمط سلسلة الصلاة',
+        
+        // Delete Mode Toast
+        'delete-mode-click-space': 'انقر على مساحة فارغة',
+        'delete-mode-to-deactivate': 'لإلغاء التفعيل!',
+        'delete-mode-deactivated': 'تم إلغاء تفعيل وضع الحذف'
     };
 }
 

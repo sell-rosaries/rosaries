@@ -76,18 +76,35 @@ function closeResetConfirmation() {
 }
 
 function performResetAll() {
-    beads.forEach(bead => scene.remove(bead));
+    beads.forEach(bead => {
+        if (bead.material) bead.material.dispose();
+        if (bead.geometry) bead.geometry.dispose();
+        scene.remove(bead);
+    });
     beads = [];
     if (stringLine) {
+        if (stringLine.geometry) stringLine.geometry.dispose();
+        if (stringLine.material) stringLine.material.dispose();
         scene.remove(stringLine);
         stringLine = null;
     }
     stringPoints = [];
+    
+    // Reset string tracking when everything is cleared
+    if (typeof resetStringTracking === 'function') {
+        resetStringTracking();
+    }
+    
     updateBeadCount();
     hideRotationControl();
     exitDeleteMode();
     closeResetMenu();
     saveState();
+    
+    // Force render to flush state
+    if (typeof renderer !== 'undefined' && renderer) {
+        renderer.render(scene, camera);
+    }
 }
 
 function deleteAllObjects() {
@@ -167,6 +184,12 @@ function enterDeleteMode() {
     
     showDeleteMarkers();
     
+    // Show toast notification with instruction
+    showDeleteModeToast();
+    
+    // Set up enhanced click and touch tracking for delete mode
+    setupDeleteModeEventListeners();
+    
     // Ensure we're in select mode for clicking beads
     if (!isSelectMode) {
         isSelectMode = true;
@@ -179,9 +202,87 @@ function enterDeleteMode() {
 }
 
 function exitDeleteMode() {
+    console.log('🔄 ENTERING exitDeleteMode()');
+    console.log('Before: isDeleteMode =', isDeleteMode);
+    console.log('Before: has delete-mode class?', document.body.classList.contains('delete-mode'));
+    
     isDeleteMode = false;
     document.body.classList.remove('delete-mode');
+    
+    console.log('After setting isDeleteMode = false:', isDeleteMode);
+    console.log('After removing class, has delete-mode class?', document.body.classList.contains('delete-mode'));
+    
+    console.log('Removing delete markers...');
     removeDeleteMarkers();
+    
+    console.log('Cleaning up event listeners...');
+    // Clean up delete mode event listeners
+    cleanupDeleteModeEventListeners();
+    
+    // Reset touch tracking
+    touchGestureActive = false;
+    touchCount = 0;
+    twoFingerGestureTimestamp = 0;
+    
+    console.log('✅ exitDeleteMode() completed');
+}
+
+function showDeleteModeToast() {
+    // Create temporary instruction message
+    const existingMessage = document.querySelector('.delete-mode-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = 'delete-mode-message';
+    messageEl.innerHTML = `
+        <div style="text-align: center;">
+            <div>${window.getTranslation('delete-mode-click-space') || 'Click on an empty space'}</div>
+            <div style="font-size: 14px; opacity: 0.9;">${window.getTranslation('delete-mode-to-deactivate') || 'to deactivate!'}</div>
+        </div>
+    `;
+    messageEl.style.cssText = `
+        position: fixed;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(34, 197, 94, 0.98);
+        color: white;
+        padding: var(--space-3) var(--space-6);
+        border-radius: var(--radius-md);
+        font-size: var(--font-size-body-sm);
+        font-weight: var(--weight-semibold);
+        z-index: 1000;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        animation: delete-mode-message-slide 3s ease-in-out forwards;
+        max-width: 90vw;
+        text-align: center;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    `;
+    
+    // Add animation keyframes
+    if (!document.querySelector('#delete-mode-message-styles')) {
+        const style = document.createElement('style');
+        style.id = 'delete-mode-message-styles';
+        style.textContent = `
+            @keyframes delete-mode-message-slide {
+                0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                20%, 80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(messageEl);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        messageEl.remove();
+    }, 3000);
 }
 
 function deleteIndividualBead(bead) {
@@ -207,4 +308,217 @@ function deleteIndividualBead(bead) {
             exitDeleteMode();
         }
     }
+}
+
+// Make the function globally available
+window.showDeleteModeToast = showDeleteModeToast;
+
+/**
+ * TRACK TOUCH GESTURES TO PREVENT ACCIDENTAL DEACTIVATION
+ * Updates touch tracking for multi-touch gestures
+ */
+function trackTouchGestures(event) {
+    if (event.type === 'touchstart') {
+        touchCount = event.touches.length;
+        if (touchCount === 2) {
+            touchGestureActive = true;
+            twoFingerGestureTimestamp = Date.now(); // Track only 2-finger gestures
+        }
+    } else if (event.type === 'touchend' || event.type === 'touchcancel') {
+        touchCount = Math.max(0, touchCount - event.changedTouches.length);
+        if (touchCount < 2) {
+            touchGestureActive = false;
+            twoFingerGestureTimestamp = Date.now(); // Reset only after 2-finger gesture ends
+        }
+    }
+}
+
+/**
+ * CHECK IF CLICK TARGET SHOULD DEACTIVATE DELETE MODE
+ * Returns true if we should deactivate, false if we should not
+ * User wants deactivation everywhere EXCEPT: beads, zoom buttons (+/-), zoom instruction text
+ */
+function shouldDeactivateDeleteMode(target, event) {
+    // Don't deactivate during active 2-finger gestures
+    if (typeof touchGestureActive !== 'undefined' && touchGestureActive) {
+        console.log('❌ No deactivation - touch gesture active');
+        return false;
+    }
+    
+    // Never deactivate when clicking zoom buttons (+/-)
+    if (target.closest('#zoom-in-btn') || target.closest('#zoom-out-btn')) {
+        console.log('No deactivation - clicked zoom button');
+        return false;
+    }
+    
+    // Don't deactivate when clicking zoom controls container or nearby instruction areas
+    if (target.closest('#canvas-zoom-controls') || target.closest('#canvas-info')) {
+        console.log('No deactivation - clicked zoom controls/info');
+        return false;
+    }
+    
+    // Check if this is a click within the canvas container
+    if (target.closest('#canvas-container')) {
+        const canvas = document.querySelector('#canvas-container canvas');
+        
+        if (canvas && typeof mouse !== 'undefined' && typeof raycaster !== 'undefined' && typeof beads !== 'undefined') {
+            // This is a canvas click - check if it hit a bead using raycasting
+            console.log('Canvas click detected - checking for beads...');
+            const coords = getNormalizedCoords(event);
+            mouse.x = coords.x;
+            mouse.y = coords.y;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(beads);
+            
+            console.log('Raycasting result - intersects:', intersects.length);
+            if (intersects.length > 0) {
+                console.log('Clicked on a bead - no deactivation');
+                return false;
+            } else {
+                // Additional protection for canvas clicks only: don't deactivate if a 2-finger gesture recently ended
+                if (typeof twoFingerGestureTimestamp !== 'undefined') {
+                    const timeSinceTwoFingerGesture = Date.now() - twoFingerGestureTimestamp;
+                    const twoFingerGestureCooldown = 30; // 30ms cooldown
+                    
+                    if (timeSinceTwoFingerGesture < twoFingerGestureCooldown) {
+                        console.log('❌ No deactivation - recent 2-finger gesture ended ' + timeSinceTwoFingerGesture + 'ms ago');
+                        return false;
+                    }
+                }
+                
+                console.log('Clicked on empty canvas - should deactivate');
+                return true;
+            }
+        } else {
+            // Clicked in canvas container but no canvas element found - deactivate
+            console.log('Canvas container clicked but no canvas - should deactivate');
+            return true;
+        }
+    }
+    
+    console.log('Non-canvas click - should deactivate');
+    // For all other clicks (menus, toolbars, empty space, etc.) - DEACTIVATE
+    return true;
+}
+
+/**
+ * HANDLE DELETE MODE CLICK DETECTION
+ * Enhanced click handler for delete mode that works properly
+ */
+function handleDeleteModeClick(event) {
+    if (!isDeleteMode) {
+        console.log('Click ignored - delete mode not active');
+        return;
+    }
+    
+    const target = event.target;
+    console.log('=== DELETE MODE CLICK DEBUG ===');
+    console.log('Target:', target.tagName, 'ID:', target.id, 'Class:', target.className);
+    console.log('Delete mode active:', isDeleteMode);
+    console.log('Touch gesture active:', touchGestureActive);
+    console.log('Event type:', event.type);
+    
+    // Check if we should deactivate based on click target and event
+    const shouldDeactivate = shouldDeactivateDeleteMode(target, event);
+    console.log('Should deactivate:', shouldDeactivate);
+    
+    if (shouldDeactivate) {
+        console.log('✅ DEACTIVATING DELETE MODE - target:', target.tagName, target.id, target.className);
+        console.log('About to call exitDeleteMode()...');
+        exitDeleteMode();
+        console.log('exitDeleteMode() completed, isDeleteMode is now:', isDeleteMode);
+        console.log('About to show deactivation toast...');
+        showDeleteModeDeactivatedToast();
+        console.log('Deactivation toast shown');
+    } else {
+        console.log('❌ NOT deactivating - clicked on protected element:', target.tagName, target.id, target.className);
+    }
+    console.log('=== END DEBUG ===');
+}
+
+/**
+ * SHOW DELETE MODE DEACTIVATED TOAST
+ * Toast message when delete mode is deactivated
+ */
+function showDeleteModeDeactivatedToast() {
+    const existingMessage = document.querySelector('.delete-mode-deactivated-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = 'delete-mode-deactivated-message';
+    messageEl.innerHTML = `
+        <div style="text-align: center;">
+            <div>${window.getTranslation('delete-mode-deactivated') || 'Delete mode deactivated'}</div>
+        </div>
+    `;
+    messageEl.style.cssText = `
+        position: fixed;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(239, 68, 68, 0.98);
+        color: white;
+        padding: var(--space-3) var(--space-6);
+        border-radius: var(--radius-md);
+        font-size: var(--font-size-body-sm);
+        font-weight: var(--weight-semibold);
+        z-index: 1000;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        animation: delete-mode-deactivated-slide 3s ease-in-out forwards;
+        max-width: 90vw;
+        text-align: center;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    `;
+    
+    // Add animation keyframes if not present
+    if (!document.querySelector('#delete-mode-deactivated-styles')) {
+        const style = document.createElement('style');
+        style.id = 'delete-mode-deactivated-styles';
+        style.textContent = `
+            @keyframes delete-mode-deactivated-slide {
+                0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                20%, 80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(messageEl);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        messageEl.remove();
+    }, 3000);
+}
+
+
+/**
+ * SET UP ENHANCED EVENT LISTENERS FOR DELETE MODE
+ */
+function setupDeleteModeEventListeners() {
+    // Add document-level click detection for better target analysis
+    document.addEventListener("click", handleDeleteModeClick, true);
+    
+    // Add touch tracking to prevent accidental deactivation during gestures
+    document.addEventListener("touchstart", trackTouchGestures, { passive: false });
+    document.addEventListener("touchend", trackTouchGestures, { passive: false });
+    document.addEventListener("touchcancel", trackTouchGestures, { passive: false });
+}
+
+/**
+ * CLEAN UP DELETE MODE EVENT LISTENERS
+ */
+function cleanupDeleteModeEventListeners() {
+    // Remove document-level click detection
+    document.removeEventListener("click", handleDeleteModeClick, true);
+    
+    // Remove touch tracking listeners
+    document.removeEventListener("touchstart", trackTouchGestures, { passive: false });
+    document.removeEventListener("touchend", trackTouchGestures, { passive: false });
+    document.removeEventListener("touchcancel", trackTouchGestures, { passive: false });
 }

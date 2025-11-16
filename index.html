@@ -92,6 +92,7 @@
         </div>
     </div>
     
+
     <!-- Floating Action Button (FAB) - Tool Selector -->
     <button id="fab" class="fab" aria-label="Select tool">
         <svg id="fab-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -326,13 +327,7 @@
     <div id="saved-modal" class="modal">
         <div class="modal-backdrop" onclick="closeSavedModal()"></div>
         <div class="modal-content modal-compact">
-            <div class="modal-header-flex">
-                <button class="btn-close-modal-flex" onclick="closeSavedModal()" aria-label="Close">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 6L6 18M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
+            <!-- Content will be populated dynamically by saved-core.js -->
             
             <h3>Saved Designs</h3>
             <p class="modal-subtitle">Save, import, or delete your rosary designs</p>
@@ -482,6 +477,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     
+    <!-- Sandbox String Type Tracker (for testing) -->
+    <script src="js/sandboxStringType.js"></script>
+    
     <!-- Application scripts - load in order -->
     <script src="js/globals.js"></script>
     <script src="js/storage.js"></script>
@@ -489,6 +487,7 @@
     <script src="js/scene.js"></script>
     <script src="js/string.js"></script>
     <script src="js/beads.js"></script>
+    <script src="js/auto-fit-system.js"></script>
     <script src="js/history.js"></script>
     <script src="js/rotation.js"></script>
     <script src="js/tools.js"></script>
@@ -522,6 +521,7 @@
     <script src="js/saved/saved-ui.js"></script>
     <script src="js/saved/saved-delete.js"></script>
     <script src="js/saved/saved-preview.js"></script>
+    <script src="js/auto-fit-system.js"></script>
     <script src="js/saved/saved-capture.js"></script>
     <script src="js/saved/saved-import.js"></script>
     <script src="js/saved/saved-styles.js"></script>

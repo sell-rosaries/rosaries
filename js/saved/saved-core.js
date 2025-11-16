@@ -126,6 +126,7 @@ function saveCurrentDesign() {
                 id: generateUniqueId(),
                 name: `${window.getTranslation('design-singular') || 'Design'} ${existingSaves.length + 1}`,
                 timestamp: new Date().toISOString(),
+                stringType: window.getCurrentStringType ? window.getCurrentStringType() : 'preset',
                 stringPoints: stringPoints.map(p => ({ x: p.x, y: p.y, z: p.z })),
                 beads: beads.map(bead => ({
                     position: { x: bead.position.x, y: bead.position.y, z: bead.position.z },

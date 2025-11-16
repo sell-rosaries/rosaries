@@ -33,6 +33,7 @@ function addEventListeners() {
     // FAB button
     document.getElementById('fab').addEventListener('click', toggleFAB);
 
+
     // Bead library panel
     document.getElementById('close-library-btn').addEventListener('click', closeBeadLibrary);
     document.getElementById('panel-backdrop').addEventListener('click', closeBeadLibrary);
