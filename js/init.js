@@ -50,6 +50,11 @@ async function main() {
         if (typeof initCustomSize === 'function') {
             initCustomSize();
         }
+
+        // Initialize string size slider logic
+        if (typeof window.initStringSlider === 'function') {
+            window.initStringSlider();
+        }
         
         // Initialize sandbox string type tracker
         initSandboxStringType();

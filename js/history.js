@@ -55,6 +55,11 @@ function restoreState(state) {
     });
     updateStringLine();
     
+    // Reset slider base to the restored geometry
+    if (typeof window.resetSliderBase === 'function') {
+        window.resetSliderBase();
+    }
+    
     state.beads.forEach(beadData => {
         const obj = getObjectById(beadData.userData.objectId);
         if (obj) {

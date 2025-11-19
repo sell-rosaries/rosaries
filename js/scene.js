@@ -54,5 +54,11 @@ function init3DScene() {
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
+    
+    // Update gravity simulation if active
+    if (typeof window.updateGravitySimulation === 'function') {
+        window.updateGravitySimulation();
+    }
+    
     renderer.render(scene, camera);
 }

@@ -96,16 +96,51 @@ function placeBead() {
  * Checks if a new bead collides with existing ones using current rotation.
  */
 function checkBeadCollision(newBead, ignoreBeads = []) {
+    const x1 = newBead.position.x;
+    const z1 = newBead.position.z;
+    const w1 = newBead.scale.x;
+    const h1 = newBead.scale.y;
+    const rot1 = newBead.material.rotation || 0;
+
     for (const existingBead of beads) {
         if (newBead === existingBead || ignoreBeads.includes(existingBead)) continue;
         
-        const newRotation = newBead.material.rotation || 0;
-        const existingRotation = existingBead.material.rotation || 0;
+        const x2 = existingBead.position.x;
+        const z2 = existingBead.position.z;
+        const w2 = existingBead.scale.x;
+        const h2 = existingBead.scale.y;
+        const rot2 = existingBead.material.rotation || 0;
         
-        if (checkRotatedRectCollision(
-            newBead.position.x, newBead.position.z, newBead.scale.x, newBead.scale.y, newRotation,
-            existingBead.position.x, existingBead.position.z, existingBead.scale.x, existingBead.scale.y, existingRotation
-        )) {
+        // 1. Fast Broadphase: Bounding Circle Check (Max Radius)
+        // Use max dimension for safe radius - if outside this, definitely no collision
+        const r1Max = Math.max(w1, h1) / 2;
+        const r2Max = Math.max(w2, h2) / 2;
+        const dx = x1 - x2;
+        const dz = z1 - z2;
+        const distSq = dx*dx + dz*dz;
+        
+        if (distSq > (r1Max + r2Max) * (r1Max + r2Max)) continue;
+
+        // 2. Hard Inner Core Check (Min Radius) - FAILSAFE
+        // If the "inner circles" touch, it's a collision regardless of rotation.
+        // This prevents thin objects from tunneling through each other if SAT fails.
+        const r1Min = Math.min(w1, h1) / 2;
+        const r2Min = Math.min(w2, h2) / 2;
+        const minSepSq = (r1Min + r2Min) * (r1Min + r2Min);
+        if (distSq < minSepSq) return true;
+
+        // 3. Circular Optimization (if both are round-ish)
+        const ar1 = w1 / h1;
+        const ar2 = w2 / h2;
+        if (ar1 > 0.9 && ar1 < 1.1 && ar2 > 0.9 && ar2 < 1.1) {
+             const rad1 = (w1 + h1) / 4; 
+             const rad2 = (w2 + h2) / 4;
+             if (distSq < (rad1 + rad2) * (rad1 + rad2)) return true;
+             continue;
+        }
+        
+        // 4. Narrowphase: SAT (Separating Axis Theorem)
+        if (checkRotatedRectCollision(x1, z1, w1, h1, rot1, x2, z2, w2, h2, rot2)) {
             return true;
         }
     }
@@ -155,8 +190,8 @@ function getRotatedRectCorners(x, z, width, height, rotation) {
     ];
     
     return localCorners.map(corner => ({
-        x: x + corner.x * cos - corner.y * sin,
-        y: z + corner.x * sin + corner.y * cos
+        x: x + (corner.x * cos - corner.y * sin),
+        y: z + (corner.x * sin + corner.y * cos)
     }));
 }
 

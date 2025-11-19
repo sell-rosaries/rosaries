@@ -24,9 +24,11 @@ function autoSaveDesign() {
                 userData: bead.userData,
                 imageUrl: bead.material.map ? bead.material.map.image.src : null
             })),
+            stringScale: window.currentStringScale || 0, // Save current slider percentage
+            rosaryModeActive: window.rosaryModeActive || false, // Save rosary mode flag
             savedAt: new Date().toISOString()
         };
-        
+
         localStorage.setItem(STORAGE_KEYS.AUTOSAVE, JSON.stringify(designData));
         console.log('✓ Design auto-saved');
     } catch (e) {
@@ -44,14 +46,23 @@ async function autoRestoreDesign() {
             console.log('No saved design found');
             return false;
         }
-        
+
         const designData = JSON.parse(saved);
         console.log('📂 Restoring saved design from:', designData.savedAt);
-        
+
         // Restore string points
         stringPoints = designData.stringPoints.map(p => new THREE.Vector3(p.x, p.y, p.z));
         updateStringLine();
-        
+
+        // Restore slider state if available
+        if (typeof window.restoreSliderState === 'function' && designData.stringScale !== undefined) {
+            window.restoreSliderState(designData.stringScale);
+        }
+
+        // Restore rosary mode flag if available
+        window.rosaryModeActive = designData.rosaryModeActive || false;
+        console.log('📏 Restored rosary mode flag:', window.rosaryModeActive);
+
         // Restore beads - wait for all to load
         const beadPromises = designData.beads.map(beadData => {
             return new Promise((resolve) => {
@@ -61,11 +72,11 @@ async function autoRestoreDesign() {
                         bead.position.set(beadData.position.x, beadData.position.y, beadData.position.z);
                         bead.scale.set(beadData.scale.x, beadData.scale.y, beadData.scale.z);
                         bead.userData = beadData.userData;
-                        
+
                         if (beadData.rotation) {
                             bead.material.rotation = beadData.rotation;
                         }
-                        
+
                         scene.add(bead);
                         beads.push(bead);
                         resolve();
@@ -75,14 +86,14 @@ async function autoRestoreDesign() {
                 }
             });
         });
-        
+
         // Wait for all beads to load
         await Promise.all(beadPromises);
-        
+
         updateBeadCount();
         console.log('✅ Design restored successfully');
         return true;
-        
+
     } catch (e) {
         console.warn('Could not restore design:', e);
         return false;
@@ -95,16 +106,16 @@ async function autoRestoreDesign() {
 function trackRecentBead(objectId) {
     try {
         let recentBeads = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_BEADS) || '[]');
-        
+
         // Remove if already exists
         recentBeads = recentBeads.filter(id => id !== objectId);
-        
+
         // Add to front
         recentBeads.unshift(objectId);
-        
+
         // Keep only last 3
         recentBeads = recentBeads.slice(0, 3);
-        
+
         localStorage.setItem(STORAGE_KEYS.RECENT_BEADS, JSON.stringify(recentBeads));
     } catch (e) {
         console.warn('Could not track recent bead:', e);
@@ -128,7 +139,7 @@ function getRecentBeads() {
 function toggleFavorite(objectId) {
     try {
         let favorites = JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITES) || '[]');
-        
+
         if (favorites.includes(objectId)) {
             // Remove from favorites
             favorites = favorites.filter(id => id !== objectId);
@@ -136,7 +147,7 @@ function toggleFavorite(objectId) {
             // Add to favorites
             favorites.push(objectId);
         }
-        
+
         localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
         return favorites.includes(objectId);
     } catch (e) {
@@ -179,3 +190,13 @@ function clearAutoSave() {
         console.warn('Could not clear auto-save:', e);
     }
 }
+
+// Global exports
+window.autoSaveDesign = autoSaveDesign;
+window.autoRestoreDesign = autoRestoreDesign;
+window.clearAutoSave = clearAutoSave;
+window.trackRecentBead = trackRecentBead;
+window.getRecentBeads = getRecentBeads;
+window.toggleFavorite = toggleFavorite;
+window.isFavorite = isFavorite;
+window.getFavoriteBeads = getFavoriteBeads;

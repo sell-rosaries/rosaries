@@ -43,11 +43,11 @@ function openSavedModal() {
  */
 function closeSavedModal() {
     console.log('🔄 Closing saved modal - cleaning up all delete mode state...');
-    
+
     // If import mode is active, fully exit it
     if (importModeActive) {
         importModeActive = false;
-        
+
         // Reset import button
         const importBtn = document.getElementById('import-design-btn');
         if (importBtn) {
@@ -64,7 +64,7 @@ function closeSavedModal() {
             updateImportButtonText(); // Update text using the centralized function
         }
     }
-    
+
     // Remove any delete dialogs
     if (window.currentDeleteDialog) {
         window.currentDeleteDialog.remove();
@@ -73,55 +73,65 @@ function closeSavedModal() {
     if (window.bulkDeleteIds) {
         window.bulkDeleteIds = null;
     }
-    
+
     // Close the modal
     const modal = document.getElementById('saved-modal');
     if (modal) {
         modal.classList.remove('active');
     }
-    
+
     console.log('✅ Saved modal closed and fully cleaned up');
 }
 
 /**
  * Save current design to storage
+ * @param {Object} options - Save options
+ * @param {boolean} options.silent - If true, suppresses success toast
  */
-function saveCurrentDesign() {
+function saveCurrentDesign(options = {}) {
     // Check if design has content
     if (!hasDesignContent()) {
-        showSaveError(window.getTranslation('save-error-nothing') || 'Nothing to save - add some beads or draw a string first!');
+        if (!options.silent) {
+            showSaveError(window.getTranslation('save-error-nothing') || 'Nothing to save - add some beads or draw a string first!');
+        }
         return;
     }
-    
+
     // Check if we have less than 6 saves
     const existingSaves = getSavedDesigns();
     if (existingSaves.length >= 6) {
-        showSaveError(window.getTranslation('save-error-max') || 'Maximum 6 saves allowed. Please delete some saves first.');
+        if (!options.silent) {
+            showSaveError(window.getTranslation('save-error-max') || 'Maximum 6 saves allowed. Please delete some saves first.');
+        }
         return;
     }
-    
+
     try {
         // Capture screenshot first
-        showSaveSuccess(window.getTranslation('save-success-screenshot') || '📸 Auto-fitting + capturing preview...');
-        
+        if (!options.silent) {
+            showSaveSuccess(window.getTranslation('save-success-screenshot') || '📸 Auto-fitting + capturing preview...');
+        }
+
         setTimeout(() => {
             console.log('🔍 Save: Starting capture process...');
             console.log('📊 Save: Design has', stringPoints.length, 'string points,', beads.length, 'beads');
             console.log('📍 Save: Current camera position:', { x: camera.position.x, z: camera.position.z });
-            
+
             const screenshot = captureCanvasScreenshot();
-            
+
             if (!screenshot) {
-                showSaveError(window.getTranslation('save-error-screenshot') || 'Failed to capture screenshot. Please try again.');
+                if (!options.silent) {
+                    showSaveError(window.getTranslation('save-error-screenshot') || 'Failed to capture screenshot. Please try again.');
+                }
                 return;
             }
-            
+
             console.log('✅ Save: Screenshot captured successfully');
             console.log('📊 Save: Current design positions after centering:', {
                 stringPoint0: stringPoints.length > 0 ? { x: stringPoints[0].x, z: stringPoints[0].z } : 'none',
                 bead0: beads.length > 0 ? { x: beads[0].position.x, z: beads[0].position.z } : 'none'
             });
-            
+
             const designData = {
                 id: generateUniqueId(),
                 name: `${window.getTranslation('design-singular') || 'Design'} ${existingSaves.length + 1}`,
@@ -137,26 +147,30 @@ function saveCurrentDesign() {
                 })),
                 thumbnail: screenshot // Store the actual screenshot
             };
-            
+
             // Add to saved designs array
             existingSaves.push(designData);
-            
+
             // Save to localStorage
             localStorage.setItem(SAVED_DESIGNS_KEY, JSON.stringify(existingSaves));
-            
+
             // Show success feedback
-            showSaveSuccess(window.getTranslation('save-success-saved') || 'Design saved successfully!');
-            
+            if (!options.silent) {
+                showSaveSuccess(window.getTranslation('save-success-saved') || 'Design saved successfully!');
+            }
+
             // Refresh the modal
             populateSavedModal();
-            
+
             console.log('✅ Design saved:', designData.name);
-            
+
         }, 100); // Small delay to ensure renderer is ready
-        
+
     } catch (e) {
         console.warn('Could not save design:', e);
-        showSaveError(window.getTranslation('save-error-failed') || 'Failed to save design. Please try again.');
+        if (!options.silent) {
+            showSaveError(window.getTranslation('save-error-failed') || 'Failed to save design. Please try again.');
+        }
     }
 }
 
@@ -192,15 +206,15 @@ function getSavedDesigns() {
 function populateSavedModal() {
     const modal = document.getElementById('saved-modal');
     if (!modal) return;
-    
+
     const modalContent = modal.querySelector('.modal-content');
     if (!modalContent) return;
-    
+
     const savedDesigns = getSavedDesigns();
-    
+
     // Always generate 6 static placeholder slots (2x3 grid)
     const designsHTML = generateStaticDesignGrid(savedDesigns);
-    
+
     // Update modal content with new layout
     modalContent.innerHTML = `
         <div class="saved-modal-header">
@@ -246,10 +260,10 @@ function populateSavedModal() {
             </button>
         </div>
     `;
-    
+
     // Add event listeners
     setupSavedModalEvents();
-    
+
     // Generate thumbnails after DOM is ready
     setTimeout(generateThumbnailsForSavedDesigns, 100);
 }
@@ -261,18 +275,18 @@ function setupSavedModalEvents() {
     // Save button
     const saveBtn = document.getElementById('save-design-btn');
     if (saveBtn) {
-        saveBtn.addEventListener('click', saveCurrentDesign);
+        saveBtn.addEventListener('click', () => saveCurrentDesign({ silent: false }));
     }
-    
+
     // Import button (now fully functional)
     const importBtn = document.getElementById('import-design-btn');
     if (importBtn) {
         importBtn.addEventListener('click', toggleImportMode);
     }
-    
+
     // Setup click listeners for saved design cards
     setupDesignCardClickListeners();
-    
+
     // Clean Delete button
     const deleteBtn = document.getElementById('delete-design-btn');
     if (deleteBtn) {
@@ -289,7 +303,7 @@ function showSaveSuccess(message) {
     if (existingMessage) {
         existingMessage.remove();
     }
-    
+
     const messageEl = document.createElement('div');
     messageEl.className = 'save-message';
     messageEl.style.cssText = `
@@ -313,7 +327,7 @@ function showSaveSuccess(message) {
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     `;
     messageEl.textContent = message;
-    
+
     // Add animation keyframes
     if (!document.querySelector('#save-message-styles')) {
         const style = document.createElement('style');
@@ -327,9 +341,9 @@ function showSaveSuccess(message) {
         `;
         document.head.appendChild(style);
     }
-    
+
     document.body.appendChild(messageEl);
-    
+
     // Remove after animation
     setTimeout(() => {
         messageEl.remove();
@@ -346,7 +360,7 @@ function showSaveError(message) {
         if (existingAlert) {
             existingAlert.remove();
         }
-        
+
         const alertEl = document.createElement('div');
         alertEl.className = 'save-error-alert';
         alertEl.style.cssText = `
@@ -359,10 +373,10 @@ function showSaveError(message) {
             text-align: center;
         `;
         alertEl.textContent = message;
-        
+
         const modalContent = modal.querySelector('.modal-content');
         modalContent.insertBefore(alertEl, modalContent.children[4]);
-        
+
         // Remove after 4 seconds
         setTimeout(() => {
             alertEl.remove();
