@@ -61,35 +61,22 @@ function captureDesignImage() {
     const originalWidth = originalCanvas.width;
     const originalHeight = originalCanvas.height;
 
-    // Target aspect ratio for consistent previews (4:3 ratio works well for most designs)
-    const targetAspectRatio = 4 / 3;
-    const quality = 0.95;
-
-    // Calculate dimensions to maintain aspect ratio and fit within reasonable size
-    let newWidth, newHeight;
+    // FIX: Preserve ORIGINAL aspect ratio to prevent distortion on mobile (Portrait)
+    // Previously forced 4:3 which squashed portrait views
     const originalAspect = originalWidth / originalHeight;
+    const maxSize = 1200;
+    const quality = 0.95; // Restored missing variable
 
-    if (Math.abs(originalAspect - targetAspectRatio) < 0.1) {
-        // Close to target aspect ratio, use original proportions but cap size
-        const maxSize = 1200;
-        if (originalWidth > originalHeight) {
-            newWidth = Math.min(maxSize, originalWidth);
-            newHeight = Math.round((originalHeight * newWidth) / originalWidth);
-        } else {
-            newHeight = Math.min(maxSize, originalHeight);
-            newWidth = Math.round((originalWidth * newHeight) / originalHeight);
-        }
+    let newWidth, newHeight;
+
+    if (originalWidth > originalHeight) {
+        // Landscape
+        newWidth = Math.min(originalWidth, maxSize);
+        newHeight = Math.round(newWidth / originalAspect);
     } else {
-        // Different aspect ratio, adjust to target while maintaining proportions
-        if (originalAspect > targetAspectRatio) {
-            // Original is wider, match height and adjust width
-            newHeight = 800;
-            newWidth = Math.round(newHeight * targetAspectRatio);
-        } else {
-            // Original is taller, match width and adjust height
-            newWidth = 800;
-            newHeight = Math.round(newWidth / targetAspectRatio);
-        }
+        // Portrait
+        newHeight = Math.min(originalHeight, maxSize);
+        newWidth = Math.round(newHeight * originalAspect);
     }
 
     // Set temp canvas size
