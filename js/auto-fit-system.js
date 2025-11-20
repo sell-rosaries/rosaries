@@ -146,7 +146,6 @@ function performBasicSmartFraming(options = {}) {
 
     if (!hasDesign) {
         console.log('⚠️ No design elements to fit');
-        alert(window.getTranslation('import-error-empty') || 'No design to fit! Add some beads or draw a string first.');
         return;
     }
 
