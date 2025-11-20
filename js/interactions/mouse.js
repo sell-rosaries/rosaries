@@ -339,6 +339,7 @@ function onCanvasMouseUp(event) {
                     const fwdDist = startDist + searchDist;
                     const fwdPos = getPathPosLocal(currentPathData, fwdDist);
                     draggedBead.position.copy(fwdPos);
+                    draggedBead.position.y = 0.1; // FIX: Ensure bead is above string
                     if (!checkBeadCollision(draggedBead, [draggedBead])) {
                         found = true;
                         break;
@@ -348,6 +349,7 @@ function onCanvasMouseUp(event) {
                     const bwdDist = startDist - searchDist;
                     const bwdPos = getPathPosLocal(currentPathData, bwdDist);
                     draggedBead.position.copy(bwdPos);
+                    draggedBead.position.y = 0.1; // FIX: Ensure bead is above string
                     if (!checkBeadCollision(draggedBead, [draggedBead])) {
                         found = true;
                         break;
