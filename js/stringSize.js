@@ -121,14 +121,26 @@ function setupSliderEvents() {
     document.addEventListener('touchmove', handleDrag, { passive: false });
     document.addEventListener('touchend', stopDragging);
 
-    function startDragging(e) {
+    async function startDragging(e) {
         e.preventDefault();
         isDragging = true;
 
-        // Always reset the base to capture current design state
-        // This ensures we start from the LOADED design (with saved bead positions)
-        // not from some stale base from before
-        window.resetSliderBase();
+        // 1. Load saved design (User Requirement)
+        // We do this first to ensure we are working on the correct state
+        if (typeof window.autoRestoreDesign === 'function') {
+             // Note: This might be jarring if it takes time, but it's requested.
+             // We await it to ensure base points are correct before scaling.
+             await window.autoRestoreDesign();
+        }
+
+        // DO NOT reset base here. 
+        // resetSliderBase() sets base = current. If we do this on every drag,
+        // the scale accumulates (compound interest) -> infinite growth.
+        // We only want to reset base when the SHAPE changes (new string/import),
+        // not when we are just resizing the existing shape.
+        
+        // However, if we just loaded the design, restoreSliderState should have set the correct base.
+        // If we didn't load, we assume the current base is valid.
 
         // Disable transitions for instant feedback (No Lag)
         sliderLiquid.style.transition = 'none';
@@ -186,6 +198,11 @@ function setupSliderEvents() {
         if (typeof window.startGravitySimulation === 'function') {
             window.startGravitySimulation({ speed: 9.0, saveOnComplete: true });
         }
+
+        // 3. Save design (User Requirement)
+        if (typeof window.autoSaveDesign === 'function') {
+            window.autoSaveDesign();
+        }
     }
 
     function handleSizeChange(e) {
@@ -233,6 +250,14 @@ function setupSliderEvents() {
 
         // Apply Scaling
         applyStringScale(percentage);
+
+        // 2. Live Fit (User Requirement)
+        if (typeof window.performBasicSmartFraming === 'function') {
+            const stringType = window.getCurrentStringType ? window.getCurrentStringType() : 'preset';
+            const mode = stringType === 'pen' ? 'pen-mode' : 'preset';
+            // We might want to throttle this if it's too heavy, but let's try direct first.
+            window.performBasicSmartFraming({ mode });
+        }
 
         // Update Gravity Path Live
         // IMPORTANT: This must be called AFTER applyStringScale so the path is updated

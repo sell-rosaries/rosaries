@@ -158,13 +158,21 @@ function performBasicSmartFraming(options = {}) {
     const designCenter = calculateCurrentDesignCenter();
     console.log('🎯 Current design center:', designCenter);
 
+    // Calculate scale multiplier from slider
+    const sliderPercentage = window.currentStringScale || 0;
+    const scaleMultiplier = 1 + (sliderPercentage / 100) * 2.0; // 1.0x to 3.0x
+
+    // Scale vertical offset to maintain relative framing
+    // If the object is 3x bigger, we need 3x the offset to keep it in the same visual spot relative to center
+    const scaledVerticalOffset = verticalOffset * scaleMultiplier;
+
     // STEP 3: Translate design geometry to center under camera view + vertical offset
     const translation = {
         x: cameraCenter.x - designCenter.x,
-        z: cameraCenter.z - designCenter.z + verticalOffset  // Add vertical offset
+        z: cameraCenter.z - designCenter.z + scaledVerticalOffset
     };
 
-    console.log('📐 Translation needed:', translation);
+    console.log('📐 Translation needed:', translation, `(Offset: ${verticalOffset} -> ${scaledVerticalOffset.toFixed(2)})`);
 
     if (translation.x !== 0 || translation.z !== 0) {
         translateDesignGeometry(translation);
@@ -180,37 +188,17 @@ function performBasicSmartFraming(options = {}) {
 
     const targetScreenCoverage = screenCoverage;
     const zoomRatio = targetScreenCoverage / maxScreenDim;
-    let optimalZoom = Math.min(Math.max(camera.zoom * zoomRatio * 2.0, 0.5), 5.0);
+
+    // FIX: Lowered min zoom from 0.5 to 0.1 to allow zooming out for large (100% scaled) designs.
+    // Previously, the 0.5 limit caused large designs to be clamped and appear "too big".
+    let optimalZoom = Math.min(Math.max(camera.zoom * zoomRatio * 2.0, 0.1), 5.0);
 
     // STEP 4.5: Compensate for slider scale
-    // Only compensate above 20% threshold
-    const sliderPercentage = window.currentStringScale || 0;
-    const compensationThreshold = 20;
+    // REMOVED: With the zoom clamp fixed (0.5 -> 0.1), the standard linear math works perfectly 
+    // for all shapes (Heart, Rosary, Circle, Pen). 
+    // The bounding box scales by X, so the zoom divides by X, resulting in identical visual size.
 
-    if (sliderPercentage > compensationThreshold) {
-        const scaleMultiplier = 1 + (sliderPercentage / 100) * 2.0;
-
-        let zoomAdjustment = 1.5; // Works for heart, circle, cross
-
-        if (options.mode === 'pen-mode') {
-            zoomAdjustment = 1.0; // Pen mode perfect
-        } else if (window.rosaryModeActive) {
-            // Rosary needs increasing adjustment as slider increases
-            // At 20%: 1.5 (less big), At 50%: 2.0 (perfect), At 100%: 2.5 (compensate for shrinking)
-            const minAdjustment = 1.5;
-            const maxAdjustment = 2.5;
-            const normalizedSlider = (sliderPercentage - 20) / 80; // 0 at 20%, 1 at 100%
-            zoomAdjustment = minAdjustment + (normalizedSlider * (maxAdjustment - minAdjustment));
-        }
-
-        optimalZoom = (optimalZoom / scaleMultiplier) * zoomAdjustment;
-
-        console.log('📏 TEST FIT: Compensated zoom:', optimalZoom.toFixed(2),
-            `(${window.rosaryModeActive ? 'rosary' : (options.mode || 'preset')}, ${sliderPercentage.toFixed(0)}%, adj: ${zoomAdjustment.toFixed(2)}x)`);
-    } else {
-        console.log('📏 TEST FIT: Natural zoom:', optimalZoom.toFixed(2), `(${sliderPercentage.toFixed(0)}% ≤ 20%)`);
-    }
-
+    console.log('📏 TEST FIT: Natural zoom:', optimalZoom.toFixed(2), `(slider: ${sliderPercentage.toFixed(0)}%)`);
 
     // STEP 5: Apply zoom adjustment
     camera.zoom = optimalZoom;

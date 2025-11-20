@@ -63,6 +63,13 @@ async function autoRestoreDesign() {
         window.rosaryModeActive = designData.rosaryModeActive || false;
         console.log('📏 Restored rosary mode flag:', window.rosaryModeActive);
 
+        // Clear existing beads before restoring to prevent duplication
+        // We must do this because we are about to push new beads to the array
+        if (typeof beads !== 'undefined') {
+            beads.forEach(bead => scene.remove(bead));
+            beads.length = 0;
+        }
+
         // Restore beads - wait for all to load
         const beadPromises = designData.beads.map(beadData => {
             return new Promise((resolve) => {
