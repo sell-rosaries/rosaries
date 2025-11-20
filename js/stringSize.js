@@ -91,7 +91,7 @@ function updateSliderUI(percentage) {
         sliderLiquid.style.height = percentage + '%';
         // Remove animation temporarily to prevent jumping
         sliderLiquid.style.transition = 'none';
-        setTimeout(() => sliderLiquid.style.transition = '', 50);
+        // setTimeout(() => sliderLiquid.style.transition = '', 50);
     }
     if (sliderLevel) sliderLevel.style.bottom = percentage + '%';
 }
@@ -109,8 +109,29 @@ function setupSliderEvents() {
         return;
     }
 
+    // Create red minimum limit line indicator
+    let minLimitLine = document.querySelector('.size-slider-min-limit');
+    if (!minLimitLine) {
+        minLimitLine = document.createElement('div');
+        minLimitLine.className = 'size-slider-min-limit';
+        minLimitLine.style.cssText = `
+            position: absolute;
+            left: -4px;
+            right: -4px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff3b5c 20%, #ff3b5c 80%, transparent);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease, bottom 0.15s ease;
+            z-index: 5;
+            box-shadow: 0 0 8px rgba(255, 59, 92, 0.6);
+        `;
+        sliderTube.appendChild(minLimitLine);
+    }
+
     let isDragging = false;
     let lastPercentage = window.currentStringScale || 0; // Track last percentage to determine drag direction
+    let currentMinPercentage = 0; // Track current minimum limit
 
     // Mouse events
     sliderTube.addEventListener('mousedown', startDragging);
@@ -277,7 +298,33 @@ function setupSliderEvents() {
                 totalBeadSpace += beadSize;
             });
 
-            // Calculate space utilization percentage
+            // Calculate what percentage would give exactly enough space
+            // totalBeadSpace / stringLength = 0.95 (95% utilization)
+            // stringLength = baseLength * testScale
+            // testScale = 1 + (percentage / 100) * 4
+            // Solve for minimum percentage
+            let baseLength = 0;
+            for (let i = 0; i < baseStringPoints.length - 1; i++) {
+                baseLength += baseStringPoints[i].distanceTo(baseStringPoints[i + 1]);
+            }
+
+            // totalBeadSpace / (baseLength * (1 + p/100 * 4)) = 0.95
+            // Solve for p: p = ((totalBeadSpace / (0.95 * baseLength)) - 1) / 4 * 100
+            const minScale = totalBeadSpace / (0.95 * baseLength);
+            const calculatedMinPercentage = Math.max(0, ((minScale - 1) / 4.0) * 100);
+
+            // Update current minimum for red line display
+            currentMinPercentage = calculatedMinPercentage;
+
+            // Update red limit line position and visibility
+            if (calculatedMinPercentage > 0 && beads.length > 0) {
+                minLimitLine.style.bottom = Math.min(calculatedMinPercentage, 100) + '%';
+                minLimitLine.style.opacity = '1';
+            } else {
+                minLimitLine.style.opacity = '0';
+            }
+
+            // Calculate space utilization percentage at current drag position
             const spaceUtilization = (totalBeadSpace / totalStringLength) * 100;
 
             // Allow decrease if beads use less than 95% of string length
@@ -289,6 +336,7 @@ function setupSliderEvents() {
                 beadSpace: totalBeadSpace.toFixed(2),
                 utilization: spaceUtilization.toFixed(1) + '%',
                 maxAllowed: maxUtilization + '%',
+                minPercentage: calculatedMinPercentage.toFixed(1) + '%',
                 testScale: testScale.toFixed(2),
                 percentage: percentage.toFixed(1) + '%'
             });
@@ -297,7 +345,7 @@ function setupSliderEvents() {
                 showToast("Too many beads, can't make it smaller!");
                 // Block decrease - stay at current size
                 percentage = lastPercentage;
-                console.log('� Space exceeded! Staying at', percentage.toFixed(2) + '%');
+                console.log('🔴 Space exceeded! Staying at', percentage.toFixed(2) + '%');
             } else {
                 console.log('✅ Space OK (', spaceUtilization.toFixed(1) + '%), allowing decrease to', percentage.toFixed(1) + '%');
             }
@@ -348,38 +396,61 @@ function setupSliderEvents() {
 
 let toastTimeout;
 function showToast(message) {
-    let toast = document.getElementById('slider-toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'slider-toast';
-        toast.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            z-index: 1000;
-            pointer-events: none;
-            font-family: var(--font-family, sans-serif);
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        `;
-        document.body.appendChild(toast);
+    // Remove any existing toast
+    const existingToast = document.querySelector('.slider-limit-toast');
+    if (existingToast) {
+        existingToast.remove();
     }
 
-    toast.textContent = message;
-    toast.style.opacity = '1';
+    const toast = document.createElement('div');
+    toast.className = 'slider-limit-toast';
+    toast.innerHTML = `
+        <div style="text-align: center;">
+            <div>Too many beads!</div>
+            <div style="font-size: 14px; opacity: 0.9;">Can't make it smaller</div>
+        </div>
+    `;
+    toast.style.cssText = `
+        position: fixed;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(34, 197, 94, 0.98);
+        color: white;
+        padding: var(--space-3) var(--space-6);
+        border-radius: var(--radius-md);
+        font-size: var(--font-size-body-sm);
+        font-weight: var(--font-weight-semibold);
+        z-index: 1000;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        animation: slider-limit-toast-slide 3s ease-in-out forwards;
+        max-width: 90vw;
+        text-align: center;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    `;
 
-    if (toastTimeout) clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-        toast.style.opacity = '0';
-    }, 2000);
+    // Add animation keyframes if not present
+    if (!document.querySelector('#slider-limit-toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'slider-limit-toast-styles';
+        style.textContent = `
+            @keyframes slider-limit-toast-slide {
+                0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                20%, 80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }
 
 let percentageIndicator;
