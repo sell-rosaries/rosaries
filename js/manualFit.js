@@ -217,9 +217,9 @@ function setupFitButtonEvents() {
                     if (window.gravityState) window.gravityState.active = false;
 
                     // Scale gravity speed based on slider position
-                    // 0% = 9.0 (base speed), 100% = 31.5 (9.0 * 3.5)
+                    // 0% = 9.0 (base speed), 100% = 45.0 (9.0 * 5.0)
                     const sliderPercentage = window.currentStringScale || 0;
-                    const speedMultiplier = 1 + (sliderPercentage / 100) * 2.5; // 1.0x to 3.5x
+                    const speedMultiplier = 1 + (sliderPercentage / 100) * 4.0; // 1.0x to 5.0x
                     const gravitySpeed = 9.0 * speedMultiplier;
 
                     console.log(`⚡ *** FIT GRAVITY SPEED: ${gravitySpeed.toFixed(1)} *** (slider: ${sliderPercentage.toFixed(0)}%, multiplier: ${speedMultiplier.toFixed(2)}x)`);

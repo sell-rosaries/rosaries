@@ -160,7 +160,7 @@ function performBasicSmartFraming(options = {}) {
 
     // Calculate scale multiplier from slider
     const sliderPercentage = window.currentStringScale || 0;
-    const scaleMultiplier = 1 + (sliderPercentage / 100) * 2.0; // 1.0x to 3.0x
+    const scaleMultiplier = 1 + (sliderPercentage / 100) * 4.0; // 1.0x to 5.0x
 
     // Scale vertical offset to maintain relative framing
     // If the object is 3x bigger, we need 3x the offset to keep it in the same visual spot relative to center

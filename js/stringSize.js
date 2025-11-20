@@ -60,8 +60,8 @@ window.restoreSliderState = function (savedPercentage) {
     window.currentStringScale = savedPercentage;
 
     // 1. Calculate the scale factor that was applied
-    // Scale = 1 + (p/100)*2
-    const appliedScale = 1 + (savedPercentage / 100) * 2.0;
+    // Scale = 1 + (p/100)*4
+    const appliedScale = 1 + (savedPercentage / 100) * 4.0;
 
     // 2. Reverse-engineer the base points
     // current = center + (base - center) * scale
@@ -128,9 +128,9 @@ function setupSliderEvents() {
         // 1. Load saved design (User Requirement)
         // We do this first to ensure we are working on the correct state
         if (typeof window.autoRestoreDesign === 'function') {
-             // Note: This might be jarring if it takes time, but it's requested.
-             // We await it to ensure base points are correct before scaling.
-             await window.autoRestoreDesign();
+            // Note: This might be jarring if it takes time, but it's requested.
+            // We await it to ensure base points are correct before scaling.
+            await window.autoRestoreDesign();
         }
 
         // DO NOT reset base here. 
@@ -138,7 +138,7 @@ function setupSliderEvents() {
         // the scale accumulates (compound interest) -> infinite growth.
         // We only want to reset base when the SHAPE changes (new string/import),
         // not when we are just resizing the existing shape.
-        
+
         // However, if we just loaded the design, restoreSliderState should have set the correct base.
         // If we didn't load, we assume the current base is valid.
 
@@ -226,8 +226,8 @@ function setupSliderEvents() {
 
         // Calculate minimum allowed percentage based on beads
         const minScale = calculateMinScale();
-        // scale = 1 + (p/100)*2  =>  p = (scale - 1)/2 * 100
-        const minPercentage = Math.max(0, (minScale - 1) / 2.0 * 100);
+        // scale = 1 + (p/100)*4  =>  p = (scale - 1)/4 * 100
+        const minPercentage = Math.max(0, (minScale - 1) / 4.0 * 100);
 
         // Check if we are hitting the limit (trying to go smaller than allowed)
         // Add a small buffer (0.5%) to avoid flickering at the boundary
@@ -347,8 +347,8 @@ function hidePercentage() {
  * @param {number} percentage - 0 to 100
  */
 function applyStringScale(percentage) {
-    // Scale Factor: 0% -> 1.0x, 100% -> 3.0x (200% increase)
-    const scale = 1 + (percentage / 100) * 2.0;
+    // Scale Factor: 0% -> 1.0x, 100% -> 5.0x (400% increase)
+    const scale = 1 + (percentage / 100) * 4.0;
 
     // Calculate centroid of base string
     const center = new THREE.Vector3();
