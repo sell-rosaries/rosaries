@@ -140,7 +140,11 @@ function checkBeadCollision(newBead, ignoreBeads = []) {
         }
         
         // 4. Narrowphase: SAT (Separating Axis Theorem)
-        if (checkRotatedRectCollision(x1, z1, w1, h1, rot1, x2, z2, w2, h2, rot2)) {
+        // Calculate corners based on STRING TANGENT, not visual rotation
+        const corners1 = getBeadCorners(newBead);
+        const corners2 = getBeadCorners(existingBead);
+
+        if (checkPolygonCollision(corners1, corners2)) {
             return true;
         }
     }
@@ -148,52 +152,112 @@ function checkBeadCollision(newBead, ignoreBeads = []) {
 }
 
 /**
- * Checks collision between two rotated rectangles using Separating Axis Theorem (SAT).
+ * Calculates the 4 corners of a bead based on string alignment
+ * Handles 'Tube' beads (Height > Width) by aligning Height with string
  */
-function checkRotatedRectCollision(x1, z1, w1, h1, rot1, x2, z2, w2, h2, rot2) {
-    const corners1 = getRotatedRectCorners(x1, z1, w1, h1, rot1);
-    const corners2 = getRotatedRectCorners(x2, z2, w2, h2, rot2);
+function getBeadCorners(bead) {
+    // 1. Get dimensions
+    const w = bead.scale.x;
+    const h = bead.scale.y;
+
+    // Determine physical orientation
+    // If Tube (h > w), Length is along string. Width is perpendicular.
+    let length = w;
+    let width = h;
     
-    const axes = [
-        { x: Math.cos(rot1), y: Math.sin(rot1) },
-        { x: -Math.sin(rot1), y: Math.cos(rot1) },
-        { x: Math.cos(rot2), y: Math.sin(rot2) },
-        { x: -Math.sin(rot2), y: Math.cos(rot2) }
+    if (h > w) {
+        length = h;
+        width = w;
+    }
+
+    // 2. Get Tangent Vector from String
+    let tangent = { x: 1, y: 0 }; // Default Horizontal
+
+    if (typeof stringPoints !== 'undefined' && bead.userData && bead.userData.segmentIndex !== undefined) {
+        const idx = bead.userData.segmentIndex;
+        if (idx >= 0 && idx < stringPoints.length - 1) {
+            const p1 = stringPoints[idx];
+            const p2 = stringPoints[idx + 1];
+            const dx = p2.x - p1.x;
+            const dz = p2.z - p1.z;
+            const len = Math.sqrt(dx * dx + dz * dz);
+            if (len > 0.0001) {
+                tangent = { x: dx / len, y: dz / len };
+            }
+        }
+    }
+
+    // 3. Calculate Normal (Perpendicular to Tangent in 2D)
+    // (x, y) -> (-y, x) is 90 deg rotation
+    const normal = { x: -tangent.y, y: tangent.x };
+
+    // 4. Calculate Corners
+    const px = bead.position.x;
+    const pz = bead.position.z;
+    const halfL = length / 2;
+    const halfW = width / 2;
+
+    // Corner = Pos + Tangent*L_offset + Normal*W_offset
+    return [
+        {
+            x: px + tangent.x * halfL + normal.x * halfW,
+            y: pz + tangent.y * halfL + normal.y * halfW
+        },
+        {
+            x: px + tangent.x * halfL - normal.x * halfW,
+            y: pz + tangent.y * halfL - normal.y * halfW
+        },
+        {
+            x: px - tangent.x * halfL - normal.x * halfW,
+            y: pz - tangent.y * halfL - normal.y * halfW
+        },
+        {
+            x: px - tangent.x * halfL + normal.x * halfW,
+            y: pz - tangent.y * halfL + normal.y * halfW
+        }
     ];
+}
+
+/**
+ * Checks collision between two polygons using Separating Axis Theorem (SAT).
+ * Accepts arrays of corner points {x, y}.
+ */
+function checkPolygonCollision(corners1, corners2) {
+    // Helper to get axes from corners (normals of edges)
+    const getAxes = (corners) => {
+        const axes = [];
+        for (let i = 0; i < corners.length; i++) {
+            const p1 = corners[i];
+            const p2 = corners[(i + 1) % corners.length];
+            const edge = { x: p1.x - p2.x, y: p1.y - p2.y };
+            const normal = { x: -edge.y, y: edge.x };
+            
+            // Normalize (optional for SAT but good for stability)
+            const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y);
+            if (len > 0.00001) {
+                axes.push({ x: normal.x / len, y: normal.y / len });
+            }
+        }
+        return axes;
+    };
+
+    const axes1 = getAxes(corners1);
+    const axes2 = getAxes(corners2);
+    const axes = [...axes1, ...axes2];
     
     for (const axis of axes) {
         const proj1 = projectOntoAxis(corners1, axis);
         const proj2 = projectOntoAxis(corners2, axis);
         
         if (proj1.max < proj2.min || proj2.max < proj1.min) {
-            return false;
+            return false; // Separating axis found
         }
     }
     
     return true;
 }
 
-/**
- * Gets the 4 corners of a rotated rectangle.
- */
-function getRotatedRectCorners(x, z, width, height, rotation) {
-    const halfW = width / 2;
-    const halfH = height / 2;
-    const cos = Math.cos(rotation);
-    const sin = Math.sin(rotation);
-    
-    const localCorners = [
-        { x: -halfW, y: -halfH },
-        { x: halfW, y: -halfH },
-        { x: halfW, y: halfH },
-        { x: -halfW, y: halfH }
-    ];
-    
-    return localCorners.map(corner => ({
-        x: x + (corner.x * cos - corner.y * sin),
-        y: z + (corner.x * sin + corner.y * cos)
-    }));
-}
+// Removed getRotatedRectCorners in favor of getBeadCorners
 
 /**
  * Projects corners onto an axis and returns min/max values.

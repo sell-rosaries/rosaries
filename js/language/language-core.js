@@ -28,7 +28,11 @@ const translations = {
         'reset-all-confirm-message-1': 'This will delete all beads and string.',
         'reset-all-confirm-message-2': 'This action cannot be undone.',
         'confirm-reset': 'Reset All',
-        'cancel': 'Cancel'
+        'cancel': 'Cancel',
+        
+        // Slider Limit Toast
+        'slider-limit-toast-title': 'Too many beads!',
+        'slider-limit-toast-message': "Can't make it smaller"
     },
     ar: {
         // Header
@@ -53,7 +57,11 @@ const translations = {
         'reset-all-confirm-message-1': 'سيتم حذف جميع الخرزات والخيط.',
         'reset-all-confirm-message-2': 'لا يمكن التراجع عن هذا الإجراء.',
         'confirm-reset': 'إعادة تعيين الكل',
-        'cancel': 'إلغاء'
+        'cancel': 'إلغاء',
+
+        // Slider Limit Toast
+        'slider-limit-toast-title': 'عدد الخرز كبير!',
+        'slider-limit-toast-message': 'لا يمكن تقليل الحجم'
     }
 };
 

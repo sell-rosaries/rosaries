@@ -395,19 +395,30 @@ function setupSliderEvents() {
 }
 
 let toastTimeout;
+let lastToastTime = 0;
+
 function showToast(message) {
+    const now = Date.now();
+    if (now - lastToastTime < 3000) {
+        return;
+    }
+    lastToastTime = now;
+
     // Remove any existing toast
     const existingToast = document.querySelector('.slider-limit-toast');
     if (existingToast) {
         existingToast.remove();
     }
 
+    const title = window.getTranslation ? window.getTranslation('slider-limit-toast-title') : 'Too many beads!';
+    const subtext = window.getTranslation ? window.getTranslation('slider-limit-toast-message') : "Can't make it smaller";
+
     const toast = document.createElement('div');
     toast.className = 'slider-limit-toast';
     toast.innerHTML = `
         <div style="text-align: center;">
-            <div>Too many beads!</div>
-            <div style="font-size: 14px; opacity: 0.9;">Can't make it smaller</div>
+            <div>${title}</div>
+            <div style="font-size: 14px; opacity: 0.9;">${subtext}</div>
         </div>
     `;
     toast.style.cssText = `

@@ -593,64 +593,79 @@ function validatePosition(bead, dist, sortedBeads, myIndex) {
     const w1 = bead.mesh.scale.x;
     const h1 = bead.mesh.scale.y;
 
-    // --- Two-Point Rotation Calculation (Same as updateBeadVisuals) ---
-    const lookAhead = Math.max(w1, h1) * 0.4;
-    const posFront = getPathPos(path, dist + lookAhead);
-    const posBack = getPathPos(path, dist - lookAhead);
-
-    const dx = posFront.x - posBack.x;
-    const dz = posFront.z - posBack.z;
-
-    // "Head Up" Logic
-    let rawAngle = -Math.atan2(dz, dx);
-    let a1 = rawAngle;
-    let a2 = rawAngle + Math.PI;
-
-    let checkA1 = a1;
-    let checkA2 = a2;
+    // GENERATE HYPOTHETICAL CORNERS FOR BEAD 1
+    // Based on path tangent at 'dist'
+    let length1 = w1;
+    let width1 = h1;
     if (h1 > w1) {
-        checkA1 -= Math.PI / 2;
-        checkA2 -= Math.PI / 2;
+        length1 = h1;
+        width1 = w1;
     }
 
-    const norm = (a) => {
-        a = a % (2 * Math.PI);
-        if (a > Math.PI) a -= 2 * Math.PI;
-        if (a < -Math.PI) a += 2 * Math.PI;
-        return a;
-    };
+    // Tangent is already in state
+    const tangent1 = { x: state.tangent.x, y: state.tangent.z };
+    const normal1 = { x: -tangent1.y, y: tangent1.x };
+    
+    const px1 = state.position.x;
+    const pz1 = state.position.z;
+    const halfL1 = length1 / 2;
+    const halfW1 = width1 / 2;
 
-    const dist1 = Math.abs(norm(checkA1));
-    const dist2 = Math.abs(norm(checkA2));
-
-    let rot1 = (dist1 < dist2) ? a1 : a2;
-
-    if (h1 > w1) {
-        rot1 -= Math.PI / 2;
-    }
-    // ----------------------------------------------------------------
-
-    // Calculate center position (already have it from state.position, but let's be consistent)
-    const x1 = state.position.x;
-    const z1 = state.position.z;
+    const corners1 = [
+        { x: px1 + tangent1.x * halfL1 + normal1.x * halfW1, y: pz1 + tangent1.y * halfL1 + normal1.y * halfW1 },
+        { x: px1 + tangent1.x * halfL1 - normal1.x * halfW1, y: pz1 + tangent1.y * halfL1 - normal1.y * halfW1 },
+        { x: px1 - tangent1.x * halfL1 - normal1.x * halfW1, y: pz1 - tangent1.y * halfL1 - normal1.y * halfW1 },
+        { x: px1 - tangent1.x * halfL1 + normal1.x * halfW1, y: pz1 - tangent1.y * halfL1 + normal1.y * halfW1 }
+    ];
 
     // Check against all closer beads
     for (let j = 0; j < myIndex; j++) {
         const other = sortedBeads[j];
 
-        const x2 = other.mesh.position.x;
-        const z2 = other.mesh.position.z;
-        const w2 = other.mesh.scale.x;
-        const h2 = other.mesh.scale.y;
-        const rot2 = other.mesh.material.rotation || 0;
+        // Get corners for the EXISTING bead
+        // We can use the helper from beads.js if available, or recalculate
+        // Since other bead is stationary on string, we can use getBeadCorners(other.mesh)
+        // Ensure getBeadCorners is available (global)
+        let corners2;
+        if (typeof getBeadCorners === 'function') {
+            corners2 = getBeadCorners(other.mesh);
+        } else {
+            // Fallback: Recalculate manually if helper not found
+            // This duplicates logic but ensures safety
+            const w2 = other.mesh.scale.x;
+            const h2 = other.mesh.scale.y;
+            let length2 = w2;
+            let width2 = h2;
+            if (h2 > w2) { length2 = h2; width2 = w2; }
+
+            // Need tangent for other bead. It's at other.distance
+            const otherState = getPathState(path, other.distance);
+            const t2 = { x: otherState.tangent.x, y: otherState.tangent.z };
+            const n2 = { x: -t2.y, y: t2.x };
+            const px2 = otherState.position.x;
+            const pz2 = otherState.position.z;
+            const hl2 = length2 / 2;
+            const hw2 = width2 / 2;
+
+            corners2 = [
+                { x: px2 + t2.x * hl2 + n2.x * hw2, y: pz2 + t2.y * hl2 + n2.y * hw2 },
+                { x: px2 + t2.x * hl2 - n2.x * hw2, y: pz2 + t2.y * hl2 - n2.y * hw2 },
+                { x: px2 - t2.x * hl2 - n2.x * hw2, y: pz2 - t2.y * hl2 - n2.y * hw2 },
+                { x: px2 - t2.x * hl2 + n2.x * hw2, y: pz2 - t2.y * hl2 + n2.y * hw2 }
+            ];
+        }
 
         // Distance squared
-        const dx = x1 - x2;
-        const dz = z1 - z2;
+        const x2 = other.mesh.position.x;
+        const z2 = other.mesh.position.z;
+        const dx = px1 - x2;
+        const dz = pz1 - z2;
         const distSq = dx * dx + dz * dz;
 
         // 1. Hard Inner Core Check (Failsafe)
         const r1Min = Math.min(w1, h1) / 2;
+        const w2 = other.mesh.scale.x;
+        const h2 = other.mesh.scale.y;
         const r2Min = Math.min(w2, h2) / 2;
         const minSepSq = (r1Min + r2Min) * (r1Min + r2Min);
 
@@ -674,8 +689,10 @@ function validatePosition(bead, dist, sortedBeads, myIndex) {
             }
         } else {
             // Use global SAT function for complex shapes
-            if (checkRotatedRectCollision(x1, z1, w1, h1, rot1, x2, z2, w2, h2, rot2)) {
-                return false; // Collision detected
+            if (typeof checkPolygonCollision === 'function') {
+                if (checkPolygonCollision(corners1, corners2)) {
+                    return false; // Collision detected
+                }
             }
         }
     }
