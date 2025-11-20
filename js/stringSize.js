@@ -110,6 +110,7 @@ function setupSliderEvents() {
     }
 
     let isDragging = false;
+    let lastPercentage = window.currentStringScale || 0; // Track last percentage to determine drag direction
 
     // Mouse events
     sliderTube.addEventListener('mousedown', startDragging);
@@ -124,6 +125,9 @@ function setupSliderEvents() {
     async function startDragging(e) {
         e.preventDefault();
         isDragging = true;
+
+        // Initialize last percentage to current value
+        lastPercentage = window.currentStringScale || 0;
 
         // 1. Load saved design (User Requirement)
         // We do this first to ensure we are working on the correct state
@@ -224,19 +228,69 @@ function setupSliderEvents() {
             ((rect.bottom - clientY) / rect.height) * 100
         ));
 
-        // Calculate minimum allowed percentage based on beads
-        const minScale = calculateMinScale();
-        // scale = 1 + (p/100)*4  =>  p = (scale - 1)/4 * 100
-        const minPercentage = Math.max(0, (minScale - 1) / 4.0 * 100);
+        // Determine drag direction
+        const isDecreasing = percentage < lastPercentage;
 
-        // Check if we are hitting the limit (trying to go smaller than allowed)
-        // Add a small buffer (0.5%) to avoid flickering at the boundary
-        if (percentage < minPercentage - 0.5) {
-            showToast("Too many beads, can't make it smaller!");
+        // Only check space constraints when DECREASING size
+        if (isDecreasing && beads && beads.length > 0) {
+            // Calculate test scale
+            const testScale = 1 + (percentage / 100) * 4.0;
+
+            // Calculate total string length at target scale
+            const center = new THREE.Vector3();
+            baseStringPoints.forEach(p => center.add(p));
+            center.divideScalar(baseStringPoints.length);
+
+            let totalStringLength = 0;
+            for (let i = 0; i < baseStringPoints.length - 1; i++) {
+                const p1 = baseStringPoints[i];
+                const p2 = baseStringPoints[i + 1];
+                const dist = p1.distanceTo(p2);
+                totalStringLength += dist * testScale;
+            }
+
+            // Calculate total space needed by beads
+            // Use the larger dimension (width or height) as the "占用空间" for each bead
+            let totalBeadSpace = 0;
+            beads.forEach(bead => {
+                const beadSize = Math.max(bead.scale.x, bead.scale.y);
+                totalBeadSpace += beadSize;
+            });
+
+            // Calculate space utilization percentage
+            const spaceUtilization = (totalBeadSpace / totalStringLength) * 100;
+
+            // Allow decrease if beads use less than 95% of string length
+            // This 5% buffer accounts for spacing between beads
+            const maxUtilization = 95;
+
+            console.log('🔍 Space check:', {
+                stringLength: totalStringLength.toFixed(2),
+                beadSpace: totalBeadSpace.toFixed(2),
+                utilization: spaceUtilization.toFixed(1) + '%',
+                maxAllowed: maxUtilization + '%',
+                testScale: testScale.toFixed(2),
+                percentage: percentage.toFixed(1) + '%'
+            });
+
+            if (spaceUtilization > maxUtilization) {
+                showToast("Too many beads, can't make it smaller!");
+                // Block decrease - stay at current size
+                percentage = lastPercentage;
+                console.log('� Space exceeded! Staying at', percentage.toFixed(2) + '%');
+            } else {
+                console.log('✅ Space OK (', spaceUtilization.toFixed(1) + '%), allowing decrease to', percentage.toFixed(1) + '%');
+            }
+        } else if (!isDecreasing) {
+            // When increasing, allow any value up to 100%
+            console.log('🔍 Slider Debug (INCREASING):', {
+                draggedPercentage: percentage.toFixed(2),
+                lastPercentage: lastPercentage.toFixed(2)
+            });
         }
 
-        // Clamp percentage
-        percentage = Math.max(percentage, minPercentage);
+        // Update last percentage for next comparison
+        lastPercentage = percentage;
 
         // Update Global State
         window.currentStringScale = percentage;
@@ -406,22 +460,25 @@ function updateBeadPositions() {
 
 /**
  * Calculates the minimum scale factor required to fit all beads without overlapping.
- * Uses the baseStringPoints as the reference (scale 1.0).
+ * Now calculates based on CURRENT string configuration and current scale.
  */
 function calculateMinScale() {
     if (!beads || beads.length < 2 || baseStringPoints.length < 2) return 1.0;
 
-    // Helper to get distance along base string
+    // Get the current scale from the global state
+    const currentScale = 1 + (window.currentStringScale / 100) * 4.0;
+
+    // Helper to get distance along CURRENT string
     const getDist = (segIdx, t) => {
         let d = 0;
         for (let i = 0; i < segIdx; i++) {
-            d += baseStringPoints[i].distanceTo(baseStringPoints[i + 1]);
+            d += stringPoints[i].distanceTo(stringPoints[i + 1]);
         }
-        d += baseStringPoints[segIdx].distanceTo(baseStringPoints[segIdx + 1]) * t;
+        d += stringPoints[segIdx].distanceTo(stringPoints[segIdx + 1]) * t;
         return d;
     };
 
-    // Collect bead positions along base string
+    // Collect bead positions along CURRENT string
     const beadPositions = beads.map(bead => {
         const dist = getDist(bead.userData.segmentIndex, bead.userData.t);
         // Use max dimension as diameter approximation (safe bound)
@@ -433,39 +490,62 @@ function calculateMinScale() {
     // Sort by distance along string
     beadPositions.sort((a, b) => a.dist - b.dist);
 
-    let maxRequiredScale = 1.0;
+    let maxRequiredRatio = 1.0;
+    let criticalPair = null;
 
     // Check adjacent pairs
     for (let i = 0; i < beadPositions.length - 1; i++) {
         const b1 = beadPositions[i];
         const b2 = beadPositions[i + 1];
-        const deltaBase = b2.dist - b1.dist;
+        const deltaCurrent = b2.dist - b1.dist;
         const requiredSep = b1.radius + b2.radius;
 
-        if (deltaBase > 0.0001) {
-            maxRequiredScale = Math.max(maxRequiredScale, requiredSep / deltaBase);
+        if (deltaCurrent > 0.0001) {
+            // If current separation is less than required, we need to scale up
+            const requiredRatio = requiredSep / deltaCurrent;
+            if (requiredRatio > maxRequiredRatio) {
+                maxRequiredRatio = requiredRatio;
+                criticalPair = { pair: `${i} to ${i + 1}`, deltaCurrent, requiredSep, requiredRatio };
+            }
         }
     }
 
     // Check loop closure (Last to First)
-    const isClosed = baseStringPoints[0].distanceTo(baseStringPoints[baseStringPoints.length - 1]) < 0.1;
+    const isClosed = stringPoints[0].distanceTo(stringPoints[stringPoints.length - 1]) < 0.1;
     if (isClosed && beadPositions.length > 1) {
         const first = beadPositions[0];
         const last = beadPositions[beadPositions.length - 1];
 
-        // Calculate total length of base string
+        // Calculate total length of CURRENT string
         let totalLen = 0;
-        for (let i = 0; i < baseStringPoints.length - 1; i++) {
-            totalLen += baseStringPoints[i].distanceTo(baseStringPoints[i + 1]);
+        for (let i = 0; i < stringPoints.length - 1; i++) {
+            totalLen += stringPoints[i].distanceTo(stringPoints[i + 1]);
         }
 
-        const deltaBase = (totalLen - last.dist) + first.dist;
+        const deltaCurrent = (totalLen - last.dist) + first.dist;
         const requiredSep = last.radius + first.radius;
 
-        if (deltaBase > 0.0001) {
-            maxRequiredScale = Math.max(maxRequiredScale, requiredSep / deltaBase);
+        if (deltaCurrent > 0.0001) {
+            const requiredRatio = requiredSep / deltaCurrent;
+            if (requiredRatio > maxRequiredRatio) {
+                maxRequiredRatio = requiredRatio;
+                criticalPair = { pair: 'loop closure', deltaCurrent, requiredSep, requiredRatio };
+            }
         }
     }
 
-    return maxRequiredScale;
+    // The minimum scale is current scale * ratio
+    // e.g., if we're at 2.0x and need 1.5x more space, minimum is 3.0x
+    const minScale = currentScale * maxRequiredRatio;
+
+    if (criticalPair && maxRequiredRatio > 1.1) {
+        console.log('🔴 Critical constraint:', {
+            ...criticalPair,
+            currentScale: currentScale.toFixed(3),
+            requiredRatio: maxRequiredRatio.toFixed(3),
+            minScale: minScale.toFixed(3)
+        });
+    }
+
+    return minScale;
 }
