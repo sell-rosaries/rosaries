@@ -5,8 +5,10 @@
 
 /**
  * Finds the closest point on the string to a given position.
+ * @param {THREE.Vector3} clickPoint - The point to check against
+ * @param {number} maxDistance - Maximum distance to consider (default: 0.5)
  */
-function findClosestPointOnString(clickPoint) {
+function findClosestPointOnString(clickPoint, maxDistance = 0.5) {
     if (stringPoints.length < 2) return null;
 
     let closestPoint = null;
@@ -14,25 +16,23 @@ function findClosestPointOnString(clickPoint) {
     let closestSegmentIndex = -1;
     let closestT = 0;
 
-    const snapDistance = 0.5;
-
     for (let i = 0; i < stringPoints.length - 1; i++) {
         const p1 = stringPoints[i];
         const p2 = stringPoints[i + 1];
-        
+
         const segmentVec = new THREE.Vector3().subVectors(p2, p1);
         const pointVec = new THREE.Vector3().subVectors(clickPoint, p1);
-        
+
         const segmentLength = segmentVec.length();
         const t = Math.max(0, Math.min(1, pointVec.dot(segmentVec) / (segmentLength * segmentLength)));
-        
+
         const closestOnSegment = new THREE.Vector3().addVectors(
             p1,
             segmentVec.clone().multiplyScalar(t)
         );
-        
+
         const distance = clickPoint.distanceTo(closestOnSegment);
-        
+
         if (distance < closestDistance) {
             closestDistance = distance;
             closestPoint = closestOnSegment;
@@ -41,7 +41,7 @@ function findClosestPointOnString(clickPoint) {
         }
     }
 
-    if (closestDistance > snapDistance) return null;
+    if (closestDistance > maxDistance) return null;
 
     const p1 = stringPoints[closestSegmentIndex];
     const p2 = stringPoints[closestSegmentIndex + 1];
@@ -71,7 +71,7 @@ function updateStringLine() {
         stringLine = new THREE.Line(geometry, material);
         stringLine.position.y = 0.05;
         scene.add(stringLine);
-        
+
         // Trigger string type update if we have pen drawing
         if (typeof updateStringType === 'function') {
             updateStringType();

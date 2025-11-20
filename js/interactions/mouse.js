@@ -43,27 +43,27 @@ function onCanvasMouseDown(event) {
     if (isStringMode) {
         // String drawing mode
         isDrawingString = true;
-        
+
         const intersects = raycaster.intersectObject(plane);
         if (intersects.length > 0) {
             const clickPoint = intersects[0].point.clone();
-            
+
             if (stringPoints.length >= 2) {
                 const startPoint = stringPoints[0];
                 const endPoint = stringPoints[stringPoints.length - 1];
                 const snapDistance = 2.0;
-                
+
                 const distanceToStart = clickPoint.distanceTo(startPoint);
                 const distanceToEnd = clickPoint.distanceTo(endPoint);
-                
+
                 if (distanceToStart < distanceToEnd && distanceToStart < snapDistance) {
                     stringPoints.reverse();
                     updateStringLine();
                 }
             }
-            
+
             stringPoints.push(clickPoint);
-            
+
             // Track that pen drawing has started AFTER adding the point
             if (typeof hasPenDrawing !== 'undefined') {
                 hasPenDrawing = true;
@@ -76,7 +76,7 @@ function onCanvasMouseDown(event) {
     } else if (selectedObjectId && selectedSize) {
         // Placement mode - but check if clicking on existing bead first
         const beadIntersects = raycaster.intersectObjects(beads);
-        
+
         if (beadIntersects.length > 0) {
             // Clicked on existing bead - auto-switch to select mode
             isSelectMode = true;
@@ -93,7 +93,7 @@ function onCanvasMouseDown(event) {
             if (planeIntersects.length > 0) {
                 const clickPoint = planeIntersects[0].point;
                 const stringInfo = findClosestPointOnString(clickPoint);
-                
+
                 if (stringInfo) {
                     // Near string - place bead
                     placeBead();
@@ -112,7 +112,7 @@ function onCanvasMouseDown(event) {
         // Default: select/pan mode
         isSelectMode = true;
         controls.enabled = true;
-        
+
         const intersects = raycaster.intersectObjects(beads);
         if (intersects.length > 0) {
             draggedBead = intersects[0].object;
@@ -132,7 +132,7 @@ function onCanvasMouseMove(event) {
     if (!isDragging && !isDrawingString) return;
 
     const coords = getNormalizedCoords(event);
-    
+
     if (mouseDownPosition && isDragging) {
         const dx = coords.x - mouseDownPosition.x;
         const dy = coords.y - mouseDownPosition.y;
@@ -154,90 +154,82 @@ function onCanvasMouseMove(event) {
             updateStringLine();
         }
     } else if (isDragging && draggedBead) {
-        const stringInfo = findClosestPointOnString(intersectPoint);
-        if (stringInfo) {
-            draggedBead.position.copy(stringInfo.position);
+        // SMART DRAG (Walker Algorithm + Ghost Mode)
+
+        // 1. Ensure we have path data
+        if (!currentPathData) {
+            currentPathData = calculatePathDataLocal();
+        }
+
+        if (currentPathData) {
+            // 2. Find where the bead currently is on the path
+            // We use the bead's CURRENT position as the starting point for the search
+            // This ensures we "walk" from where we are, preventing teleports
+            const currentDist = projectBeadToPathLocal(draggedBead.position, currentPathData);
+
+            // 3. Solve for the new best position using local search (Hill Climbing)
+            // This finds the point on the string closest to the mouse, but by walking along the string
+            const newDist = solveClosestPointOnPathLocal(intersectPoint, currentDist, currentPathData);
+
+            // 4. Update Bead Position
+            const newPos = getPathPosLocal(currentPathData, newDist);
+            draggedBead.position.copy(newPos);
             draggedBead.position.y = 0.1;
-            
-            // SMART ROTATION (Manual Drag - Exact Path Match)
-            // Lazily generate path data if missing
-            if (!currentPathData) {
-                currentPathData = calculatePathDataLocal();
-            }
-            
-            let newAngle = 0;
-            let rotationCalculated = false;
-            
-            if (currentPathData) {
-                const w = draggedBead.scale.x;
-                const h = draggedBead.scale.y;
-                const lookAhead = Math.max(w, h) * 0.4;
-                
-                // 1. Find where we are on the path (Project position to path distance)
-                const dist = projectBeadToPathLocal(draggedBead.position, currentPathData);
-                
-                // 2. Sample ahead/behind
-                const posFront = getPathPosLocal(currentPathData, dist + lookAhead);
-                const posBack = getPathPosLocal(currentPathData, dist - lookAhead);
-                
-                const rdx = posFront.x - posBack.x;
-                const rdz = posFront.z - posBack.z;
-                
-                // 3. Calc Angle
-                // Use "Head Up" Logic: Closest to Rotation 0 (World Up)
-                if (rdx*rdx + rdz*rdz > 0.000001) {
-                    let rawAngle = -Math.atan2(rdz, rdx);
-                    
-                    // Two possible orientations (180 apart)
-                    let a1 = rawAngle;
-                    let a2 = rawAngle + Math.PI;
-                    
-                    // Apply Tube Fix temp to find actual visual rotation
-                    let checkA1 = a1;
-                    let checkA2 = a2;
-                    if (h > w) {
-                         checkA1 -= Math.PI / 2;
-                         checkA2 -= Math.PI / 2;
-                    }
-                    
-                    // Normalize angles to -PI..PI
-                    const norm = (a) => {
-                        a = a % (2 * Math.PI);
-                        if (a > Math.PI) a -= 2 * Math.PI;
-                        if (a < -Math.PI) a += 2 * Math.PI;
-                        return a;
-                    };
-                    
-                    // Check distance to 0 (Up)
-                    // We want the rotation that keeps the bead most "Upright"
-                    const dist1 = Math.abs(norm(checkA1));
-                    const dist2 = Math.abs(norm(checkA2));
-                    
-                    // Pick the one closer to 0
-                    let finalAngle = (dist1 < dist2) ? a1 : a2;
-                    
-                    // Apply Tube Fix permanently
-                    if (h > w) {
-                        finalAngle -= Math.PI / 2;
-                    }
-                    
-                    draggedBead.material.rotation = finalAngle;
-                    // Sync userData for UI consistency
-                    draggedBead.userData.rotation = Math.round((finalAngle * 180) / Math.PI) % 360;
+
+            // 5. Update Rotation (Existing Logic)
+            const w = draggedBead.scale.x;
+            const h = draggedBead.scale.y;
+            const lookAhead = Math.max(w, h) * 0.4;
+
+            const posFront = getPathPosLocal(currentPathData, newDist + lookAhead);
+            const posBack = getPathPosLocal(currentPathData, newDist - lookAhead);
+
+            const rdx = posFront.x - posBack.x;
+            const rdz = posFront.z - posBack.z;
+
+            if (rdx * rdx + rdz * rdz > 0.000001) {
+                let rawAngle = -Math.atan2(rdz, rdx);
+                let a1 = rawAngle;
+                let a2 = rawAngle + Math.PI;
+
+                let checkA1 = a1;
+                let checkA2 = a2;
+                if (h > w) {
+                    checkA1 -= Math.PI / 2;
+                    checkA2 -= Math.PI / 2;
                 }
+
+                const norm = (a) => {
+                    a = a % (2 * Math.PI);
+                    if (a > Math.PI) a -= 2 * Math.PI;
+                    if (a < -Math.PI) a += 2 * Math.PI;
+                    return a;
+                };
+
+                const dist1 = Math.abs(norm(checkA1));
+                const dist2 = Math.abs(norm(checkA2));
+
+                let finalAngle = (dist1 < dist2) ? a1 : a2;
+
+                if (h > w) {
+                    finalAngle -= Math.PI / 2;
+                }
+
+                draggedBead.material.rotation = finalAngle;
+                draggedBead.userData.rotation = Math.round((finalAngle * 180) / Math.PI) % 360;
             }
-            
-            if (checkBeadCollision(draggedBead, [draggedBead])) {
-                draggedBead.position.copy(draggedBeadPreviousPosition);
-            } else {
-                // userData.stringAngle is legacy? Keep it just in case other systems read it.
-                if (rotationCalculated) draggedBead.userData.stringAngle = newAngle; 
-                draggedBead.userData.segmentIndex = stringInfo.segmentIndex;
-                draggedBead.userData.t = stringInfo.t;
-                draggedBeadPreviousPosition.copy(draggedBead.position);
-            }
-        } else {
-            draggedBead.position.copy(draggedBeadPreviousPosition);
+
+            // 6. GHOST MODE: Disable collision check during drag
+            // if (checkBeadCollision(draggedBead, [draggedBead])) {
+            //     draggedBead.position.copy(draggedBeadPreviousPosition);
+            // } else {
+            // Update metadata
+            // We need to find the segment index for the new position to keep data consistent
+            // projectBeadToPathLocal doesn't return segment index, but we can approximate or ignore it for now
+            // since we re-calculate everything on save/load.
+            // For now, just update position.
+            draggedBeadPreviousPosition.copy(draggedBead.position);
+            // }
         }
     }
 }
@@ -249,7 +241,7 @@ function onCanvasMouseUp(event) {
     currentPathData = null; // Clear temp data
 
     let shouldSave = false;
-    
+
     if (isSelectMode && !hasDragged && mouseDownPosition) {
         if (draggedBead) {
             if (isDeleteMode) {
@@ -265,36 +257,36 @@ function onCanvasMouseUp(event) {
                 // Check if this is a canvas-only click (not UI elements)
                 const eventTarget = event.target;
                 const canvas = renderer?.domElement;
-                
+
                 // If click was NOT on canvas, let document handlers handle it
                 if (eventTarget !== canvas) {
                     console.log('❌ Click was not on canvas - letting document handlers handle it');
                     return;
                 }
-                
+
                 console.log('🧠 No bead clicked in delete mode - checking if should deactivate...');
-                
+
                 // Don't deactivate during active 2-finger gestures OR recently ended gestures
                 if (typeof touchGestureActive !== 'undefined' && touchGestureActive) {
                     console.log('❌ No deactivation - touch gesture active (pinch/zoom)');
                     return;
                 }
-                
+
                 // Additional protection: don't deactivate if a 2-finger gesture recently ended
                 if (typeof twoFingerGestureTimestamp !== 'undefined') {
                     const timeSinceTwoFingerGesture = Date.now() - twoFingerGestureTimestamp;
                     const twoFingerGestureCooldown = 30; // 30ms cooldown
-                    
+
                     if (timeSinceTwoFingerGesture < twoFingerGestureCooldown) {
                         console.log('❌ No deactivation - recent 2-finger gesture ended ' + timeSinceTwoFingerGesture + 'ms ago');
                         return;
                     }
                 }
-                
+
                 // Raycast to check if click was on empty canvas space
                 const planeIntersects = raycaster.intersectObject(plane);
                 console.log('Canvas empty space check - plane intersects:', planeIntersects.length);
-                
+
                 if (planeIntersects.length > 0) {
                     // Clicked on empty canvas space - should deactivate
                     console.log('✅ CLICKED ON EMPTY CANVAS - DEACTIVATING DELETE MODE');
@@ -309,10 +301,10 @@ function onCanvasMouseUp(event) {
             }
         }
     }
-    
+
     if (isDrawingString && stringPoints.length > 0) {
         shouldSave = true;
-        
+
         // Reset slider base to the new string geometry
         if (typeof window.resetSliderBase === 'function') {
             window.resetSliderBase();
@@ -320,17 +312,64 @@ function onCanvasMouseUp(event) {
 
         // Automatically exit string mode after completing a drawing gesture
         exitStringMode();
-        
+
         // Ensure string type is updated after drawing complete
         if (typeof updateStringType === 'function') {
             updateStringType();
         }
     }
-    
+
     if (isDragging && hasDragged && draggedBead) {
+        // SNAP ON RELEASE: Resolve collisions
+        if (checkBeadCollision(draggedBead, [draggedBead])) {
+            console.log('💥 Collision detected on release - finding nearest free space...');
+
+            if (!currentPathData) {
+                currentPathData = calculatePathDataLocal();
+            }
+
+            if (currentPathData) {
+                const startDist = projectBeadToPathLocal(draggedBead.position, currentPathData);
+                let searchDist = 0.1; // Start small
+                const maxSearch = currentPathData.totalLength / 2;
+                let found = false;
+
+                while (searchDist < maxSearch) {
+                    // Check forward
+                    const fwdDist = startDist + searchDist;
+                    const fwdPos = getPathPosLocal(currentPathData, fwdDist);
+                    draggedBead.position.copy(fwdPos);
+                    if (!checkBeadCollision(draggedBead, [draggedBead])) {
+                        found = true;
+                        break;
+                    }
+
+                    // Check backward
+                    const bwdDist = startDist - searchDist;
+                    const bwdPos = getPathPosLocal(currentPathData, bwdDist);
+                    draggedBead.position.copy(bwdPos);
+                    if (!checkBeadCollision(draggedBead, [draggedBead])) {
+                        found = true;
+                        break;
+                    }
+
+                    searchDist += 0.1;
+                }
+
+                if (found) {
+                    console.log('✅ Found free space!');
+                } else {
+                    console.warn('⚠️ Could not find free space, reverting to previous position');
+                    if (draggedBeadPreviousPosition) {
+                        draggedBead.position.copy(draggedBeadPreviousPosition);
+                    }
+                }
+            }
+        }
+
         shouldSave = true;
     }
-    
+
     isDrawingString = false;
     isDragging = false;
     draggedBead = null;
@@ -340,7 +379,7 @@ function onCanvasMouseUp(event) {
     if (isSelectMode) {
         controls.enabled = true;
     }
-    
+
     if (shouldSave) {
         saveState();
     }
@@ -350,16 +389,16 @@ function onCanvasMouseUp(event) {
 
 function calculatePathDataLocal() {
     if (typeof stringPoints === 'undefined' || stringPoints.length < 2) return null;
-    
+
     const segments = [];
     let totalLength = 0;
-    
+
     for (let i = 0; i < stringPoints.length - 1; i++) {
         const p1 = stringPoints[i];
-        const p2 = stringPoints[i+1];
+        const p2 = stringPoints[i + 1];
         const vec = new THREE.Vector3().subVectors(p2, p1);
         const len = vec.length();
-        
+
         if (len < 0.0001) continue;
 
         segments.push({
@@ -372,11 +411,11 @@ function calculatePathDataLocal() {
         });
         totalLength += len;
     }
-    
+
     const first = stringPoints[0];
     const last = stringPoints[stringPoints.length - 1];
-    const isClosed = first.distanceTo(last) < 0.5; 
-    
+    const isClosed = first.distanceTo(last) < 0.5;
+
     return { segments, totalLength, isClosed };
 }
 
@@ -386,10 +425,10 @@ function getPathPosLocal(path, dist) {
     } else {
         dist = Math.max(0, Math.min(dist, path.totalLength));
     }
-    
+
     let seg = path.segments.find(s => dist >= s.startDist && dist <= s.endDist);
     if (!seg) seg = dist <= 0 ? path.segments[0] : path.segments[path.segments.length - 1];
-    
+
     const localT = dist - seg.startDist;
     return new THREE.Vector3().copy(seg.start).addScaledVector(seg.dir, localT);
 }
@@ -397,18 +436,69 @@ function getPathPosLocal(path, dist) {
 function projectBeadToPathLocal(pos, path) {
     let minDist = Infinity;
     let bestPathDist = 0;
-    
+
     path.segments.forEach(seg => {
         const v = new THREE.Vector3().subVectors(pos, seg.start);
         const t = v.dot(seg.dir);
         const clampedT = Math.max(0, Math.min(t, seg.length));
         const closest = new THREE.Vector3().copy(seg.start).addScaledVector(seg.dir, clampedT);
         const d = closest.distanceTo(pos);
-        
+
         if (d < minDist) {
             minDist = d;
             bestPathDist = seg.startDist + clampedT;
         }
     });
     return bestPathDist;
+}
+
+/**
+ * Solves for the closest point on the path using local search (Hill Climbing).
+ * This prevents teleporting across the center of loops.
+ * @param {THREE.Vector3} targetPos - The mouse/finger position
+ * @param {number} currentDist - Current distance along the path
+ * @param {object} path - Path data object
+ * @returns {number} - The new best distance along the path
+ */
+function solveClosestPointOnPathLocal(targetPos, currentDist, path) {
+    let bestDist = currentDist;
+    let bestScore = getPathPosLocal(path, currentDist).distanceTo(targetPos);
+
+    // Step size for search (approx 1% of length to start)
+    let step = path.totalLength * 0.01;
+    const minStep = 0.001;
+    const maxIter = 50;
+
+    for (let i = 0; i < maxIter; i++) {
+        // Check forward and backward
+        const distFwd = bestDist + step;
+        const distBwd = bestDist - step;
+
+        const posFwd = getPathPosLocal(path, distFwd);
+        const posBwd = getPathPosLocal(path, distBwd);
+
+        const scoreFwd = posFwd.distanceTo(targetPos);
+        const scoreBwd = posBwd.distanceTo(targetPos);
+
+        if (scoreFwd < bestScore) {
+            bestDist = distFwd;
+            bestScore = scoreFwd;
+        } else if (scoreBwd < bestScore) {
+            bestDist = distBwd;
+            bestScore = scoreBwd;
+        } else {
+            // If neither direction improves, reduce step size
+            step *= 0.5;
+            if (step < minStep) break;
+        }
+    }
+
+    // Normalize result for closed paths
+    if (path.isClosed) {
+        bestDist = (bestDist % path.totalLength + path.totalLength) % path.totalLength;
+    } else {
+        bestDist = Math.max(0, Math.min(bestDist, path.totalLength));
+    }
+
+    return bestDist;
 }
