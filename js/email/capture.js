@@ -15,36 +15,60 @@ function captureDesignImage() {
         y: controls.target.y,
         z: controls.target.z
     };
-    
+
     // Change background to white for clean screenshots
     scene.background = new THREE.Color(0xffffff);
-    
+
+    // Save original camera state
+    const originalUp = camera.up.clone();
+    const originalTarget = controls.target.clone();
+    const originalRotation = camera.rotation.clone(); // Save rotation too
+    const originalControlsEnabled = controls.enabled;
+
+    // DISABLE CONTROLS to prevent interference
+    controls.enabled = false;
+
+    // FORCE TOP-DOWN VIEW for perfect screenshot
+    // 1. Reset Up vector to default Y-axis for standard rotation math
+    camera.up.set(0, 1, 0);
+    // 2. Position camera straight up
+    camera.position.set(0, 100, 0);
+    // 3. Look at center - BUT we will force rotation manually to be sure
+    camera.lookAt(0, 0, 0);
+    // 4. FORCE ROTATION: -90 degrees around X axis is looking straight down
+    camera.rotation.set(-Math.PI / 2, 0, 0);
+
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld(true); // Force update
+
     // Get smart frame for the design (if there's a string, frame it perfectly)
+    let appliedTranslation = { x: 0, z: 0 };
     const hasDesign = stringPoints.length > 0 || beads.length > 0;
     if (hasDesign) {
-        frameDesignForCapture();
+        // This will move the design to (0,0) since camera is at (0,0)
+        appliedTranslation = frameDesignForCapture() || { x: 0, z: 0 };
     }
-    
+
     // Render the scene
     renderer.render(scene, camera);
-    
+
     // Create a temporary canvas for resizing
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
-    
+
     // Get original canvas dimensions
     const originalCanvas = renderer.domElement;
     const originalWidth = originalCanvas.width;
     const originalHeight = originalCanvas.height;
-    
+
     // Target aspect ratio for consistent previews (4:3 ratio works well for most designs)
-    const targetAspectRatio = 4/3;
+    const targetAspectRatio = 4 / 3;
     const quality = 0.95;
-    
+
     // Calculate dimensions to maintain aspect ratio and fit within reasonable size
     let newWidth, newHeight;
     const originalAspect = originalWidth / originalHeight;
-    
+
     if (Math.abs(originalAspect - targetAspectRatio) < 0.1) {
         // Close to target aspect ratio, use original proportions but cap size
         const maxSize = 1200;
@@ -67,35 +91,47 @@ function captureDesignImage() {
             newHeight = Math.round(newWidth / targetAspectRatio);
         }
     }
-    
+
     // Set temp canvas size
     tempCanvas.width = newWidth;
     tempCanvas.height = newHeight;
-    
+
     // Draw resized image with proper scaling to prevent distortion
     tempCtx.imageSmoothingEnabled = true;
     tempCtx.imageSmoothingQuality = 'high';
     tempCtx.drawImage(originalCanvas, 0, 0, newWidth, newHeight);
-    
+
     // Convert to JPEG with high quality
     const imageData = tempCanvas.toDataURL('image/jpeg', quality);
-    
+
     // Restore original background
     scene.background = originalBackgroundColor;
-    
+
     // Restore original camera position and lookAt target
-    if (hasDesign) {
-        camera.position.set(originalCameraPosition.x, originalCameraPosition.y, originalCameraPosition.z);
-        controls.target.set(originalCameraLookAt.x, originalCameraLookAt.y, originalCameraLookAt.z);
-        controls.update();
+    camera.position.set(originalCameraPosition.x, originalCameraPosition.y, originalCameraPosition.z);
+    camera.up.copy(originalUp); // Restore Up vector
+    camera.rotation.copy(originalRotation); // Restore rotation
+
+    controls.target.copy(originalTarget);
+    controls.enabled = originalControlsEnabled; // Restore controls state
+    controls.update();
+
+    // RESTORE DESIGN POSITION
+    // We must reverse the translation so the design goes back to where the user had it
+    if (appliedTranslation.x !== 0 || appliedTranslation.z !== 0) {
+        translateDesignGeometry({
+            x: -appliedTranslation.x,
+            z: -appliedTranslation.z
+        });
+        console.log('↩️ Restored design position after capture');
     }
-    
+
     renderer.render(scene, camera);
-    
+
     // Log size for debugging
     const imageSizeKB = (imageData.length * 0.75) / 1024;
     console.log(`Image captured: ${imageSizeKB.toFixed(1)}KB at ${quality} quality (${newWidth}x${newHeight})`);
-    
+
     return imageData;
 }
 
@@ -112,18 +148,18 @@ function getCurrentCameraViewportCenter() {
     // Camera is looking at (0, 0, 0), but may have panned via OrbitControls
     const viewWidth = (camera.right - camera.left) / camera.zoom;
     const viewHeight = (camera.top - camera.bottom) / camera.zoom;
-    
+
     // Calculate center based on camera position (camera.position tells us where we are)
     // Since camera looks at (0, 0, 0) and is at (0, 100, 0), we need to understand the mapping
     // For orthographic camera, we can estimate center based on camera's pan offset
-    
+
     // Use camera's position offset as the viewport center
     const centerX = camera.position.x; // X position tells us the pan offset
     const centerZ = camera.position.z; // Z position tells us the pan offset
-    
+
     console.log('📊 Viewport dimensions:', { width: viewWidth, height: viewHeight });
     console.log('📊 Camera position (pan offset):', { x: centerX, z: centerZ });
-    
+
     return {
         x: centerX,
         z: centerZ
@@ -136,7 +172,7 @@ function getCurrentCameraViewportCenter() {
 function calculateCurrentDesignCenter() {
     let sumX = 0, sumZ = 0;
     let totalPoints = 0;
-    
+
     // Collect string points
     if (typeof stringPoints !== 'undefined' && stringPoints.length > 0) {
         stringPoints.forEach(point => {
@@ -145,7 +181,7 @@ function calculateCurrentDesignCenter() {
         });
         totalPoints += stringPoints.length;
     }
-    
+
     // Collect bead positions
     if (typeof beads !== 'undefined' && beads.length > 0) {
         beads.forEach(bead => {
@@ -154,11 +190,11 @@ function calculateCurrentDesignCenter() {
         });
         totalPoints += beads.length;
     }
-    
+
     if (totalPoints === 0) {
         return { x: 0, z: 0 };
     }
-    
+
     return {
         x: sumX / totalPoints,
         z: sumZ / totalPoints
@@ -172,7 +208,7 @@ function calculateDesignBounds() {
     let minX = Infinity, maxX = -Infinity;
     let minY = Infinity, maxY = -Infinity;
     let minZ = Infinity, maxZ = -Infinity;
-    
+
     // Collect string points
     if (typeof stringPoints !== 'undefined') {
         stringPoints.forEach(point => {
@@ -184,7 +220,7 @@ function calculateDesignBounds() {
             maxZ = Math.max(maxZ, point.z);
         });
     }
-    
+
     // Collect bead positions
     if (typeof beads !== 'undefined' && beads.length > 0) {
         beads.forEach(bead => {
@@ -196,7 +232,7 @@ function calculateDesignBounds() {
             maxZ = Math.max(maxZ, bead.position.z);
         });
     }
-    
+
     return { minX, maxX, minY, maxY, minZ, maxZ };
 }
 
@@ -211,17 +247,17 @@ function translateDesignGeometry(translation) {
             point.x += translation.x;
             point.z += translation.z;
         });
-        
+
         // Update the visual string line
         updateStringLine();
     }
-    
+
     // Translate beads
     if (typeof beads !== 'undefined' && beads.length > 0) {
         beads.forEach(bead => {
             bead.position.x += translation.x;
             bead.position.z += translation.z;
-            
+
             // Update the bead mesh position
             if (bead.mesh) {
                 bead.mesh.position.x += translation.x;
@@ -239,56 +275,62 @@ function translateDesignGeometry(translation) {
  */
 function frameDesignForCapture() {
     console.log('🧪 EMAIL FRAMING: Smart framing with design repositioning to current view');
-    
+
     // Check if we have any design elements
-    const hasDesign = (typeof stringPoints !== 'undefined' && stringPoints.length > 0) || 
-                     (typeof beads !== 'undefined' && beads.length > 0);
-    
+    const hasDesign = (typeof stringPoints !== 'undefined' && stringPoints.length > 0) ||
+        (typeof beads !== 'undefined' && beads.length > 0);
+
     if (!hasDesign) {
         console.log('⚠️ No design elements to fit');
         return;
     }
-    
+
     // STEP 1: Get current camera viewport center in world coordinates
     const cameraCenter = getCurrentCameraViewportCenter();
     console.log('📍 Camera viewport center:', cameraCenter);
-    
+
     // STEP 2: Calculate current design center
     const designCenter = calculateCurrentDesignCenter();
     console.log('🎯 Current design center:', designCenter);
-    
+
     // STEP 3: Translate design geometry to center under camera view
     const translation = {
         x: cameraCenter.x - designCenter.x,
         z: cameraCenter.z - designCenter.z
     };
-    
+
     console.log('📐 Translation needed:', translation);
-    
+
     if (translation.x !== 0 || translation.z !== 0) {
         translateDesignGeometry(translation);
         console.log('✅ Design geometry translated by:', translation);
     }
-    
-    // STEP 4: Calculate optimal zoom (37.5% screen coverage) using new bounds
+
+    // STEP 4: Calculate optimal zoom (20% screen coverage for "zoomed out" look) using new bounds
     const bounds = calculateDesignBounds();
     const maxScreenDim = Math.max(
         (bounds.maxX - bounds.minX) / (camera.right - camera.left) * (camera.zoom || 1),
         (bounds.maxZ - bounds.minZ) / (camera.top - camera.bottom) * (camera.zoom || 1)
     );
-    
-    const targetScreenCoverage = 0.375;
+
+    // User requested "zoomed out by 2x". 
+    // Standard fit is ~0.4 coverage. We'll use 0.2 to make it look smaller in the frame.
+    const targetScreenCoverage = 0.2;
     const zoomRatio = targetScreenCoverage / maxScreenDim;
-    const optimalZoom = Math.min(Math.max(camera.zoom * zoomRatio * 2.0, 0.5), 5.0);
-    
+
+    // FIX: Lowered min zoom from 0.5 to 0.1 to allow zooming out for large (5x) designs.
+    const optimalZoom = Math.min(Math.max(camera.zoom * zoomRatio * 2.0, 0.1), 5.0);
+
     console.log('📏 EMAIL FRAMING: Calculated optimal zoom:', optimalZoom.toFixed(2));
-    
+
     // STEP 5: Apply zoom adjustment
     camera.zoom = optimalZoom;
     camera.updateProjectionMatrix();
-    
+
     console.log('✅ EMAIL FRAMING complete: Design positioned under camera view + zoom:', camera.zoom.toFixed(2));
     console.log('🔒 Design now appears in current viewport - users can still pan for detail exploration');
+
+    return translation; // Return translation so it can be reversed if needed
 }
 
 /**
@@ -323,7 +365,7 @@ function captureDesignData() {
  */
 function generateDesignHTML() {
     const designData = captureDesignData();
-    
+
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -610,7 +652,7 @@ function generateDesignHTML() {
     </script>
 </body>
 </html>`;
-    
+
     return html;
 }
 
