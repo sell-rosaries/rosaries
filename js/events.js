@@ -8,7 +8,7 @@
  */
 function addEventListeners() {
     const canvas = renderer.domElement;
-    
+
     // Canvas interactions
     canvas.addEventListener('mousedown', onCanvasMouseDown);
     canvas.addEventListener('mousemove', onCanvasMouseMove);
@@ -25,7 +25,7 @@ function addEventListeners() {
     const redoBtn = document.getElementById('redo-btn');
     if (undoBtn) undoBtn.addEventListener('click', undo);
     if (redoBtn) redoBtn.addEventListener('click', redo);
-    
+
     document.getElementById('email-btn').addEventListener('click', openEmailModal);
     document.getElementById('reset-button').addEventListener('click', openResetMenu);
     document.getElementById('draw-string-btn').addEventListener('click', activateDrawStringTool);
@@ -37,7 +37,7 @@ function addEventListeners() {
     // Bead library panel
     document.getElementById('close-library-btn').addEventListener('click', closeBeadLibrary);
     document.getElementById('panel-backdrop').addEventListener('click', closeBeadLibrary);
-    
+
     // String tool selection
     const stringTool = document.getElementById('string-tool');
     if (stringTool) {
@@ -57,7 +57,7 @@ function addEventListeners() {
     document.getElementById('reset-all-btn').addEventListener('click', resetAll);
     document.getElementById('delete-objects-btn').addEventListener('click', deleteAllObjects);
     document.getElementById('delete-individual-btn').addEventListener('click', enterDeleteMode);
-    
+
     // Email form
     const emailForm = document.getElementById('email-form');
     if (emailForm) {
@@ -66,9 +66,9 @@ function addEventListeners() {
             sendDesignEmail();
         });
     }
-    
+
     // Language toggle is handled by language.js
-    
+
     // Saved toggle
     const savedToggle = document.getElementById('saved-toggle');
     if (savedToggle) {
@@ -82,11 +82,11 @@ function addEventListeners() {
             }, 200);
         });
     }
-    
+
     // Zoom controls
     const zoomInBtn = document.getElementById('zoom-in-btn');
     const zoomOutBtn = document.getElementById('zoom-out-btn');
-    
+
     if (zoomInBtn) {
         console.log('Zoom in button found, setting up event listener');
         zoomInBtn.addEventListener('click', (e) => {
@@ -98,7 +98,7 @@ function addEventListeners() {
     } else {
         console.error('Zoom in button not found!');
     }
-    
+
     if (zoomOutBtn) {
         console.log('Zoom out button found, setting up event listener');
         zoomOutBtn.addEventListener('click', (e) => {
@@ -132,14 +132,14 @@ function selectStringTool(event) {
     updateFABIcon();
     hideRotationControl();
     updateSelectedBeadPreview();
-    
+
     // Update FAB to show active state
     document.getElementById('fab').classList.add('active');
-    
+
     // Update toolbar button state
     document.querySelectorAll('.toolbar-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById('draw-string-btn').classList.add('active');
-    
+
     // Close library after selection
     closeBeadLibrary();
 }
@@ -149,13 +149,13 @@ function selectStringTool(event) {
  */
 function activateDrawStringTool() {
     const drawBtn = document.getElementById('draw-string-btn');
-    
+
     if (isStringMode) {
         // If already in string mode, turn it off
         exitStringMode();
         return;
     }
-    
+
     // Turn on string mode (auto-turns off after drawing gesture)
     isStringMode = true;
     isSelectMode = false;
@@ -165,14 +165,14 @@ function activateDrawStringTool() {
     hideRotationControl();
     updateFABIcon();
     updateSelectedBeadPreview();
-    
+
     // Update button state
     document.querySelectorAll('.toolbar-btn').forEach(btn => btn.classList.remove('active'));
     drawBtn.classList.add('active');
-    
+
     // Update FAB to show active state
     document.getElementById('fab').classList.add('active');
-    
+
     // Show import presets button when string mode is active
     const importPresetsBtn = document.getElementById('import-presets-btn');
     if (importPresetsBtn) {
@@ -192,14 +192,14 @@ function onWindowResize() {
     const container = document.getElementById('canvas-container');
     const aspect = container.clientWidth / container.clientHeight;
     const currentZoom = camera.zoom; // Preserve zoom level
-    
+
     camera.left = -10 * aspect;
     camera.right = 10 * aspect;
     camera.top = 10;
     camera.bottom = -10;
     camera.zoom = currentZoom; // Restore zoom level
     camera.updateProjectionMatrix();
-    
+
     renderer.setSize(container.clientWidth, container.clientHeight);
 }
 
@@ -208,22 +208,22 @@ function onWindowResize() {
  */
 function zoomIn() {
     console.log('Zoom in function called');
-    
+
     if (typeof camera === 'undefined' || camera === null) {
         console.error('Camera not available');
         return;
     }
-    
+
     if (typeof controls === 'undefined' || controls === null) {
         console.error('Controls not available');
         return;
     }
-    
+
     try {
         // Enable controls temporarily for zoom operation
         const wasEnabled = controls.enabled;
         controls.enabled = true;
-        
+
         // Method 1: Try dollyIn if available
         if (typeof controls.dollyIn === 'function') {
             console.log('Using dollyIn method');
@@ -231,13 +231,13 @@ function zoomIn() {
         } else {
             // Method 2: Direct camera zoom modification for OrthographicCamera
             console.log('Using direct camera zoom modification');
-            camera.zoom = Math.min(camera.zoom * 1.2, 5); // Zoom in by 20%, max zoom 5x
+            camera.zoom = Math.min(camera.zoom * 1.2, 50); // Zoom in by 20%, max zoom 50x (was 5x)
             camera.updateProjectionMatrix();
         }
-        
+
         controls.update();
         controls.enabled = wasEnabled; // Restore original state
-        
+
         console.log('Zoom in completed successfully, camera.zoom:', camera.zoom);
     } catch (error) {
         console.error('Zoom in error:', error);
@@ -249,22 +249,22 @@ function zoomIn() {
  */
 function zoomOut() {
     console.log('Zoom out function called');
-    
+
     if (typeof camera === 'undefined' || camera === null) {
         console.error('Camera not available');
         return;
     }
-    
+
     if (typeof controls === 'undefined' || controls === null) {
         console.error('Controls not available');
         return;
     }
-    
+
     try {
         // Enable controls temporarily for zoom operation
         const wasEnabled = controls.enabled;
         controls.enabled = true;
-        
+
         // Method 1: Try dollyOut if available
         if (typeof controls.dollyOut === 'function') {
             console.log('Using dollyOut method');
@@ -272,13 +272,13 @@ function zoomOut() {
         } else {
             // Method 2: Direct camera zoom modification for OrthographicCamera
             console.log('Using direct camera zoom modification');
-            camera.zoom = Math.max(camera.zoom / 1.2, 0.5); // Zoom out by 20%, min zoom 0.5x
+            camera.zoom = Math.max(camera.zoom / 1.2, 0.01); // Zoom out by 20%, min zoom 0.01x (was 0.5x)
             camera.updateProjectionMatrix();
         }
-        
+
         controls.update();
         controls.enabled = wasEnabled; // Restore original state
-        
+
         console.log('Zoom out completed successfully, camera.zoom:', camera.zoom);
     } catch (error) {
         console.error('Zoom out error:', error);
