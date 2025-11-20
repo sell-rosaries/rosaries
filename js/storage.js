@@ -15,6 +15,11 @@ const STORAGE_KEYS = {
  */
 function autoSaveDesign() {
     try {
+        // Cancel any pending slider save timer since we're saving now
+        if (window.cancelSliderSave && typeof window.cancelSliderSave === 'function') {
+            window.cancelSliderSave();
+        }
+
         const designData = {
             stringPoints: stringPoints.map(p => ({ x: p.x, y: p.y, z: p.z })),
             beads: beads.map(bead => ({

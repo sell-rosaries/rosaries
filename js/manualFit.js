@@ -26,6 +26,10 @@ let kinematicState = {
     saveOnComplete: false
 };
 
+// Slider save debounce timer
+let sliderSaveTimer = null;
+let sliderSavePending = false;
+
 // Expose for interaction cancellation
 window.gravityState = kinematicState;
 
@@ -545,9 +549,35 @@ function updateGravitySimulation() {
     // Stop if settled
     if (!anyoneMoved) {
         kinematicState.active = false;
+
         if (kinematicState.saveOnComplete && typeof window.autoSaveDesign === 'function') {
-            console.log('💾 Gravity settled - triggering auto-save');
-            window.autoSaveDesign();
+            // CRITICAL: Sync bead attachment data before saving
+            // This ensures segmentIndex and t match actual bead positions
+            if (typeof window.syncBeadAttachmentData === 'function') {
+                window.syncBeadAttachmentData();
+            }
+
+            console.log('💾 Gravity settled - scheduling save in 5s');
+
+            // Clear any existing timer
+            if (sliderSaveTimer) {
+                clearTimeout(sliderSaveTimer);
+                console.log('🔄 Cancelled previous save timer');
+            }
+
+            // Mark that we have a pending save from slider
+            sliderSavePending = true;
+
+            // Schedule save for 5 seconds from now
+            sliderSaveTimer = setTimeout(() => {
+                // Only save if still pending (not cancelled by other save)
+                if (sliderSavePending) {
+                    console.log('💾 Executing delayed save');
+                    window.autoSaveDesign();
+                    sliderSavePending = false;
+                }
+                sliderSaveTimer = null;
+            }, 5000);
         }
     }
 }
@@ -712,6 +742,19 @@ function updateBeadVisuals(bead, path) {
 
     bead.mesh.material.rotation = finalAngle;
 }
+
+/**
+ * Cancels any pending slider save timer
+ * Called when save is triggered from elsewhere to prevent duplicate saves
+ */
+window.cancelSliderSave = function () {
+    if (sliderSaveTimer) {
+        clearTimeout(sliderSaveTimer);
+        sliderSaveTimer = null;
+        sliderSavePending = false;
+        console.log('🚫 Slider save cancelled (save triggered elsewhere)');
+    }
+};
 
 window.initCustomSize = initCustomSize;
 window.updateGravitySimulation = updateGravitySimulation;

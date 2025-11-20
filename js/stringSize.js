@@ -198,15 +198,35 @@ function setupSliderEvents() {
             window.performBasicSmartFraming({ mode });
         }
 
-        // Settle Gravity (Normal Speed, Save on Complete)
-        if (typeof window.startGravitySimulation === 'function') {
-            window.startGravitySimulation({ speed: 9.0, saveOnComplete: true });
+        // CRITICAL: Stop gravity completely before restarting
+        // This ensures beads are re-projected from their current positions
+        // rather than just updating speed on active simulation
+        if (window.gravityState) {
+            window.gravityState.active = false;
         }
 
-        // 3. Save design (User Requirement)
-        if (typeof window.autoSaveDesign === 'function') {
-            window.autoSaveDesign();
+        // Settle Gravity (Normal Speed, Save on Complete)
+        // Use higher speed at smaller sizes where beads are more tightly packed
+        // and need more iterations to properly redistribute
+        const currentPercentage = window.currentStringScale || 0;
+        let gravitySpeed = 9.0; // Default for medium/large sizes
+
+        if (currentPercentage <= 20) {
+            // At very small sizes, use much higher speed for more iterations
+            gravitySpeed = 25.0;
+            console.log('⚡ Using high gravity speed for small size:', currentPercentage.toFixed(0) + '%');
+        } else if (currentPercentage <= 40) {
+            // At small-medium sizes, use moderately higher speed
+            gravitySpeed = 15.0;
         }
+
+        // Now it will properly restart and re-project beads
+        if (typeof window.startGravitySimulation === 'function') {
+            window.startGravitySimulation({ speed: gravitySpeed, saveOnComplete: true });
+        }
+
+        // NOTE: We don't save here - gravity will save when it settles
+        // This prevents saving unstable mid-animation states
     }
 
     function handleSizeChange(e) {
@@ -549,3 +569,98 @@ function calculateMinScale() {
 
     return minScale;
 }
+
+/**
+ * Syncs bead attachment data (segmentIndex, t) with their current 3D positions
+ * Called after gravity settles to ensure saved positions match visual positions
+ * Uses gravity's distance calculations to preserve non-overlapping spacing
+ */
+window.syncBeadAttachmentData = function () {
+    if (typeof beads === 'undefined' || !beads || beads.length === 0) return;
+    if (typeof stringPoints === 'undefined' || !stringPoints || stringPoints.length < 2) return;
+
+    console.log('🔄 Syncing bead attachment data for', beads.length, 'beads');
+
+    // Check if gravity state has distance info (preferred method)
+    const hasGravityData = window.gravityState && window.gravityState.beads && window.gravityState.beads.length > 0;
+
+    if (hasGravityData) {
+        // Use gravity's distance values which already account for non-overlapping positions
+        console.log('Using gravity distance data for accurate positioning');
+
+        // Calculate total string length
+        let totalLength = 0;
+        for (let i = 0; i < stringPoints.length - 1; i++) {
+            totalLength += stringPoints[i].distanceTo(stringPoints[i + 1]);
+        }
+
+        // Map each gravity bead to actual bead and update userData
+        window.gravityState.beads.forEach(gravityBead => {
+            const bead = gravityBead.mesh;
+            const distance = gravityBead.distance;
+
+            // Convert distance along path to segmentIndex and t
+            let remainingDist = distance;
+            let segmentIndex = 0;
+            let t = 0;
+
+            for (let i = 0; i < stringPoints.length - 1; i++) {
+                const segmentLength = stringPoints[i].distanceTo(stringPoints[i + 1]);
+
+                if (remainingDist <= segmentLength) {
+                    segmentIndex = i;
+                    t = segmentLength > 0.0001 ? remainingDist / segmentLength : 0;
+                    break;
+                }
+
+                remainingDist -= segmentLength;
+            }
+
+            // Handle edge case: if we're past the end, clamp to last segment
+            if (segmentIndex >= stringPoints.length - 1) {
+                segmentIndex = Math.max(0, stringPoints.length - 2);
+                t = 1.0;
+            }
+
+            bead.userData.segmentIndex = segmentIndex;
+            bead.userData.t = t;
+        });
+    } else {
+        // Fallback: Calculate from current positions (less accurate)
+        console.log('Using position-based calculation (gravity data not available)');
+
+        beads.forEach(bead => {
+            const beadPos = bead.position;
+            let closestDist = Infinity;
+            let closestSegmentIndex = 0;
+            let closestT = 0;
+
+            for (let i = 0; i < stringPoints.length - 1; i++) {
+                const p1 = stringPoints[i];
+                const p2 = stringPoints[i + 1];
+
+                const v = new THREE.Vector3().subVectors(p2, p1);
+                const len = v.length();
+
+                if (len < 0.0001) continue;
+
+                const w = new THREE.Vector3().subVectors(beadPos, p1);
+                const t = Math.max(0, Math.min(1, w.dot(v) / (len * len)));
+
+                const closestPoint = new THREE.Vector3().copy(p1).lerp(p2, t);
+                const dist = beadPos.distanceTo(closestPoint);
+
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestSegmentIndex = i;
+                    closestT = t;
+                }
+            }
+
+            bead.userData.segmentIndex = closestSegmentIndex;
+            bead.userData.t = closestT;
+        });
+    }
+
+    console.log('✅ Bead attachment data synced');
+};
