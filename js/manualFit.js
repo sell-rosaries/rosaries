@@ -840,6 +840,8 @@ function updateBeadVisuals(bead, path) {
     }
 
     bead.mesh.material.rotation = finalAngle;
+    // Save rotation to userData so history system can track it
+    bead.mesh.userData.rotation = (finalAngle * 180) / Math.PI;
 }
 
 /**

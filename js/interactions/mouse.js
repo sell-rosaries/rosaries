@@ -344,40 +344,14 @@ function onCanvasMouseMove(event) {
             }
         }
     } else if (isDrawingString) {
-
-        // Check End
-        if (stringPoints.length > 0) {
-            const endDist = intersectPoint.distanceTo(stringPoints[stringPoints.length - 1]);
-            if (endDist < activeEraserThreshold) {
-                 // BEAD PROTECTION CHECK:
-                 const tip = stringPoints[stringPoints.length - 1];
-                 let isSafeToErase = true;
-                 const protectionRadius = 0.8;
-                 
-                 if (beads && beads.length > 0) {
-                     for (const beadWrapper of beads) {
-                          if (beadWrapper && beadWrapper.object) {
-                             const beadSize = Math.max(beadWrapper.object.scale.x, beadWrapper.object.scale.y);
-                             const dist = tip.distanceTo(beadWrapper.object.position);
-                             if (dist < (beadSize/2 + protectionRadius)) {
-                                 isSafeToErase = false;
-                                 break;
-                             }
-                          }
-                     }
-                 }
-
-                if (isSafeToErase) {
-                    stringPoints.pop();
-                    updateStringLine();
-                }
-            }
-        }
-    } else if (isDrawingString) {
+        
+        // Normal Drawing Logic
+        // We only add points if we are far enough from the last point to avoid clumping
         if (stringPoints.length > 0 && stringPoints[stringPoints.length - 1].distanceTo(intersectPoint) > 0.1) {
             stringPoints.push(intersectPoint.clone());
             updateStringLine();
         }
+
     } else if (isDragging && draggedBead) {
         // SMART DRAG (Walker Algorithm + Ghost Mode)
 

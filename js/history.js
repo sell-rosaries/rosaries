@@ -5,6 +5,7 @@
 
 function captureState() {
     return {
+        stringScale: window.currentStringScale || 0, // Save current string scale
         stringPoints: stringPoints.map(p => {
             // Handle both THREE.Vector3 objects and plain objects
             if (p.clone && typeof p.clone === 'function') {
@@ -55,8 +56,11 @@ function restoreState(state) {
     });
     updateStringLine();
     
-    // Reset slider base to the restored geometry
-    if (typeof window.resetSliderBase === 'function') {
+    // Restore string scale and slider UI
+    if (typeof window.restoreSliderState === 'function' && state.stringScale !== undefined) {
+        window.restoreSliderState(state.stringScale);
+    } else if (typeof window.resetSliderBase === 'function') {
+        // Fallback for legacy history states
         window.resetSliderBase();
     }
     
