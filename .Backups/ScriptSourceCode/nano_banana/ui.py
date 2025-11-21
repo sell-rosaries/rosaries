@@ -8,7 +8,7 @@ class NanoBananaUI:
         self.parent = parent
         self.switch_to_main_callback = switch_to_main_callback
         self.parent.title("Nano Banana")
-        self.parent.geometry("800x600")
+        self.parent.geometry("800x720")
         
         self.style = ttk.Style()
         self.style.theme_use('clam')
@@ -47,8 +47,17 @@ class NanoBananaUI:
         self.notebook = notebook
 
     def create_config_tab(self, parent):
+        # Pack Action Frame FIRST to the BOTTOM to ensure it's always visible
+        action_frame = ttk.Frame(parent)
+        action_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
+        self.process_button = ttk.Button(action_frame, text="Process Images", command=self.start_processing_thread)
+        self.process_button.pack(side=tk.LEFT, padx=(0, 10))
+        self.stop_button = ttk.Button(action_frame, text="Stop", command=self.stop_process, state=tk.DISABLED)
+        self.stop_button.pack(side=tk.LEFT)
+
+        # Config Frame
         config_frame = ttk.LabelFrame(parent, text="Nano Banana Configuration", padding="15")
-        config_frame.pack(fill=tk.X, padx=10, pady=10)
+        config_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
         self.style.configure("TLabelframe.Label", font=("Arial", 12, "bold"))
         
         ttk.Label(config_frame, text="API Key:").grid(row=0, column=0, sticky=tk.W, pady=8)
@@ -67,11 +76,29 @@ class NanoBananaUI:
         ttk.Button(config_frame, text="Save Configuration", command=self.save_config).grid(row=3, column=0, columnspan=3, pady=15)
         config_frame.columnconfigure(1, weight=1)
 
-        action_frame = ttk.Frame(parent); action_frame.pack(fill=tk.X, padx=10, pady=10)
-        self.process_button = ttk.Button(action_frame, text="Process Images", command=self.start_processing_thread)
-        self.process_button.pack(side=tk.LEFT, padx=(0, 10))
-        self.stop_button = ttk.Button(action_frame, text="Stop", command=self.stop_process, state=tk.DISABLED)
-        self.stop_button.pack(side=tk.LEFT)
+        # Advanced Settings Frame
+        advanced_frame = ttk.LabelFrame(parent, text="Advanced Settings (Per Run)", padding="15")
+        advanced_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=(0, 10))
+        
+        # Row 1: Thinking Level & Media Resolution
+        ttk.Label(advanced_frame, text="Thinking Level:").grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
+        self.thinking_var = tk.StringVar(value="low")
+        ttk.Combobox(advanced_frame, textvariable=self.thinking_var, values=["low", "high"], state="readonly", width=10).grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        
+        ttk.Label(advanced_frame, text="Media Resolution:").grid(row=0, column=2, sticky=tk.W, padx=(0, 5))
+        self.media_res_var = tk.StringVar(value="media_resolution_medium")
+        ttk.Combobox(advanced_frame, textvariable=self.media_res_var, values=["media_resolution_low", "media_resolution_medium", "media_resolution_high"], state="readonly", width=25).grid(row=0, column=3, sticky=tk.W)
+
+        # Row 2: Output Resolution & Checkboxes
+        ttk.Label(advanced_frame, text="Output Resolution:").grid(row=1, column=0, sticky=tk.W, padx=(0, 5), pady=(10, 0))
+        self.output_res_var = tk.StringVar(value="1024x1024")
+        ttk.Combobox(advanced_frame, textvariable=self.output_res_var, values=["1024x1024", "2048x2048", "4096x4096"], state="readonly", width=15).grid(row=1, column=1, sticky=tk.W, padx=(0, 20), pady=(10, 0))
+        
+        self.grounding_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(advanced_frame, text="Enable Grounding (Google Search)", variable=self.grounding_var).grid(row=1, column=2, columnspan=2, sticky=tk.W, pady=(10, 0))
+        
+        self.adv_text_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(advanced_frame, text="Advanced Text Rendering", variable=self.adv_text_var).grid(row=2, column=0, columnspan=4, sticky=tk.W, pady=(10, 0))
 
     def create_log_tab(self, parent):
         log_frame = ttk.Frame(parent); log_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -119,13 +146,26 @@ class NanoBananaUI:
         self.stop_button.config(state=tk.NORMAL)
         self.clear_log()
         self.notebook.select(1)
+        
+        # Gather advanced settings
+        thinking_level = self.thinking_var.get()
+        media_resolution = self.media_res_var.get()
+        output_resolution = self.output_res_var.get()
+        use_grounding = self.grounding_var.get()
+        use_advanced_text = self.adv_text_var.get()
+
         thread = threading.Thread(
             target=self.nano_manager.process_images,
             args=(
                 self.api_key_var.get(),
                 prompt_text,
                 self.folder_path_var.get(),
-                self.log_message
+                self.log_message,
+                thinking_level,
+                media_resolution,
+                output_resolution,
+                use_grounding,
+                use_advanced_text
             ),
             daemon=True
         )

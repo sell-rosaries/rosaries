@@ -3,4 +3,4 @@
 
 rembg
 pillow
-google-generativeai
+google-genai
