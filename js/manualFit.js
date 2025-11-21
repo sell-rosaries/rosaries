@@ -41,8 +41,24 @@ function initCustomSize() {
     addCustomSizeHTML();
     addCustomSizeStyles();
     setupFitButtonEvents();
+    setupToggleEvents(); // Add toggle events
     // Slider events are now handled by stringSize.js via initStringSlider()
     console.log('✅ Custom size control initialized');
+}
+
+/**
+ * Setup toggle button events
+ */
+function setupToggleEvents() {
+    const container = document.getElementById('custom-size-control');
+    const toggleBtn = document.getElementById('size-toggle-btn');
+    
+    if (toggleBtn && container) {
+        toggleBtn.addEventListener('click', () => {
+            container.classList.toggle('collapsed');
+            console.log('↔️ Size control toggled:', container.classList.contains('collapsed') ? 'Hidden' : 'Visible');
+        });
+    }
 }
 
 /**
@@ -51,19 +67,26 @@ function initCustomSize() {
 function addCustomSizeHTML() {
     const customSizeHTML = `
         <div id="custom-size-control" class="custom-size-container">
-            <div class="custom-size-control">
-                <div class="size-slider-tube">
-                    <div class="size-slider-track"></div>
-                    <div class="size-slider-liquid" style="height: 30%;"></div>
-                    <div class="size-slider-level-indicator" style="bottom: 30%;"></div>
+            <button id="size-toggle-btn" class="size-toggle-btn" aria-label="Toggle Size Controls">
+                <svg class="toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <div class="custom-size-content">
+                <div class="custom-size-control">
+                    <div class="size-slider-tube">
+                        <div class="size-slider-track"></div>
+                        <div class="size-slider-liquid" style="height: 30%;"></div>
+                        <div class="size-slider-level-indicator" style="bottom: 30%;"></div>
+                    </div>
+                    <button id="fit-button" class="fit-button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="2" width="20" height="20" rx="2"/>
+                            <path d="M8 2v4M16 2v4M8 18v4M16 18v4M2 8h4M2 16h4M18 8h4M18 16h4"/>
+                        </svg>
+                        <span class="fit-button-text">FIT</span>
+                    </button>
                 </div>
-                <button id="fit-button" class="fit-button">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="2" width="20" height="20" rx="2"/>
-                        <path d="M8 2v4M16 2v4M8 18v4M16 18v4M2 8h4M2 16h4M18 8h4M18 16h4"/>
-                    </svg>
-                    <span class="fit-button-text">FIT</span>
-                </button>
             </div>
         </div>
     `;
@@ -84,7 +107,66 @@ function addCustomSizeStyles() {
             transform: translateY(-50%);
             z-index: 150;
             pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+        
+        /* Toggle Button */
+        .size-toggle-btn {
+            pointer-events: auto;
+            width: 32px;
+            height: 32px;
+            background: var(--glass-light);
+            backdrop-filter: var(--backdrop-light);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--neutral-600);
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            z-index: 151;
+        }
+        .size-toggle-btn:hover {
+            background: var(--glass-medium);
+            color: var(--primary-600);
+            transform: scale(1.1);
+        }
+        .size-toggle-btn .toggle-icon {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        /* Content Wrapper */
+        .custom-size-content {
+            transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1), opacity 0.3s ease;
+            transform-origin: top center;
+        }
+
+        /* Collapsed State */
+        .custom-size-container.collapsed {
+            transform: translateY(-50%) translateX(-16px); /* Move to screen edge */
+        }
+        .custom-size-container.collapsed .custom-size-content {
+            transform: translateX(-200%) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .custom-size-container.collapsed .size-toggle-btn {
+            border-radius: 0 50% 50% 0; /* Half circle attached to side */
+            width: 24px;
+            padding-left: 2px;
+            background: var(--glass-medium);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+        .custom-size-container.collapsed .toggle-icon {
+            transform: rotate(180deg);
+        }
+
         .custom-size-control {
             display: flex;
             flex-direction: column;

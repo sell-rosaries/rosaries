@@ -64,16 +64,8 @@ function addEventListeners() {
         });
     }
     
-    // Smart Pen (Placeholder)
-    const smartPenBtn = document.getElementById('smart-pen-btn');
-    if (smartPenBtn) {
-        smartPenBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            alert('Smart Pen feature coming soon!');
-            // Hide menu
-            document.getElementById('pen-options-menu').classList.remove('active');
-        });
-    }
+    // Smart Pen (Placeholder) - Removed
+
 
     // FAB button
     document.getElementById('fab').addEventListener('click', toggleFAB);
