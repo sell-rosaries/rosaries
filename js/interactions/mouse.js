@@ -17,11 +17,77 @@ function getNormalizedCoords(event) {
 }
 
 let currentPathData = null;
+let isErasing = false;
+let eraserMarker = null;
+
+function createEraserTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+
+    // Scale and center the path (Original viewbox 0 0 24 24)
+    const scale = 2.0; 
+    const offsetX = 8;
+    const offsetY = 8;
+
+    const path = new Path2D("M18 13.5L20.5 16L16 20.5L13.5 18M7 21H12M13.5 18L4 8.5C3.17157 7.67157 3.17157 6.32843 4 5.5L6.5 3C7.32843 2.17157 8.67157 2.17157 9.5 3L19 12.5");
+    
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+    ctx.scale(scale, scale);
+
+    // Draw white outline first (for visibility against any background)
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke(path);
+
+    // Draw black main icon
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.stroke(path);
+
+    ctx.restore();
+
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+}
+
+function updateEraserMarker(position, visible) {
+    if (!eraserMarker) {
+        // Create sprite marker
+        const texture = createEraserTexture();
+        const material = new THREE.SpriteMaterial({ 
+            map: texture,
+            transparent: true,
+            opacity: 0.9,
+            depthTest: false // Always visible on top
+        });
+        eraserMarker = new THREE.Sprite(material);
+        eraserMarker.scale.set(1.5, 1.5, 1.5); // Adjust size
+        eraserMarker.renderOrder = 999;
+        scene.add(eraserMarker);
+    }
+
+    if (visible && position) {
+        eraserMarker.visible = true;
+        eraserMarker.position.copy(position);
+        eraserMarker.position.y += 0.8; // Float above the tip
+    } else {
+        if (eraserMarker) eraserMarker.visible = false;
+    }
+}
 
 /**
  * Mouse down event handler
  */
 function onCanvasMouseDown(event) {
+    // Hide Pen Menu if open
+    const penMenu = document.getElementById('pen-options-menu');
+    if (penMenu) penMenu.classList.remove('active');
+
     // Stop gravity if active
     if (window.gravityState && window.gravityState.active) {
         window.gravityState.active = false;
@@ -34,6 +100,16 @@ function onCanvasMouseDown(event) {
     mouseDownPosition = { x: coords.x, y: coords.y };
     hasDragged = false;
     raycaster.setFromCamera(mouse, camera);
+
+    // Eraser Mode Logic
+    if (isEraseMode) {
+        const intersects = raycaster.intersectObject(plane);
+        if (intersects.length > 0) {
+            isErasing = true;
+            // Marker update handled in move
+        }
+        return;
+    }
 
     // Pre-calculate path data for smooth rotation during drag
     if (!isStringMode && stringPoints && stringPoints.length > 1) {
@@ -129,7 +205,7 @@ function onCanvasMouseDown(event) {
  * Mouse move event handler
  */
 function onCanvasMouseMove(event) {
-    if (!isDragging && !isDrawingString) return;
+    if (!isDragging && !isDrawingString && !isErasing) return;
 
     const coords = getNormalizedCoords(event);
 
@@ -148,7 +224,156 @@ function onCanvasMouseMove(event) {
     if (intersects.length === 0) return;
     const intersectPoint = intersects[0].point;
 
-    if (isDrawingString) {
+    // Update Eraser Marker Preview (Snap to Tip)
+    if (isEraseMode && stringPoints && stringPoints.length > 0) {
+        const startPoint = stringPoints[0];
+        const endPoint = stringPoints[stringPoints.length - 1];
+        
+        const distStart = intersectPoint.distanceTo(startPoint);
+        const distEnd = intersectPoint.distanceTo(endPoint);
+        
+        const eraserThreshold = 3.0; // Detection range (generous)
+        
+        let targetPos = null;
+        
+        if (distStart < eraserThreshold && distStart <= distEnd) {
+            targetPos = startPoint;
+        } else if (distEnd < eraserThreshold && distEnd < distStart) {
+            targetPos = endPoint;
+        }
+        
+        if (targetPos) {
+             updateEraserMarker(targetPos, true);
+        } else {
+             updateEraserMarker(null, false);
+        }
+    } else {
+        updateEraserMarker(null, false);
+    }
+
+    if (isErasing) {
+        // ERASER LOGIC
+        if (!stringPoints || stringPoints.length === 0) return;
+
+        const activeEraserThreshold = 1.5; // Distance to actually erase
+
+        // HITBOX CHECK: Stop if eraser hits ANY bead directly
+        let hitBead = false;
+        
+        if (beads && beads.length > 0) {
+            for (const bead of beads) {
+                if (bead) {
+                     // Check distance from cursor (intersectPoint) to bead center
+                     const beadPos = bead.position;
+                     const dist = Math.sqrt(
+                         Math.pow(intersectPoint.x - beadPos.x, 2) + 
+                         Math.pow(intersectPoint.z - beadPos.z, 2)
+                     );
+                     
+                     const beadSize = Math.max(bead.scale.x, bead.scale.y);
+                     
+                     // If cursor is INSIDE the bead's footprint (with small margin)
+                     if (dist < (beadSize / 2 + 0.2)) {
+                         hitBead = true;
+                         break;
+                     }
+                }
+            }
+        }
+        
+        if (hitBead) {
+            // Eraser hit a bead -> STOP erasing
+            return;
+        }
+
+        // Check Start
+        if (stringPoints.length > 0) {
+            const startDist = intersectPoint.distanceTo(stringPoints[0]);
+            if (startDist < activeEraserThreshold) {
+                 // BEAD PROTECTION CHECK (Proximity to tip)
+                 const tip = stringPoints[0];
+                 let isSafeToErase = true;
+                 const protectionRadius = 0.8; 
+                 
+                 if (beads && beads.length > 0) {
+                     for (const bead of beads) {
+                         if (bead) {
+                             const beadSize = Math.max(bead.scale.x, bead.scale.y);
+                             const dist = tip.distanceTo(bead.position);
+                             if (dist < (beadSize/2 + protectionRadius)) {
+                                 isSafeToErase = false;
+                                 break;
+                             }
+                         }
+                     }
+                 }
+
+                 if (isSafeToErase) {
+                     stringPoints.shift();
+                     updateStringLine();
+                 }
+            }
+        }
+
+        // Check End
+        if (stringPoints.length > 0) {
+            const endDist = intersectPoint.distanceTo(stringPoints[stringPoints.length - 1]);
+            if (endDist < activeEraserThreshold) {
+                 // BEAD PROTECTION CHECK:
+                 const tip = stringPoints[stringPoints.length - 1];
+                 let isSafeToErase = true;
+                 const protectionRadius = 0.8;
+                 
+                 if (beads && beads.length > 0) {
+                     for (const bead of beads) {
+                          if (bead) {
+                             const beadSize = Math.max(bead.scale.x, bead.scale.y);
+                             const dist = tip.distanceTo(bead.position);
+                             if (dist < (beadSize/2 + protectionRadius)) {
+                                 isSafeToErase = false;
+                                 break;
+                             }
+                          }
+                     }
+                 }
+
+                if (isSafeToErase) {
+                    stringPoints.pop();
+                    updateStringLine();
+                }
+            }
+        }
+    } else if (isDrawingString) {
+
+        // Check End
+        if (stringPoints.length > 0) {
+            const endDist = intersectPoint.distanceTo(stringPoints[stringPoints.length - 1]);
+            if (endDist < activeEraserThreshold) {
+                 // BEAD PROTECTION CHECK:
+                 const tip = stringPoints[stringPoints.length - 1];
+                 let isSafeToErase = true;
+                 const protectionRadius = 0.8;
+                 
+                 if (beads && beads.length > 0) {
+                     for (const beadWrapper of beads) {
+                          if (beadWrapper && beadWrapper.object) {
+                             const beadSize = Math.max(beadWrapper.object.scale.x, beadWrapper.object.scale.y);
+                             const dist = tip.distanceTo(beadWrapper.object.position);
+                             if (dist < (beadSize/2 + protectionRadius)) {
+                                 isSafeToErase = false;
+                                 break;
+                             }
+                          }
+                     }
+                 }
+
+                if (isSafeToErase) {
+                    stringPoints.pop();
+                    updateStringLine();
+                }
+            }
+        }
+    } else if (isDrawingString) {
         if (stringPoints.length > 0 && stringPoints[stringPoints.length - 1].distanceTo(intersectPoint) > 0.1) {
             stringPoints.push(intersectPoint.clone());
             updateStringLine();
@@ -239,6 +464,11 @@ function onCanvasMouseMove(event) {
  */
 function onCanvasMouseUp(event) {
     currentPathData = null; // Clear temp data
+    
+    isErasing = false;
+    // Keep marker visible if we are still in erase mode (just stopped clicking)
+    // But if we exit mode, it will be hidden by loop or tool change logic
+    // updateEraserMarker handled in move or tool exit
 
     let shouldSave = false;
 

@@ -3,6 +3,31 @@
     Handles event listeners and event handlers
 */
 
+// Global click handler for auto-exiting string/eraser mode
+document.addEventListener('click', (event) => {
+    if (!isStringMode && !isEraseMode) return;
+
+    const target = event.target;
+    
+    // List of elements that SHOULD NOT trigger exit
+    // 1. The canvas (drawing)
+    if (target.tagName === 'CANVAS') return;
+    
+    // 2. The Draw String Button and its children
+    if (target.closest('#draw-string-btn')) return;
+    
+    // 3. The Pen Options Menu and its children
+    if (target.closest('#pen-options-menu')) return;
+    
+    // 4. The Import Presets Button (part of string mode)
+    if (target.closest('#import-presets-btn')) return;
+    
+    // If we clicked anywhere else (e.g., other toolbar buttons, empty space outside canvas, etc.)
+    // Exit String Mode (which also exits Eraser Mode)
+    console.log('🖱️ Clicked outside string tools - exiting string mode');
+    exitStringMode();
+}, true); // Use capture phase to handle it before other specific handlers if needed
+
 /**
  * Adds all event listeners
  */
@@ -29,6 +54,26 @@ function addEventListeners() {
     document.getElementById('email-btn').addEventListener('click', openEmailModal);
     document.getElementById('reset-button').addEventListener('click', openResetMenu);
     document.getElementById('draw-string-btn').addEventListener('click', activateDrawStringTool);
+    
+    // Pen Options
+    const eraserBtn = document.getElementById('eraser-btn');
+    if (eraserBtn) {
+        eraserBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent triggering other clicks
+            activateEraserTool();
+        });
+    }
+    
+    // Smart Pen (Placeholder)
+    const smartPenBtn = document.getElementById('smart-pen-btn');
+    if (smartPenBtn) {
+        smartPenBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            alert('Smart Pen feature coming soon!');
+            // Hide menu
+            document.getElementById('pen-options-menu').classList.remove('active');
+        });
+    }
 
     // FAB button
     document.getElementById('fab').addEventListener('click', toggleFAB);
@@ -149,14 +194,42 @@ function selectStringTool(event) {
  */
 function activateDrawStringTool() {
     const drawBtn = document.getElementById('draw-string-btn');
+    const menu = document.getElementById('pen-options-menu');
 
-    if (isStringMode) {
-        // If already in string mode, turn it off
-        exitStringMode();
+    // If in Eraser Mode, clicking the button exits Eraser Mode
+    if (isEraseMode) {
+        exitEraserMode();
+        // We are now in normal String Mode
         return;
     }
 
-    // Turn on string mode (auto-turns off after drawing gesture)
+    // Logic for Normal Pen Button Click
+    if (isStringMode) {
+        // Already in string mode. 
+        // If menu is open, maybe close it? Or just keep it open?
+        // User says "when i click on pen button, a new icon slides just above it".
+        // So let's toggle the menu.
+        if (menu) {
+            if (menu.classList.contains('active')) {
+                menu.classList.remove('active');
+                // Optionally exit string mode if they click again?
+                // "if i click on it, it exits the eraser mode and the icon goes back to normal." 
+                // For normal pen mode, repeated clicks usually exit or toggle menu.
+                // Let's make it toggle menu. If menu is visible, clicking again closes it.
+                // But if we want to EXIT string mode, maybe we need a long press or logic check.
+                // Existing logic was "toggle off".
+                // Let's assume: Click -> Show Menu. If Menu Active -> Hide Menu & Exit Mode?
+                exitStringMode();
+            } else {
+                menu.classList.add('active');
+            }
+        } else {
+            exitStringMode();
+        }
+        return;
+    }
+
+    // Turn on string mode
     isStringMode = true;
     isSelectMode = false;
     controls.enabled = false;
@@ -169,6 +242,9 @@ function activateDrawStringTool() {
     // Update button state
     document.querySelectorAll('.toolbar-btn').forEach(btn => btn.classList.remove('active'));
     drawBtn.classList.add('active');
+
+    // Show Menu
+    if (menu) menu.classList.add('active');
 
     // Update FAB to show active state
     document.getElementById('fab').classList.add('active');

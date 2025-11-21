@@ -22,6 +22,7 @@ let isDrawingString = false;
 let stringPoints = [];
 let stringLine = null;
 let isStringMode = false;
+let isEraseMode = false;
 let isSelectMode = false;
 let draggedBeadPreviousPosition = null;
 let selectedBeadForRotation = null;

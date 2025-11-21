@@ -298,6 +298,75 @@
     background: var(--glass-subtle);
 }
 
+/* Pen Options Menu */
+.toolbar-btn-wrapper {
+    flex: 1;
+    max-width: var(--toolbar-btn-size);
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.toolbar-btn-wrapper .toolbar-btn {
+    width: 100%;
+    max-width: none;
+    flex: none;
+}
+
+.pen-options-menu {
+    position: absolute;
+    bottom: 115%; /* Increased from 100% to 115% */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    padding-bottom: 12px;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+
+.pen-options-menu.active {
+    pointer-events: auto;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.pen-option-btn {
+    width: 36px; /* 48px * 0.7 ≈ 34px, going with 36px for touch targets */
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--neutral-600);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pen-option-btn svg {
+    width: 18px; /* Smaller icons */
+    height: 18px;
+}
+
+.pen-option-btn:hover {
+    background: var(--primary-50);
+    color: var(--primary-500);
+    transform: scale(1.1);
+}
+
+.pen-option-btn.active {
+    background: var(--primary-500);
+    color: white;
+    box-shadow: var(--shadow-lg);
+}
+
 .toolbar-label {
     font-size: var(--font-size-caption);
     font-weight: var(--font-weight-medium);

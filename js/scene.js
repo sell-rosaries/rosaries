@@ -7,10 +7,18 @@
  * Sets up the core Three.js scene, including camera, renderer, lights, and plane.
  */
 function init3DScene() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color('#F4F5F7'); // Use design token canvas color
-
     const container = document.getElementById('canvas-container');
+    
+    // Safety check for container dimensions
+    if (container.clientWidth === 0 || container.clientHeight === 0) {
+        console.warn('⚠️ Container has 0 dimensions, retrying initialization in 100ms...');
+        setTimeout(init3DScene, 100);
+        return;
+    }
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf5f7fa); // Light gray background
+
     const aspect = container.clientWidth / container.clientHeight;
     camera = new THREE.OrthographicCamera(-10 * aspect, 10 * aspect, 10, -10, 0.1, 1000);
     camera.position.set(0, 100, 0);
