@@ -151,23 +151,11 @@ function setupSliderEvents() {
         lastPercentage = window.currentStringScale || 0;
 
         // 1. Load saved design (User Requirement)
-        // We do this first to ensure we are working on the correct state
         if (typeof window.autoRestoreDesign === 'function') {
-            // Note: This might be jarring if it takes time, but it's requested.
-            // We await it to ensure base points are correct before scaling.
             await window.autoRestoreDesign();
         }
 
-        // DO NOT reset base here. 
-        // resetSliderBase() sets base = current. If we do this on every drag,
-        // the scale accumulates (compound interest) -> infinite growth.
-        // We only want to reset base when the SHAPE changes (new string/import),
-        // not when we are just resizing the existing shape.
-
-        // However, if we just loaded the design, restoreSliderState should have set the correct base.
-        // If we didn't load, we assume the current base is valid.
-
-        // Disable transitions for instant feedback (No Lag)
+        // Disable transitions for instant feedback
         sliderLiquid.style.transition = 'none';
         sliderLevel.style.transition = 'none';
 
@@ -178,10 +166,13 @@ function setupSliderEvents() {
             window.performBasicSmartFraming({ mode });
         }
 
-        // Start Live Gravity (High Speed, No Save)
-        if (typeof window.startGravitySimulation === 'function') {
-            // Force restart if needed, but mainly set high speed
-            window.startGravitySimulation({ speed: 50.0, saveOnComplete: false });
+        // CRITICAL: Stop Gravity Immediately
+        // We want manual control over bead positions during drag
+        if (window.gravityState) {
+            window.gravityState.active = false;
+        }
+        if (window.stopGravitySimulation) {
+            window.stopGravitySimulation();
         }
 
         handleSizeChange(e);
@@ -219,35 +210,23 @@ function setupSliderEvents() {
             window.performBasicSmartFraming({ mode });
         }
 
-        // CRITICAL: Stop gravity completely before restarting
-        // This ensures beads are re-projected from their current positions
-        // rather than just updating speed on active simulation
+        // Restart Gravity to settle beads
         if (window.gravityState) {
             window.gravityState.active = false;
         }
 
-        // Settle Gravity (Normal Speed, Save on Complete)
-        // Use higher speed at smaller sizes where beads are more tightly packed
-        // and need more iterations to properly redistribute
+        // Settle Gravity (Dynamic Speed based on Size)
+        // Match manualFit.js logic: Larger size = Faster speed
+        // 0% = 9.0 (base speed), 100% = 45.0 (9.0 * 5.0)
         const currentPercentage = window.currentStringScale || 0;
-        let gravitySpeed = 9.0; // Default for medium/large sizes
+        const speedMultiplier = 1 + (currentPercentage / 100) * 4.0; // 1.0x to 5.0x
+        const gravitySpeed = 9.0 * speedMultiplier;
 
-        if (currentPercentage <= 20) {
-            // At very small sizes, use much higher speed for more iterations
-            gravitySpeed = 25.0;
-            console.log('⚡ Using high gravity speed for small size:', currentPercentage.toFixed(0) + '%');
-        } else if (currentPercentage <= 40) {
-            // At small-medium sizes, use moderately higher speed
-            gravitySpeed = 15.0;
-        }
+        console.log(`⚡ Gravity Speed: ${gravitySpeed.toFixed(1)} (Size: ${currentPercentage.toFixed(0)}%)`);
 
-        // Now it will properly restart and re-project beads
         if (typeof window.startGravitySimulation === 'function') {
             window.startGravitySimulation({ speed: gravitySpeed, saveOnComplete: true });
         }
-
-        // NOTE: We don't save here - gravity will save when it settles
-        // This prevents saving unstable mid-animation states
     }
 
     function handleSizeChange(e) {
@@ -269,99 +248,56 @@ function setupSliderEvents() {
             ((rect.bottom - clientY) / rect.height) * 100
         ));
 
-        // Determine drag direction
-        const isDecreasing = percentage < lastPercentage;
+        // Calculate total string length at target scale
+        const testScale = 1 + (percentage / 100) * 4.0;
 
-        // Only check space constraints when DECREASING size
-        if (isDecreasing && beads && beads.length > 0) {
-            // Calculate test scale
-            const testScale = 1 + (percentage / 100) * 4.0;
+        // Calculate base length
+        let baseLength = 0;
+        for (let i = 0; i < baseStringPoints.length - 1; i++) {
+            baseLength += baseStringPoints[i].distanceTo(baseStringPoints[i + 1]);
+        }
+        const targetStringLength = baseLength * testScale;
 
-            // Calculate total string length at target scale
-            const center = new THREE.Vector3();
-            baseStringPoints.forEach(p => center.add(p));
-            center.divideScalar(baseStringPoints.length);
-
-            let totalStringLength = 0;
-            for (let i = 0; i < baseStringPoints.length - 1; i++) {
-                const p1 = baseStringPoints[i];
-                const p2 = baseStringPoints[i + 1];
-                const dist = p1.distanceTo(p2);
-                totalStringLength += dist * testScale;
-            }
-
-            // Calculate total space needed by beads
-            // Use the larger dimension (width or height) as the "占用空间" for each bead
-            let totalBeadSpace = 0;
+        // Calculate total space needed by beads
+        let totalBeadSpace = 0;
+        if (typeof beads !== 'undefined') {
             beads.forEach(bead => {
                 const beadSize = Math.max(bead.scale.x, bead.scale.y);
-                totalBeadSpace += beadSize;
-            });
-
-            // Calculate what percentage would give exactly enough space
-            // totalBeadSpace / stringLength = 0.95 (95% utilization)
-            // stringLength = baseLength * testScale
-            // testScale = 1 + (percentage / 100) * 4
-            // Solve for minimum percentage
-            let baseLength = 0;
-            for (let i = 0; i < baseStringPoints.length - 1; i++) {
-                baseLength += baseStringPoints[i].distanceTo(baseStringPoints[i + 1]);
-            }
-
-            // totalBeadSpace / (baseLength * (1 + p/100 * 4)) = 0.95
-            // Solve for p: p = ((totalBeadSpace / (0.95 * baseLength)) - 1) / 4 * 100
-            const minScale = totalBeadSpace / (0.95 * baseLength);
-            const calculatedMinPercentage = Math.max(0, ((minScale - 1) / 4.0) * 100);
-
-            // Update current minimum for red line display
-            currentMinPercentage = calculatedMinPercentage;
-
-            // Update red limit line position and visibility
-            if (calculatedMinPercentage > 0 && beads.length > 0) {
-                minLimitLine.style.bottom = Math.min(calculatedMinPercentage, 100) + '%';
-                minLimitLine.style.opacity = '1';
-            } else {
-                minLimitLine.style.opacity = '0';
-            }
-
-            // Calculate space utilization percentage at current drag position
-            const spaceUtilization = (totalBeadSpace / totalStringLength) * 100;
-
-            // Allow decrease if beads use less than 95% of string length
-            // This 5% buffer accounts for spacing between beads
-            const maxUtilization = 95;
-
-            console.log('🔍 Space check:', {
-                stringLength: totalStringLength.toFixed(2),
-                beadSpace: totalBeadSpace.toFixed(2),
-                utilization: spaceUtilization.toFixed(1) + '%',
-                maxAllowed: maxUtilization + '%',
-                minPercentage: calculatedMinPercentage.toFixed(1) + '%',
-                testScale: testScale.toFixed(2),
-                percentage: percentage.toFixed(1) + '%'
-            });
-
-            if (spaceUtilization > maxUtilization) {
-                showToast("Too many beads, can't make it smaller!");
-                // Block decrease - stay at current size
-                percentage = lastPercentage;
-                console.log('🔴 Space exceeded! Staying at', percentage.toFixed(2) + '%');
-            } else {
-                console.log('✅ Space OK (', spaceUtilization.toFixed(1) + '%), allowing decrease to', percentage.toFixed(1) + '%');
-            }
-        } else if (!isDecreasing) {
-            // When increasing, allow any value up to 100%
-            console.log('🔍 Slider Debug (INCREASING):', {
-                draggedPercentage: percentage.toFixed(2),
-                lastPercentage: lastPercentage.toFixed(2)
+                // Add a small buffer (e.g. 1%) to ensure they don't overlap due to float errors
+                totalBeadSpace += beadSize * 1.01;
             });
         }
 
-        // Update last percentage for next comparison
-        lastPercentage = percentage;
+        // Check constraints
+        // We allow up to 98% utilization to prevent extreme edge cases
+        const maxUtilization = 0.98;
+
+        if (totalBeadSpace > targetStringLength * maxUtilization) {
+            // Calculate max allowed percentage
+            // totalBeadSpace = baseLength * (1 + p/100 * 4) * 0.98
+            // (totalBeadSpace / (baseLength * 0.98)) = 1 + p/100 * 4
+            // p = ((totalBeadSpace / (baseLength * 0.98)) - 1) / 4 * 100
+
+            const minScale = totalBeadSpace / (baseLength * maxUtilization);
+            const minPercentage = Math.max(0, ((minScale - 1) / 4.0) * 100);
+
+            if (percentage < minPercentage) {
+                percentage = minPercentage;
+                showToast("Too many beads!");
+            }
+
+            // Update red limit line
+            if (minLimitLine) {
+                minLimitLine.style.bottom = Math.min(minPercentage, 100) + '%';
+                minLimitLine.style.opacity = '1';
+            }
+        } else {
+            if (minLimitLine) minLimitLine.style.opacity = '0';
+        }
 
         // Update Global State
         window.currentStringScale = percentage;
+        lastPercentage = percentage;
 
         // Update UI
         sliderLiquid.style.height = percentage + '%';
@@ -373,23 +309,14 @@ function setupSliderEvents() {
         // Apply Scaling
         applyStringScale(percentage);
 
-        // 2. Live Fit (User Requirement)
+        // PACK BEADS (The new logic)
+        packBeadsOnString();
+
+        // Live Fit
         if (typeof window.performBasicSmartFraming === 'function') {
             const stringType = window.getCurrentStringType ? window.getCurrentStringType() : 'preset';
             const mode = stringType === 'pen' ? 'pen-mode' : 'preset';
-            // We might want to throttle this if it's too heavy, but let's try direct first.
             window.performBasicSmartFraming({ mode });
-        }
-
-        // Update Gravity Path Live
-        // IMPORTANT: This must be called AFTER applyStringScale so the path is updated
-        if (typeof window.updateGravityPath === 'function') {
-            window.updateGravityPath();
-
-            // Ensure simulation is active if it stopped
-            if (window.gravityState && !window.gravityState.active) {
-                window.startGravitySimulation({ speed: 50.0, saveOnComplete: false });
-            }
         }
     }
 }
@@ -746,3 +673,171 @@ window.syncBeadAttachmentData = function () {
 
     console.log('✅ Bead attachment data synced');
 };
+
+/**
+ * Packs beads together on the string, centered around the median bead.
+ * Ensures they touch but don't overlap, maintaining order.
+ */
+function packBeadsOnString() {
+    if (typeof beads === 'undefined' || beads.length === 0) return;
+    if (typeof stringPoints === 'undefined' || stringPoints.length < 2) return;
+
+    // 1. Calculate total string length
+    let totalStringLength = 0;
+    const segmentLengths = [];
+    for (let i = 0; i < stringPoints.length - 1; i++) {
+        const len = stringPoints[i].distanceTo(stringPoints[i + 1]);
+        segmentLengths.push(len);
+        totalStringLength += len;
+    }
+
+    // 2. Get current bead positions and sort
+    const beadData = beads.map(bead => {
+        // Calculate distance based on current segment/t
+        // We use the current values as the "desired" order
+        let dist = 0;
+        const segIdx = bead.userData.segmentIndex || 0;
+        const t = bead.userData.t || 0;
+
+        for (let i = 0; i < segIdx; i++) {
+            dist += segmentLengths[i];
+        }
+        dist += segmentLengths[segIdx] * t;
+
+        // Get radius (use max dimension for safety)
+        // We use a slightly smaller radius for packing to ensure they touch visually
+        // but don't overlap "physically" in a way that breaks things.
+        // The user asked for "hitbox touch".
+        const radius = Math.max(bead.scale.x, bead.scale.y) / 2;
+
+        return {
+            bead: bead,
+            currentDist: dist,
+            radius: radius
+        };
+    });
+
+    // Sort by current distance to maintain order
+    beadData.sort((a, b) => a.currentDist - b.currentDist);
+
+    // 3. Find Median Bead (Anchor)
+    const medianIndex = Math.floor(beadData.length / 2);
+    const medianBead = beadData[medianIndex];
+
+    // The median bead tries to stay at its relative position
+    // But we must clamp it so it doesn't push others off the string
+
+    // Calculate total span of beads
+    let totalSpan = 0;
+    beadData.forEach(b => totalSpan += b.radius * 2);
+
+    // Calculate offsets from median
+    // We want: [ ... -r1-r2 -r0-r1 (median) +r0+r1 +r1+r2 ... ]
+    // Actually simpler: Place median, then stack outwards.
+
+    // Assign target distances
+    // Start with median at its current relative position
+    // But since we just scaled the string, "currentDist" is based on the NEW string geometry 
+    // (because stringPoints are already updated in applyStringScale).
+    // So medianBead.currentDist is already where it "wants" to be roughly.
+
+    // We need to refine the positions.
+
+    // Let's define the center position for the bead chain.
+    // We can use the median bead's current position as the anchor.
+    let anchorDist = medianBead.currentDist;
+
+    // Calculate ideal positions relative to anchor
+    // We'll store "offset from anchor center"
+    const offsets = new Array(beadData.length).fill(0);
+
+    // Go backwards from median
+    let currentOffset = -medianBead.radius;
+    for (let i = medianIndex - 1; i >= 0; i--) {
+        const bead = beadData[i];
+        const nextBead = beadData[i + 1]; // The one to the right (closer to median)
+
+        // They should touch: center_dist = radius_current + radius_next
+        currentOffset -= bead.radius; // Move to center of current bead
+        offsets[i] = currentOffset;
+
+        // Prepare for next
+        currentOffset -= bead.radius;
+    }
+
+    // Go forwards from median
+    currentOffset = medianBead.radius;
+    for (let i = medianIndex + 1; i < beadData.length; i++) {
+        const bead = beadData[i];
+
+        currentOffset += bead.radius;
+        offsets[i] = currentOffset;
+
+        currentOffset += bead.radius;
+    }
+
+    // Now apply offsets to anchor
+    // Check bounds: If the chain hits the start or end of string, shift the whole chain
+    let minChainDist = anchorDist + offsets[0];
+    let maxChainDist = anchorDist + offsets[beadData.length - 1];
+
+    // Shift if out of bounds
+    if (minChainDist < 0) {
+        const shift = -minChainDist;
+        anchorDist += shift;
+    } else if (maxChainDist > totalStringLength) {
+        const shift = totalStringLength - maxChainDist;
+        anchorDist += shift;
+
+        // Double check start again (in case string is too short for beads)
+        // If string is too short, we just center the whole blob
+        if (anchorDist + offsets[0] < 0) {
+            anchorDist = totalStringLength / 2 - (offsets[0] + offsets[beadData.length - 1]) / 2;
+        }
+    }
+
+    // 4. Apply new positions
+    beadData.forEach((item, i) => {
+        const targetDist = anchorDist + offsets[i];
+
+        // Clamp to valid range (should be handled by shift above, but safety first)
+        const clampedDist = Math.max(0, Math.min(totalStringLength, targetDist));
+
+        // Convert distance back to segment/t
+        let remaining = clampedDist;
+        let newSegIdx = 0;
+        let newT = 0;
+
+        for (let s = 0; s < segmentLengths.length; s++) {
+            if (remaining <= segmentLengths[s] + 0.0001) { // Tolerance
+                newSegIdx = s;
+                newT = segmentLengths[s] > 0 ? remaining / segmentLengths[s] : 0;
+                break;
+            }
+            remaining -= segmentLengths[s];
+        }
+
+        // Handle end of string case
+        if (remaining > 0 && newSegIdx === 0 && segmentLengths.length > 0) {
+            newSegIdx = segmentLengths.length - 1;
+            newT = 1;
+        }
+
+        // Update Bead
+        item.bead.userData.segmentIndex = newSegIdx;
+        item.bead.userData.t = newT;
+
+        // Update Visual Position
+        const p1 = stringPoints[newSegIdx];
+        const p2 = stringPoints[newSegIdx + 1];
+        if (p1 && p2) {
+            item.bead.position.copy(p1).lerp(p2, newT);
+            item.bead.position.y = 0.1;
+
+            // Update rotation (tangent)
+            // We can reuse the logic from beads.js or just simple lookAt if needed
+            // But usually rotation is handled by a separate update loop or shader
+            // For now, we just place them.
+        }
+    });
+}
