@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, simpledialog
 import threading
 from .manager import GitPushManager, YesConfirmationDialog
 
@@ -76,7 +76,11 @@ class GitPushUI:
         self.username_var = tk.StringVar()
         ttk.Entry(config_frame, textvariable=self.username_var, width=50).grid(row=4, column=1, columnspan=2, sticky=tk.EW, pady=8, padx=(5, 0))
         
-        ttk.Button(config_frame, text="Save Configuration", command=self.save_config).grid(row=5, column=0, columnspan=3, pady=15)
+        btn_frame = ttk.Frame(config_frame)
+        btn_frame.grid(row=5, column=0, columnspan=3, pady=15)
+        ttk.Button(btn_frame, text="Save Configuration", command=self.save_config).pack(side=tk.LEFT, padx=10)
+        ttk.Button(btn_frame, text="Load Configuration", command=self.open_load_dialog).pack(side=tk.LEFT, padx=10)
+        
         config_frame.columnconfigure(1, weight=1)
 
     def create_sync_tab(self, parent):
@@ -150,12 +154,58 @@ class GitPushUI:
             'email': self.email_var.get(),
             'username': self.username_var.get()
         }
-        if self.git_manager.save_config(config_data):
-            self.log_message("Configuration saved.")
-            messagebox.showinfo("Success", "Configuration saved successfully.")
+        
+        current_name = self.git_manager.config.get('name', '')
+        name = simpledialog.askstring("Save Configuration", "Enter a name for this configuration:", initialvalue=current_name, parent=self.parent)
+        
+        if not name:
+            return
+            
+        if self.git_manager.save_profile(name, config_data):
+            self.log_message(f"Configuration '{name}' saved.")
+            messagebox.showinfo("Success", f"Configuration '{name}' saved successfully.")
         else:
             self.log_message("Error: Failed to save configuration.")
             messagebox.showerror("Error", "Failed to save configuration.")
+
+    def open_load_dialog(self):
+        profiles = self.git_manager.get_profile_names()
+        if not profiles:
+            messagebox.showinfo("Info", "No saved configurations found.")
+            return
+
+        dialog = tk.Toplevel(self.parent)
+        dialog.title("Load Configuration")
+        dialog.geometry("300x400")
+        dialog.transient(self.parent)
+        
+        # Center
+        dialog.update_idletasks()
+        try:
+            x = (self.parent.winfo_x() + (self.parent.winfo_width() // 2)) - 150
+            y = (self.parent.winfo_y() + (self.parent.winfo_height() // 2)) - 200
+            dialog.geometry(f"+{x}+{y}")
+        except Exception:
+            pass
+
+        listbox = tk.Listbox(dialog, font=("Arial", 11))
+        listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        for p in profiles:
+            listbox.insert(tk.END, p)
+            
+        def load(event=None):
+            selection = listbox.curselection()
+            if selection:
+                name = listbox.get(selection[0])
+                profile = self.git_manager.load_profile(name)
+                if profile:
+                    self.load_config_to_ui()
+                    self.log_message(f"Configuration '{name}' loaded.")
+                    dialog.destroy()
+        
+        listbox.bind('<Double-1>', load)
+        ttk.Button(dialog, text="Load", command=load).pack(pady=10)
     
     def check_changes(self):
         repo_path = self.repo_path_var.get()

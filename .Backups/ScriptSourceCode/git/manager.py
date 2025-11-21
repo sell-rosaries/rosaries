@@ -12,15 +12,52 @@ class GitPushManager:
     def __init__(self, parent, config_manager):
         self.parent = parent
         self.config_manager = config_manager
-        self.config = self.config_manager.get_tool_config('git_push')
+        
+        # Load list of profiles. Default to empty list if not found.
+        self.profiles = self.config_manager.get_tool_config('git_configs')
+        if not isinstance(self.profiles, list):
+            self.profiles = []
+            # Migration check: if old config exists, make it a default profile
+            old_config = self.config_manager.get_tool_config('git_push')
+            if old_config and isinstance(old_config, dict) and 'repo_path' in old_config:
+                 old_config['name'] = 'Default'
+                 self.profiles.append(old_config)
+                 self.config_manager.set_tool_config('git_configs', self.profiles)
+
+        # Current active config (default to first one or empty)
+        self.config = self.profiles[0] if self.profiles else {}
+        
         self.process = None
         self.stop_push_flag = threading.Event()
 
-    def save_config(self, config_data):
-        if self.config_manager.set_tool_config('git_push', config_data):
+    def save_profile(self, name, config_data):
+        config_data['name'] = name
+        
+        # Update existing or append new
+        updated = False
+        for i, profile in enumerate(self.profiles):
+            if profile.get('name') == name:
+                self.profiles[i] = config_data
+                updated = True
+                break
+        
+        if not updated:
+            self.profiles.append(config_data)
+            
+        if self.config_manager.set_tool_config('git_configs', self.profiles):
             self.config = config_data
             return True
         return False
+
+    def get_profile_names(self):
+        return [p.get('name', 'Unnamed') for p in self.profiles]
+
+    def load_profile(self, name):
+        for profile in self.profiles:
+            if profile.get('name') == name:
+                self.config = profile
+                return profile
+        return None
 
     def stop_process(self):
         self.stop_push_flag.set()

@@ -17,7 +17,7 @@ class ScriptLauncher:
         self.root.title("Script Launcher")
         self.root.geometry("800x600")
         
-        self.config_file = "launcher_config.json"
+        self.config_file = os.path.join(os.path.expanduser("~"), "launcher_config.json")
         self.scripts = self.load_scripts()
         self.app_config_manager = AppConfigManager()
         
