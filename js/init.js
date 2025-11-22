@@ -22,6 +22,7 @@ async function main() {
         
         createBeadSelection();
         addEventListeners();
+        initSettings(); // Initialize settings module (new)
         initGalleryEventListeners(); // Initialize gallery event listeners
         injectSavedStyles(); // Inject styles for saved designs delete mode
 

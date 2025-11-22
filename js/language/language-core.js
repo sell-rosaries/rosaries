@@ -32,7 +32,17 @@ const translations = {
         
         // Slider Limit Toast
         'slider-limit-toast-title': 'Too many beads!',
-        'slider-limit-toast-message': "Can't make it smaller"
+        'slider-limit-toast-message': "Can't make it smaller",
+        
+        // Settings Menu
+        'settings-title': 'Settings',
+        'settings-general': 'General',
+        'settings-language': 'Language',
+        'settings-downloads': 'App Downloads',
+        'settings-downloads-desc': 'Download the Android app to use offline.',
+        'settings-select-version': 'Select Version',
+        'settings-download-btn': 'Download APK',
+        'settings-loading': 'Loading versions...'
     },
     ar: {
         // Header
@@ -61,7 +71,17 @@ const translations = {
 
         // Slider Limit Toast
         'slider-limit-toast-title': 'عدد الخرز كبير!',
-        'slider-limit-toast-message': 'لا يمكن تقليل الحجم'
+        'slider-limit-toast-message': 'لا يمكن تقليل الحجم',
+        
+        // Settings Menu
+        'settings-title': 'الإعدادات',
+        'settings-general': 'عام',
+        'settings-language': 'اللغة',
+        'settings-downloads': 'تنزيل التطبيق',
+        'settings-downloads-desc': 'قم بتنزيل تطبيق الأندرويد للاستخدام دون اتصال.',
+        'settings-select-version': 'اختر الإصدار',
+        'settings-download-btn': 'تحميل APK',
+        'settings-loading': 'جاري تحميل الإصدارات...'
     }
 };
 
@@ -86,12 +106,14 @@ class LanguageManager {
     }
     
     setupLanguageToggle() {
-        const langToggle = document.getElementById('lang-toggle');
-        if (langToggle) {
-            langToggle.addEventListener('click', () => {
-                this.toggleLanguage();
-            });
-        }
+        // Use event delegation for robust handling of dynamic/modal elements
+        document.body.addEventListener('click', (e) => {
+            if (e.target.closest('#lang-en')) {
+                this.setLanguage('en');
+            } else if (e.target.closest('#lang-ar')) {
+                this.setLanguage('ar');
+            }
+        });
     }
     
     toggleLanguage() {
@@ -109,7 +131,7 @@ class LanguageManager {
         currentLanguage = lang; // Update global variable too!
         
         this.updateUI();
-        this.updateLanguageToggle();
+        this.updateLanguageButtons();
         
         // Update import button text if it exists (managed by saved.js)
         if (typeof window.updateImportButtonText === 'function') {
@@ -127,9 +149,16 @@ class LanguageManager {
         this.updateGalleryUI();
         this.updateBehaviorsUI();
         this.updateSystemUI();
+        this.updateSettingsUI();
         
         // Update Arabic RTL support
         this.updateRTLSupport();
+    }
+    
+    updateSettingsUI() {
+        if (typeof window.updateSettingsLanguage === 'function') {
+            window.updateSettingsLanguage();
+        }
     }
     
     updateUICore() {
@@ -141,9 +170,6 @@ class LanguageManager {
             'h1': langData['title'],
             '.import-presets-btn': langData['presets'],
             '.saved-label': langData['saved-menu-btn'], // This will be defined in saved module
-            
-            // Language Toggle
-            '.lang-label': this.currentLanguage === 'en' ? 'EN' : 'AR',
             
             // Toolbar
             '#undo-btn .toolbar-label': langData['undo'],
@@ -240,13 +266,18 @@ class LanguageManager {
         });
     }
     
-    updateLanguageToggle() {
-        const langToggle = document.getElementById('lang-toggle');
-        const langLabel = langToggle?.querySelector('.lang-label');
+    updateLanguageButtons() {
+        const btnEn = document.getElementById('lang-en');
+        const btnAr = document.getElementById('lang-ar');
         
-        if (langLabel) {
-            langLabel.textContent = this.currentLanguage === 'en' ? 'EN' : 'AR';
-            langLabel.setAttribute('data-lang', this.currentLanguage);
+        if (btnEn && btnAr) {
+            if (this.currentLanguage === 'en') {
+                btnEn.classList.add('active');
+                btnAr.classList.remove('active');
+            } else {
+                btnEn.classList.remove('active');
+                btnAr.classList.add('active');
+            }
         }
     }
     
