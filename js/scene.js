@@ -68,5 +68,10 @@ function animate() {
         window.updateGravitySimulation();
     }
     
+    // Update Eraser Wand Scale (to keep constant size)
+    if (typeof updateEraserWandScale === 'function') {
+        updateEraserWandScale(camera);
+    }
+
     renderer.render(scene, camera);
 }

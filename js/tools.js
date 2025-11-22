@@ -48,13 +48,18 @@ function activateEraserTool() {
     const menu = document.getElementById('pen-options-menu');
     if (menu) menu.classList.remove('active');
     
+    // Show Wand
+    if (typeof showEraserWand === 'function') {
+        showEraserWand();
+    }
+    
     // Cursor update (handled in mouse interactions and below)
     updateEraserCursor();
 }
 
 function updateEraserCursor() {
-    // Simple cursor update, dynamic indicator handled in scene/mouse events
-    document.body.style.cursor = 'crosshair';
+    // Simple cursor update
+    document.body.style.cursor = 'grab'; // Indicates draggable
 }
 
 function exitEraserMode() {
@@ -93,9 +98,12 @@ function exitEraserMode() {
     
     document.body.style.cursor = 'auto';
 
-    // Hide marker
+    // Hide marker / Wand
     if (typeof updateEraserMarker === 'function') {
         updateEraserMarker(null, false);
+    }
+    if (typeof hideEraserWand === 'function') {
+        hideEraserWand();
     }
 }
 

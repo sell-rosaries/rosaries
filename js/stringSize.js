@@ -135,20 +135,34 @@ function setupSliderEvents() {
 
     // Mouse events
     sliderTube.addEventListener('mousedown', startDragging);
+    if (sliderLiquid) sliderLiquid.addEventListener('mousedown', startDragging);
+    if (sliderLevel) sliderLevel.addEventListener('mousedown', startDragging);
+    
     document.addEventListener('mousemove', handleDrag);
     document.addEventListener('mouseup', stopDragging);
 
     // Touch events
     sliderTube.addEventListener('touchstart', startDragging, { passive: false });
+    if (sliderLiquid) sliderLiquid.addEventListener('touchstart', startDragging, { passive: false });
+    if (sliderLevel) sliderLevel.addEventListener('touchstart', startDragging, { passive: false });
+    
     document.addEventListener('touchmove', handleDrag, { passive: false });
     document.addEventListener('touchend', stopDragging);
 
     async function startDragging(e) {
         e.preventDefault();
+        e.stopPropagation(); // Prevent canvas interaction
         isDragging = true;
 
         // Initialize last percentage to current value
         lastPercentage = window.currentStringScale || 0;
+
+        // Exit Eraser Mode if active
+        if (typeof exitEraserMode === 'function') {
+            exitEraserMode();
+        } else if (typeof exitStringMode === 'function') {
+            exitStringMode();
+        }
 
         // 1. Load saved design (User Requirement)
         if (typeof window.autoRestoreDesign === 'function') {
