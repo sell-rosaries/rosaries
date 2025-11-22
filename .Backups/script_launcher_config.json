@@ -2,14 +2,7 @@
     "nano_banana": {
         "api_key": "",
         "folder_path": "",
-        "default_prompt": "From the provided image, isolate a single jewelry bead. Create a photorealistic, macro 3D render of this bead. It is critical to preserve all original details, DO NOT including any holes for stringing, and to accurately replicate the material's natural texture and pattern. The lighting should be soft and perfectly diffused, as if from a large softbox, to ensure there are no sharp reflections or specular highlights on the bead's surface; the bead should have a matte appearance. The final image must be of a single bead on a solid, pure white background, with no other objects, text, or distractions."
-    },
-    "git_push": {
-        "repo_path": "D:",
-        "repo_url": "https://github.com/sell-rosaries/rosaries.git",
-        "pat": "",
-        "email": "sell.rosaries@gmail.com",
-        "username": "sell-rosaries"
+        "default_prompt": ""
     },
     "bg_remover": {
         "folder_path": ""
@@ -17,8 +10,21 @@
     "image_renamer": {
         "api_key": "",
         "folder_path": "",
-        "default_prompt": "Give me a name that you think it suits the object in the image. your respond (name given) must be 1 to 3 words long. Your text output (object name) must be  attached and each word starts with a capital letter like \\\"GemIronRuby\\\".",
-        "excluded_words": "Bead"
+        "default_prompt": "",
+        "excluded_words": ""
+    },
+    "git_configs": [
+        {
+            "repo_path": "",
+            "repo_url": "",
+            "pat": "",
+            "email": "",
+            "username": "",
+            "name": ""
+        }
+    ],
+    "apk_updater": {
+        "git_repo_dir": "",
+        "apk_dir": ""
     }
 }
-#Put Me In C:\Users\masac

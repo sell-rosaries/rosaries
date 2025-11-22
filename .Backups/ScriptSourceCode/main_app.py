@@ -10,6 +10,7 @@ from git.ui import GitPushUI
 from nano_banana.ui import NanoBananaUI
 from bg_remover.ui import BackgroundRemoverUI
 from image_renamer.ui import ImageRenamerUI
+from apk_updater.ui import APKUpdaterUI
 
 class ScriptLauncher:
     def __init__(self, root):
@@ -91,13 +92,23 @@ class ScriptLauncher:
         buttons_frame.pack(fill=tk.X, pady=(20, 0))
         self.style.configure("Accent.TButton", font=("Arial", 10))
         
-        ttk.Button(buttons_frame, text="Add New Script", command=self.add_script).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(buttons_frame, text="Remove Selected", command=self.remove_script).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(buttons_frame, text="Run Selected", command=self.run_script).pack(side=tk.RIGHT, padx=(10, 0))
-        ttk.Button(buttons_frame, text="Image Renamer", command=self.launch_image_renamer_ui, style="Accent.TButton").pack(side=tk.RIGHT, padx=(0, 10))
-        ttk.Button(buttons_frame, text="Background Remover", command=self.launch_bg_remover_ui, style="Accent.TButton").pack(side=tk.RIGHT, padx=(0, 10))
-        ttk.Button(buttons_frame, text="Nano Banana", command=self.launch_nano_banana_ui, style="Accent.TButton").pack(side=tk.RIGHT, padx=(0, 10))
-        ttk.Button(buttons_frame, text="Git Push Tool", command=self.launch_git_push_ui, style="Accent.TButton").pack(side=tk.RIGHT, padx=(0, 10))
+        # First row: Script management buttons
+        row1_frame = ttk.Frame(buttons_frame)
+        row1_frame.pack(fill=tk.X, pady=(0, 5))
+        
+        ttk.Button(row1_frame, text="Add New Script", command=self.add_script).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(row1_frame, text="Remove Selected", command=self.remove_script).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(row1_frame, text="Run Selected", command=self.run_script).pack(side=tk.LEFT)
+        
+        # Second row: Tool buttons
+        row2_frame = ttk.Frame(buttons_frame)
+        row2_frame.pack(fill=tk.X)
+        
+        ttk.Button(row2_frame, text="Git Push Tool", command=self.launch_git_push_ui, style="Accent.TButton").pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(row2_frame, text="APK Updater", command=self.launch_apk_updater_ui, style="Accent.TButton").pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(row2_frame, text="Nano Banana", command=self.launch_nano_banana_ui, style="Accent.TButton").pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(row2_frame, text="Background Remover", command=self.launch_bg_remover_ui, style="Accent.TButton").pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(row2_frame, text="Image Renamer", command=self.launch_image_renamer_ui, style="Accent.TButton").pack(side=tk.LEFT)
 
     def refresh_script_list(self):
         self.script_listbox.delete(0, tk.END)
@@ -162,6 +173,9 @@ class ScriptLauncher:
 
     def launch_image_renamer_ui(self):
         self.image_renamer_ui = ImageRenamerUI(self.root, self.create_main_ui, self.app_config_manager)
+
+    def launch_apk_updater_ui(self):
+        self.apk_updater_ui = APKUpdaterUI(self.root, self.create_main_ui, self.app_config_manager)
 
 def main():
     root = tk.Tk()
