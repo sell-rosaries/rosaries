@@ -32,6 +32,10 @@ window.initStringSlider = function () {
  * Should be called whenever the string is redrawn (new shape), imported, or restored.
  */
 window.resetSliderBase = function () {
+    // ALWAYS reset the scale and UI first to prevent inheritance bugs
+    window.currentStringScale = 0;
+    updateSliderUI(0);
+
     if (typeof stringPoints === 'undefined' || stringPoints.length === 0) {
         baseStringPoints = [];
         return;
@@ -40,10 +44,6 @@ window.resetSliderBase = function () {
     // Deep copy the current string points as the new base (0%)
     baseStringPoints = stringPoints.map(p => p.clone());
     window.baseStringPoints = baseStringPoints; // Update global reference
-
-    // Reset UI to 0%
-    window.currentStringScale = 0;
-    updateSliderUI(0);
 
     console.log('📏 String size base reset. Points:', baseStringPoints.length);
 };
@@ -137,7 +137,7 @@ function setupSliderEvents() {
     sliderTube.addEventListener('mousedown', startDragging);
     if (sliderLiquid) sliderLiquid.addEventListener('mousedown', startDragging);
     if (sliderLevel) sliderLevel.addEventListener('mousedown', startDragging);
-    
+
     document.addEventListener('mousemove', handleDrag);
     document.addEventListener('mouseup', stopDragging);
 
@@ -145,7 +145,7 @@ function setupSliderEvents() {
     sliderTube.addEventListener('touchstart', startDragging, { passive: false });
     if (sliderLiquid) sliderLiquid.addEventListener('touchstart', startDragging, { passive: false });
     if (sliderLevel) sliderLevel.addEventListener('touchstart', startDragging, { passive: false });
-    
+
     document.addEventListener('touchmove', handleDrag, { passive: false });
     document.addEventListener('touchend', stopDragging);
 
