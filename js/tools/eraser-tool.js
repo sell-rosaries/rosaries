@@ -8,7 +8,7 @@
 let eraserWand = null;
 let eraserTip = null;
 let iconMesh = null;
-const ERASER_BASE_SCALE = 3.0; 
+const ERASER_BASE_SCALE = 2.1;
 
 // User's Perfect SVG (Mechanical Crystal Eraser)
 const ERASER_SVG = `<svg width="512" height="512" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -62,155 +62,191 @@ const ERASER_SVG = `<svg width="512" height="512" viewBox="0 0 32 32" fill="none
 </svg>`;
 
 function initEraserWand() {
-    if (eraserWand) return;
+  if (eraserWand) return;
 
-    eraserWand = new THREE.Group();
+  eraserWand = new THREE.Group();
 
-    // Load Texture
-    const img = new Image();
-    const svgBlob = new Blob([ERASER_SVG], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(svgBlob);
-    img.src = url;
-    const texture = new THREE.TextureLoader().load(url);
-    
-    texture.minFilter = THREE.LinearFilter; 
-    texture.magFilter = THREE.LinearFilter;
-    
-    // Geometry: 1 x 1
-    const geometry = new THREE.PlaneGeometry(1, 1);
-    const material = new THREE.MeshBasicMaterial({ 
-        map: texture, 
-        transparent: true,
-        side: THREE.DoubleSide,
-        depthTest: false 
-    });
-    
-    iconMesh = new THREE.Mesh(geometry, material);
-    
-    // VISUAL CORRECTION:
-    // Rotate -90 degrees on X axis to lay flat on the ground.
-    // Since the camera is Top-Down (looking down Y axis), this makes the SVG appear full size (uncompressed).
-    iconMesh.rotation.x = -Math.PI / 2; 
-    
-    iconMesh.renderOrder = 999; 
-    
-    eraserWand.add(iconMesh);
+  // Load Texture
+  const img = new Image();
+  const svgBlob = new Blob([ERASER_SVG], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(svgBlob);
+  img.src = url;
+  const texture = new THREE.TextureLoader().load(url);
 
-        // Hitbox Positioning
-        // SVG Tip is at Y=2. Center=16.
-        // Offset = 14px / 32px = 0.4375.
-        // We nudge it slightly to 0.45 to be at the very "sharp" point of the crystal.
-        
-        const tipGeo = new THREE.SphereGeometry(0.15, 8, 8);
-        const tipMat = new THREE.MeshBasicMaterial({
-            color: 0xff0000,
-            visible: false, // Debug
-            wireframe: true 
-        });
-        eraserTip = new THREE.Mesh(tipGeo, tipMat);
-        eraserTip.position.set(0, 0.45, 0.1); 
-        
-        iconMesh.add(eraserTip);
-    
-        eraserWand.visible = false;
-        scene.add(eraserWand);
-    }
-    
-    function showEraserWand(position) {
-        if (!eraserWand) initEraserWand();
-        eraserWand.visible = true;
-        
-        if (position) {
-            eraserWand.position.copy(position);
-        } else {
-            eraserWand.position.set(0, 0, 0);
-        }
-        
-        eraserWand.position.y = 2.0;
-    }
-    
-    function hideEraserWand() {
-        if (eraserWand) eraserWand.visible = false;
-    }
-    
-    function updateEraserWandScale(camera) {
-        if (!eraserWand || !eraserWand.visible || !iconMesh) return;
-    
-        // Update Scale (Distance based)
-        let scale = ERASER_BASE_SCALE;
-        if (camera.isOrthographicCamera) {
-            if (camera.zoom > 0) scale = ERASER_BASE_SCALE / camera.zoom;
-        } else {
-            const distance = camera.position.distanceTo(eraserWand.position);
-            scale = (distance / 10.0) * ERASER_BASE_SCALE;
-        }
-        eraserWand.scale.setScalar(scale);
-    }
-    
-    function checkEraserCollisionWithString(startPoint, endPoint) {
-    
-        if (!eraserWand || !eraserWand.visible || !eraserTip) return null;
-    
-    
-    
-        const tipPos = new THREE.Vector3();
-    
-        eraserTip.getWorldPosition(tipPos);
-    
-        
-    
-        // ADAPTIVE PRECISION UPDATE:
-    
-        // User reported "hard to erase" when string is large.
-    
-        // Base threshold: 0.5 (generous starting point, ~ bead radius)
-    
-        // Scaling: Add 0.015 per percent.
-    
-        // At 0%: 0.5
-    
-        // At 50%: 0.5 + 0.75 = 1.25
-    
-        // At 100%: 0.5 + 1.5 = 2.0
-    
-        // This ensures the hitbox grows significantly with the string scale.
-    
-        
-    
-        const currentScale = (typeof window.currentStringScale !== 'undefined') ? window.currentStringScale : 0;
-    
-        const threshold = 0.5 + (currentScale * 0.015); 
-    
-    
-    
-        const dist2D = (p1, p2) => {
-    
-            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.z - p2.z, 2));
-    
-        };
-    
-    
-    
-        if (startPoint) {
-    
-            const dist = dist2D(tipPos, startPoint);
-    
-            // console.log('Eraser Tip Dist:', dist.toFixed(3), 'Threshold:', threshold.toFixed(3));
-    
-            if (dist < threshold) return 'start';
-    
-        }
-    
-        if (endPoint) {
-    
-            const dist = dist2D(tipPos, endPoint);
-    
-            if (dist < threshold) return 'end';
-    
-        }
-    
-        return null;
-    
-    }function getEraserWandObject() {
-    return eraserWand;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+
+  // Geometry: 1 x 1
+  const geometry = new THREE.PlaneGeometry(1, 1);
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    side: THREE.DoubleSide,
+    depthTest: false
+  });
+
+  iconMesh = new THREE.Mesh(geometry, material);
+
+  // VISUAL CORRECTION:
+  // Rotate -90 degrees on X axis to lay flat on the ground.
+  // Since the camera is Top-Down (looking down Y axis), this makes the SVG appear full size (uncompressed).
+  iconMesh.rotation.x = -Math.PI / 2;
+
+  iconMesh.renderOrder = 999;
+
+  // Adjust pivot point (handle grabbing)
+  iconMesh.position.set(0, 0, -0.75);
+
+  eraserWand.add(iconMesh);
+
+  // Hitbox Positioning
+  // SVG Tip is at Y=2. Center=16.
+  // Offset = 14px / 32px = 0.4375.
+  // We nudge it slightly to 0.45 to be at the very "sharp" point of the crystal.
+
+  const tipGeo = new THREE.SphereGeometry(0.15, 8, 8);
+  const tipMat = new THREE.MeshBasicMaterial({
+    color: 0xff0000,
+    visible: false, // Debug
+    wireframe: true
+  });
+  eraserTip = new THREE.Mesh(tipGeo, tipMat);
+  eraserTip.position.set(0, 0.45, 0.1);
+
+  iconMesh.add(eraserTip);
+
+  eraserWand.visible = false;
+  scene.add(eraserWand);
 }
+
+function showEraserWand(position) {
+  if (!eraserWand) initEraserWand();
+  eraserWand.visible = true;
+
+  if (position) {
+    eraserWand.position.copy(position);
+  } else {
+    eraserWand.position.set(0, 0, 0);
+  }
+
+  eraserWand.position.y = 2.0;
+}
+
+function hideEraserWand() {
+  if (eraserWand) eraserWand.visible = false;
+}
+
+function updateEraserWandScale(camera) {
+  if (!eraserWand || !eraserWand.visible || !iconMesh) return;
+
+  // Update Scale (Distance based)
+  let scale = ERASER_BASE_SCALE;
+  if (camera.isOrthographicCamera) {
+    if (camera.zoom > 0) scale = ERASER_BASE_SCALE / camera.zoom;
+  } else {
+    const distance = camera.position.distanceTo(eraserWand.position);
+    scale = (distance / 10.0) * ERASER_BASE_SCALE;
+  }
+  eraserWand.scale.setScalar(scale);
+}
+
+function checkEraserCollisionWithString(startPoint, endPoint) {
+
+  if (!eraserWand || !eraserWand.visible || !eraserTip) return null;
+
+
+
+  const tipPos = new THREE.Vector3();
+
+  eraserTip.getWorldPosition(tipPos);
+
+
+
+  // ADAPTIVE PRECISION UPDATE:
+
+  // User reported "hard to erase" when string is large.
+
+  // Base threshold: 0.5 (generous starting point, ~ bead radius)
+
+  // Scaling: Add 0.015 per percent.
+
+  // At 0%: 0.5
+
+  // At 50%: 0.5 + 0.75 = 1.25
+
+  // At 100%: 0.5 + 1.5 = 2.0
+
+  // This ensures the hitbox grows significantly with the string scale.
+
+
+
+  const currentScale = (typeof window.currentStringScale !== 'undefined') ? window.currentStringScale : 0;
+
+  const threshold = 0.5 + (currentScale * 0.015);
+
+
+
+  const dist2D = (p1, p2) => {
+
+    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.z - p2.z, 2));
+
+  };
+
+
+
+  if (startPoint) {
+
+    const dist = dist2D(tipPos, startPoint);
+
+    // console.log('Eraser Tip Dist:', dist.toFixed(3), 'Threshold:', threshold.toFixed(3));
+
+    if (dist < threshold) return 'start';
+
+  }
+
+  if (endPoint) {
+
+    const dist = dist2D(tipPos, endPoint);
+
+    if (dist < threshold) return 'end';
+
+  }
+
+  return null;
+
+}
+
+// Smart Rotation Logic
+function updateEraserOrientation(targetPoint) {
+  if (!eraserWand || !iconMesh || !targetPoint) return;
+
+  // Calculate angle required for eraser tip to point towards target
+  // The tip is offset in -Z direction (due to iconMesh.position.set(0, 0, -0.75))
+  // So we need to point the -Z axis towards the target
+  const dx = targetPoint.x - eraserWand.position.x;
+  const dz = targetPoint.z - eraserWand.position.z;
+
+  // atan2(dz, dx) gives us the angle to point +X towards target
+  // Since our tip is in -Z direction when rotation.y = 0, we need to add PI/2
+  // to rotate so that -Z points towards the target
+  let targetAngle = Math.atan2(dz, dx) + Math.PI / 2;
+
+  // Current angle
+  const currentAngle = eraserWand.rotation.y;
+
+  // Linear interpolation (damping) for smooth rotation
+  const damping = 0.15;
+  let angleDiff = targetAngle - currentAngle;
+
+  // Normalize angle difference to [-PI, PI]
+  while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+  while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+  const newAngle = currentAngle + angleDiff * damping;
+  eraserWand.rotation.y = newAngle;
+}
+
+function getEraserWandObject() {
+  return eraserWand;
+}
+

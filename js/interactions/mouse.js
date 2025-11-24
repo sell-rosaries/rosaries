@@ -31,12 +31,12 @@ function createEraserTexture() {
     const ctx = canvas.getContext('2d');
 
     // Scale and center the path (Original viewbox 0 0 24 24)
-    const scale = 2.0; 
+    const scale = 2.0;
     const offsetX = 8;
     const offsetY = 8;
 
     const path = new Path2D("M18 13.5L20.5 16L16 20.5L13.5 18M7 21H12M13.5 18L4 8.5C3.17157 7.67157 3.17157 6.32843 4 5.5L6.5 3C7.32843 2.17157 8.67157 2.17157 9.5 3L19 12.5");
-    
+
     ctx.save();
     ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
@@ -63,7 +63,7 @@ function updateEraserMarker(position, visible) {
     if (!eraserMarker) {
         // Create sprite marker
         const texture = createEraserTexture();
-        const material = new THREE.SpriteMaterial({ 
+        const material = new THREE.SpriteMaterial({
             map: texture,
             transparent: true,
             opacity: 0.9,
@@ -109,21 +109,21 @@ function onCanvasMouseDown(event) {
     if (isEraseMode) {
         const wand = typeof getEraserWandObject === 'function' ? getEraserWandObject() : null;
         if (wand && wand.visible) {
-             // Raycast against the wand group
-             const intersects = raycaster.intersectObjects([wand], true);
-             if (intersects.length > 0) {
-                 isDraggingEraser = true;
-                 controls.enabled = false;
-                 
-                 // Calculate offset to keep relative position during drag
-                 const hitPoint = intersects[0].point;
-                 eraserDragOffset.subVectors(wand.position, hitPoint);
-                 // We only care about XZ plane dragging, keep Y separate
-                 eraserDragOffset.y = 0; 
-                 
-                 hasErasedInThisStroke = false;
-                 console.log('✏️ Grabbed Eraser Wand');
-             }
+            // Raycast against the wand group
+            const intersects = raycaster.intersectObjects([wand], true);
+            if (intersects.length > 0) {
+                isDraggingEraser = true;
+                controls.enabled = false;
+
+                // Calculate offset to keep relative position during drag
+                const hitPoint = intersects[0].point;
+                eraserDragOffset.subVectors(wand.position, hitPoint);
+                // We only care about XZ plane dragging, keep Y separate
+                eraserDragOffset.y = 0;
+
+                hasErasedInThisStroke = false;
+                console.log('✏️ Grabbed Eraser Wand');
+            }
         }
         return;
     }
@@ -245,52 +245,68 @@ function onCanvasMouseMove(event) {
     if (isDraggingEraser) {
         const wand = typeof getEraserWandObject === 'function' ? getEraserWandObject() : null;
         if (wand) {
-            // Move wand
-            wand.position.x = intersectPoint.x + eraserDragOffset.x;
-            wand.position.z = intersectPoint.z + eraserDragOffset.z;
+            // Snap eraser body directly to mouse/touch position
+            wand.position.x = intersectPoint.x;
+            wand.position.z = intersectPoint.z;
             wand.position.y = 1.0; // Keep hovering
-            
-            // Check Collision
-             if (stringPoints && stringPoints.length > 0) {
-                 // Check Start
-                 const startTip = stringPoints[0];
-                 const endTip = stringPoints[stringPoints.length - 1];
-                 
-                 if (typeof checkEraserCollisionWithString === 'function') {
-                     const collision = checkEraserCollisionWithString(startTip, endTip);
-                     
-                     // Helper for safety check
-                     const isSafeToErase = (tipPosition) => {
-                         const protectionRadius = 0.8; 
-                         if (beads && beads.length > 0) {
-                             for (const bead of beads) {
-                                 if (bead) {
-                                     const beadSize = Math.max(bead.scale.x, bead.scale.y);
-                                     const dist = tipPosition.distanceTo(bead.position);
-                                     if (dist < (beadSize/2 + protectionRadius)) {
-                                         return false;
-                                     }
-                                 }
-                             }
-                         }
-                         return true;
-                     };
 
-                     if (collision === 'start') {
-                         if (isSafeToErase(startTip)) {
-                             stringPoints.shift();
-                             updateStringLine();
-                             hasErasedInThisStroke = true;
-                             // Quick haptic/visual feedback?
-                         }
-                     } else if (collision === 'end') {
-                         if (isSafeToErase(endTip)) {
-                             stringPoints.pop();
-                             updateStringLine();
-                             hasErasedInThisStroke = true;
-                         }
-                     }
-                 }
+            // Determine which string end is closer and update orientation
+            if (stringPoints && stringPoints.length > 0) {
+                const startTip = stringPoints[0];
+                const endTip = stringPoints[stringPoints.length - 1];
+
+                const distToStart = wand.position.distanceTo(startTip);
+                const distToEnd = wand.position.distanceTo(endTip);
+
+                const nearestTip = (distToStart < distToEnd) ? startTip : endTip;
+
+                // Call updateEraserOrientation with nearest string tip
+                if (typeof updateEraserOrientation === 'function') {
+                    updateEraserOrientation(nearestTip);
+                }
+            }
+
+            // Check Collision
+            if (stringPoints && stringPoints.length > 0) {
+                // Check Start
+                const startTip = stringPoints[0];
+                const endTip = stringPoints[stringPoints.length - 1];
+
+                if (typeof checkEraserCollisionWithString === 'function') {
+                    const collision = checkEraserCollisionWithString(startTip, endTip);
+
+                    // Helper for safety check
+                    const isSafeToErase = (tipPosition) => {
+                        const protectionRadius = 0.8;
+                        if (beads && beads.length > 0) {
+                            for (const bead of beads) {
+                                if (bead) {
+                                    const beadSize = Math.max(bead.scale.x, bead.scale.y);
+                                    const dist = tipPosition.distanceTo(bead.position);
+                                    if (dist < (beadSize / 2 + protectionRadius)) {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                        return true;
+                    };
+
+                    if (collision === 'start') {
+                        if (isSafeToErase(startTip)) {
+                            stringPoints.shift();
+                            updateStringLine();
+                            hasErasedInThisStroke = true;
+                            // Quick haptic/visual feedback?
+                        }
+                    } else if (collision === 'end') {
+                        if (isSafeToErase(endTip)) {
+                            stringPoints.pop();
+                            updateStringLine();
+                            hasErasedInThisStroke = true;
+                        }
+                    }
+                }
             }
         }
         return;
@@ -298,20 +314,38 @@ function onCanvasMouseMove(event) {
 
     // Update Eraser Marker Preview (Legacy - keeping just in case, but likely unused now)
     if (isEraseMode && !isDraggingEraser) {
-         // Don't update legacy marker if we are using Wand
-         if (typeof getEraserWandObject === 'function') return;
+        // Don't update legacy marker if we are using Wand
+        if (typeof getEraserWandObject === 'function') return;
     }
 
     if (isErasing) {
         // LEGACY ERASER LOGIC (Keeping if isErasing is triggered somehow, but shouldn't be)
         // ... (We can effectively disable this or leave it as fallback)
     } else if (isDrawingString) {
-        
-        // Normal Drawing Logic
-        // We only add points if we are far enough from the last point to avoid clumping
-        if (stringPoints.length > 0 && stringPoints[stringPoints.length - 1].distanceTo(intersectPoint) > 0.1) {
-            stringPoints.push(intersectPoint.clone());
-            updateStringLine();
+
+        // Smooth String Drawing (High Density)
+        // Use linear interpolation to ensure consistent density of 0.05 units
+        if (stringPoints.length > 0) {
+            const lastPoint = stringPoints[stringPoints.length - 1];
+            const distance = lastPoint.distanceTo(intersectPoint);
+            const density = 0.05;
+
+            if (distance > density) {
+                // Calculate number of points needed
+                const numPoints = Math.floor(distance / density);
+
+                // Add interpolated points
+                for (let i = 1; i <= numPoints; i++) {
+                    const t = i / (numPoints + 1);
+                    const interpolatedPoint = new THREE.Vector3(
+                        lastPoint.x + (intersectPoint.x - lastPoint.x) * t,
+                        lastPoint.y + (intersectPoint.y - lastPoint.y) * t,
+                        lastPoint.z + (intersectPoint.z - lastPoint.z) * t
+                    );
+                    stringPoints.push(interpolatedPoint);
+                }
+                updateStringLine();
+            }
         }
 
     } else if (isDragging && draggedBead) {
@@ -400,9 +434,9 @@ function onCanvasMouseMove(event) {
  */
 function onCanvasMouseUp(event) {
     currentPathData = null; // Clear temp data
-    
+
     isErasing = false;
-    
+
     let shouldSave = false;
 
     // Handle Eraser Wand Drop
