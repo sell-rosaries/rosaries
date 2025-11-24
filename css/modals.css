@@ -77,7 +77,8 @@
 
 /* Reset menu specific spacing */
 #reset-menu h3 {
-    margin-bottom: var(--space-6); /* More spacing between title and options */
+    margin-bottom: var(--space-6);
+    /* More spacing between title and options */
 }
 
 /* Ensure spacing works in both LTR and RTL modes */
@@ -117,7 +118,8 @@
 .modal-content {
     position: relative;
     width: 100%;
-    max-width: 480px; /* Increased from 400px for better fit */
+    max-width: 480px;
+    /* Increased from 400px for better fit */
     max-height: 85vh;
     background: white;
     border-radius: var(--radius-xl);
@@ -128,10 +130,12 @@
 }
 
 .modal-compact {
-    max-width: 480px; /* Increased from 360px for better fit */
+    max-width: 480px;
+    /* Increased from 360px for better fit */
     padding: var(--space-6);
     /* Allow flexible height to prevent content cutoff */
-    max-height: 90vh; /* Increased from 700px */
+    max-height: 90vh;
+    /* Increased from 700px */
     height: auto;
 }
 
@@ -140,6 +144,7 @@
         opacity: 0;
         transform: translateY(40px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -211,7 +216,8 @@
 .rtl #import-presets-modal .btn-close-modal {
     left: auto !important;
     right: var(--space-4) !important;
-    top: var(--space-4) !important; /* Explicitly set top position */
+    top: var(--space-4) !important;
+    /* Explicitly set top position */
     /* Ensure click area matches visual in RTL mode */
     box-sizing: border-box !important;
     padding: 8px !important;
@@ -337,9 +343,26 @@
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-    20%, 40%, 60%, 80% { transform: translateX(8px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-8px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(8px);
+    }
 }
 
 .shake {
@@ -557,70 +580,73 @@ body.delete-mode .bead-delete-x {
 /* ==================== SAVED MODAL RESPONSIVE ==================== */
 @media (max-width: 640px) {
     .modal-compact {
-        max-height: 600px; /* Smaller max-height on mobile */
+        max-height: 600px;
+        /* Smaller max-height on mobile */
         padding: var(--space-4);
     }
-    
+
     #saved-modal .modal-content {
         max-height: 550px;
         gap: var(--space-2);
     }
-    
+
     .saved-designs-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: var(--space-2);
-        height: 360px; /* Static height for 6 items */
+        height: 360px;
+        /* Static height for 6 items */
         padding: var(--space-2);
     }
-    
+
     .saved-design-card {
         width: 100%;
-        height: 100px; /* Consistent smaller cards on mobile */
+        height: 100px;
+        /* Consistent smaller cards on mobile */
         max-width: 100px;
     }
-    
+
     .saved-design-preview {
         height: 80px;
     }
-    
+
     .saved-design-info {
         padding: var(--space-2);
     }
-    
+
     .saved-design-name {
         font-size: 11px;
     }
-    
+
     .saved-design-date {
         font-size: 10px;
     }
-    
+
     .saved-actions {
         margin-bottom: var(--space-3);
     }
-    
+
     .saved-action-btn {
         padding: var(--space-2) var(--space-1);
         gap: var(--space-1);
     }
-    
+
     .saved-action-btn svg {
         width: 18px;
         height: 18px;
     }
-    
+
     .saved-action-btn .btn-text {
         font-size: var(--font-size-body-xs);
     }
-    
+
     .saved-actions-bottom {
         gap: var(--space-2);
     }
-    
+
     .empty-slot-text {
         font-size: 10px;
     }
-    
+
     .empty-slot-icon {
         font-size: 20px;
     }
@@ -628,43 +654,180 @@ body.delete-mode .bead-delete-x {
 
 @media (max-width: 480px) {
     .modal-compact {
-        max-height: 550px; /* Even smaller for very small screens */
+        max-height: 550px;
+        /* Even smaller for very small screens */
         padding: var(--space-3);
     }
-    
+
     #saved-modal .modal-content {
         max-height: 500px;
     }
-    
+
     .saved-designs-grid {
         /* Maintain static layout but reduce for very small screens */
         height: 300px;
         gap: var(--space-2);
         padding: var(--space-2);
     }
-    
+
     .saved-design-card {
         height: 90px;
         max-width: 90px;
     }
-    
+
     .saved-design-preview {
         height: 70px;
     }
-    
+
     .saved-action-btn {
         padding: var(--space-2) var(--space-1);
     }
-    
+
     .saved-action-btn .btn-text {
         font-size: var(--font-size-body-xs);
     }
-    
+
     .empty-slot-text {
         font-size: 9px;
     }
-    
+
     .empty-slot-icon {
         font-size: 18px;
+    }
+}
+
+/* ==================== BEAD DETAILS MODAL ==================== */
+.bead-details-list {
+    margin-top: var(--space-4);
+    max-height: 400px;
+    overflow-y: auto;
+    padding: var(--space-2);
+}
+
+.bead-detail-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
+    transition: all var(--duration-fast);
+}
+
+.bead-detail-item:hover {
+    background: var(--neutral-100);
+    transform: translateX(4px);
+}
+
+.bead-detail-image {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: white;
+    border: 1px solid var(--neutral-200);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bead-detail-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+}
+
+.bead-detail-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.bead-detail-name {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
+    color: var(--neutral-900);
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bead-detail-sizes {
+    font-size: var(--font-size-body-sm);
+    color: var(--neutral-600);
+}
+
+.bead-detail-count {
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-500);
+    flex-shrink: 0;
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Empty state */
+.bead-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8) var(--space-4);
+    text-align: center;
+    color: var(--neutral-400);
+}
+
+.bead-empty-state svg {
+    margin-bottom: var(--space-4);
+    opacity: 0.5;
+}
+
+.bead-empty-state p {
+    margin: 0;
+    font-size: var(--font-size-body);
+}
+
+.empty-hint {
+    font-size: var(--font-size-body-sm) !important;
+    opacity: 0.7;
+    margin-top: var(--space-2) !important;
+}
+
+/* Modal show animation */
+.modal.show {
+    display: flex;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .bead-details-list {
+        max-height: 350px;
+    }
+
+    .bead-detail-item {
+        padding: var(--space-2);
+        gap: var(--space-2);
+    }
+
+    .bead-detail-image {
+        width: 40px;
+        height: 40px;
+    }
+
+    .bead-detail-name {
+        font-size: var(--font-size-body-sm);
+    }
+
+    .bead-detail-sizes {
+        font-size: var(--font-size-caption);
+    }
+
+    .bead-detail-count {
+        font-size: var(--font-size-h4);
+        min-width: 32px;
     }
 }

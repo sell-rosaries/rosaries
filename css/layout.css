@@ -35,6 +35,20 @@
     font-size: var(--font-size-body-sm);
     font-weight: var(--font-weight-semibold);
     backdrop-filter: blur(10px);
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--easing-smooth);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.bead-count-badge:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.bead-count-badge:active {
+    transform: scale(0.98);
 }
 
 /* Import Presets Button (shown underneath title when string mode is active) */
