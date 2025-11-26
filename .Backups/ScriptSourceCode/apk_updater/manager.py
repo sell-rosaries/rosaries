@@ -82,16 +82,72 @@ class APKUpdaterManager:
                 log_callback("Process stopped by user.")
                 return
 
-            # Step 3: Build APK using gradlew
-            log_callback("\n--- Step 2: Building APK with Gradle ---")
-            log_callback("Setting JAVA_HOME and running gradlew assembleDebug...")
+            # Step 3: Calculate Next Version (Moved up to before build)
+            log_callback("\n--- Step 2: Calculating Version and Updating build.gradle ---")
             
-            # PowerShell command to set JAVA_HOME and run gradlew
+            latest_apk_dir = os.path.join(git_repo_dir, "apk", "latest")
+            old_apk_dir = os.path.join(git_repo_dir, "apk", "old")
+
+            # Create directories if they don't exist
+            os.makedirs(latest_apk_dir, exist_ok=True)
+            os.makedirs(old_apk_dir, exist_ok=True)
+
+            # Find current latest version
+            latest_files = [f for f in os.listdir(latest_apk_dir) if f.startswith("Latest-version-") and f.endswith(".apk")]
+            
+            current_version = 0
+            if latest_files:
+                # Extract version number from filename (e.g., Latest-version-3.apk)
+                latest_file = latest_files[0]
+                match = re.search(r'Latest-version-(\d+)\.apk', latest_file)
+                if match:
+                    current_version = int(match.group(1))
+            
+            new_version = current_version + 1
+            log_callback(f"Current version found: {current_version}")
+            log_callback(f"New version will be: {new_version}")
+
+            # Step 4: Update build.gradle with new version name
+            gradle_file_path = os.path.join(apk_dir, "app", "build.gradle")
+            if not os.path.exists(gradle_file_path):
+                log_callback(f"ERROR: build.gradle not found: {gradle_file_path}")
+                self.show_error("build.gradle not found.")
+                return
+
+            log_callback(f"Updating versionName to \"{new_version}\" in build.gradle...")
+            
+            with open(gradle_file_path, 'r', encoding='utf-8') as f:
+                gradle_content = f.read()
+            
+            # Regex to find 'versionName "..."' and replace it with 'versionName "new_version"'
+            new_gradle_content = re.sub(
+                r'versionName\s+"[^"]+"',
+                f'versionName "{new_version}"', 
+                gradle_content
+            )
+            
+            # Verify if change actually happened
+            if new_gradle_content == gradle_content:
+                log_callback("WARNING: Could not find versionName pattern in build.gradle or it was already set.")
+            else:
+                with open(gradle_file_path, 'w', encoding='utf-8') as f:
+                    f.write(new_gradle_content)
+                log_callback("✓ build.gradle updated successfully")
+
+            if self.stop_flag.is_set():
+                log_callback("Process stopped by user.")
+                return
+
+            # Step 5: Build APK using gradlew (RELEASE)
+            log_callback("\n--- Step 3: Building APK (Release) ---")
+            log_callback("Setting JAVA_HOME and running gradlew assembleRelease...")
+            
+            # PowerShell command to set JAVA_HOME and run gradlew assembleRelease
             ps_command = [
                 "powershell.exe",
                 "-NoProfile",
                 "-Command",
-                f'$env:JAVA_HOME = "C:\\Program Files\\jbr"; Set-Location "{apk_dir}"; .\\gradlew.bat assembleDebug'
+                f'$env:JAVA_HOME = \"C:\\Program Files\\jbr\"; Set-Location \"{apk_dir}\"; .\\gradlew.bat assembleRelease'
             ]
 
             log_callback(f"Running: {' '.join(ps_command)}")
@@ -126,18 +182,12 @@ class APKUpdaterManager:
                 log_callback("Process stopped by user.")
                 return
 
-            # Step 4: Move APK to git repo with version increment
-            log_callback("\n--- Step 3: Moving APK to Git repo ---")
+            # Step 6: Move APK to git repo
+            log_callback("\n--- Step 4: Moving APK to Git repo ---")
             
-            apk_source_dir = os.path.join(apk_dir, "app", "build", "outputs", "apk", "debug")
-            latest_apk_dir = os.path.join(git_repo_dir, "apk", "latest")
-            old_apk_dir = os.path.join(git_repo_dir, "apk", "old")
-
-            # Create directories if they don't exist
-            os.makedirs(latest_apk_dir, exist_ok=True)
-            os.makedirs(old_apk_dir, exist_ok=True)
-
-            # Find the built APK
+            # Look in RELEASE folder now
+            apk_source_dir = os.path.join(apk_dir, "app", "build", "outputs", "apk", "release")
+            
             if not os.path.exists(apk_source_dir):
                 log_callback(f"ERROR: APK output directory not found: {apk_source_dir}")
                 self.show_error("APK output directory not found.")
@@ -145,8 +195,6 @@ class APKUpdaterManager:
 
             log_callback(f"Scanning APK output directory: {apk_source_dir}")
             all_files = os.listdir(apk_source_dir)
-            log_callback(f"All files in directory: {all_files}")
-            
             apk_files = [f for f in all_files if f.endswith('.apk')]
             log_callback(f"APK files found: {apk_files}")
             
@@ -155,42 +203,35 @@ class APKUpdaterManager:
                 self.show_error("No APK file found in output directory.")
                 return
 
+            # Pick the first APK found (usually app-release.apk)
             built_apk = os.path.join(apk_source_dir, apk_files[0])
             log_callback(f"Found built APK: {built_apk}")
 
-            # Find current latest version and increment
-            latest_files = [f for f in os.listdir(latest_apk_dir) if f.startswith("Latest-version-") and f.endswith(".apk")]
-            
-            if latest_files:
-                # Extract version number
-                latest_file = latest_files[0]
-                match = re.search(r'Latest-version-(\d+)\.apk', latest_file)
-                if match:
-                    current_version = int(match.group(1))
-                    new_version = current_version + 1
-                    old_version = current_version
-                else:
-                    new_version = 1
-                    old_version = 0
-                
-                # Move current latest to old
-                old_apk_name = f"Old-version-{old_version}.apk"
-                old_apk_path = os.path.join(old_apk_dir, old_apk_name)
+            # Move current latest to old (if it exists)
+            if current_version > 0 and latest_files:
+                latest_file = latest_files[0] # The one we found earlier
                 latest_apk_path = os.path.join(latest_apk_dir, latest_file)
                 
-                # Delete all existing old APKs
+                # Construct old filename
+                old_apk_name = f"Old-version-{current_version}.apk"
+                old_apk_path = os.path.join(old_apk_dir, old_apk_name)
+                
+                # Delete all existing old APKs to keep only the most recent "Old"
                 existing_old_apks = [f for f in os.listdir(old_apk_dir) if f.endswith('.apk')]
                 for old_apk in existing_old_apks:
                     old_apk_to_delete = os.path.join(old_apk_dir, old_apk)
                     log_callback(f"Deleting existing old APK: {old_apk_to_delete}")
-                    os.remove(old_apk_to_delete)
+                    try:
+                        os.remove(old_apk_to_delete)
+                    except OSError as e:
+                        log_callback(f"Warning: Could not delete {old_apk}: {e}")
                 
-                log_callback(f"Moving {latest_file} to old directory as {old_apk_name}")
-                shutil.move(latest_apk_path, old_apk_path)
-                log_callback(f"✓ Previous version moved to old directory")
-            else:
-                new_version = 1
-                log_callback("No previous version found. Starting with version 1.")
+                if os.path.exists(latest_apk_path):
+                    log_callback(f"Moving {latest_file} to old directory as {old_apk_name}")
+                    shutil.move(latest_apk_path, old_apk_path)
+                    log_callback("✓ Previous version moved to old directory")
+                else:
+                    log_callback(f"Warning: Expected previous file {latest_file} missing.")
 
             # Move new APK to latest
             new_apk_name = f"Latest-version-{new_version}.apk"
