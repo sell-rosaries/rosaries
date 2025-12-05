@@ -196,9 +196,7 @@ function checkEraserCollisionWithString(startPoint, endPoint) {
 
   if (startPoint) {
 
-    const dist = dist2D(tipPos, startPoint);
-
-    // console.log('Eraser Tip Dist:', dist.toFixed(3), 'Threshold:', threshold.toFixed(3));
+    const dist = dist2D(tipPos, startPoint);
 
     if (dist < threshold) return 'start';
 

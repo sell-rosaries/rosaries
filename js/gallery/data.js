@@ -17,7 +17,7 @@ async function loadGalleryConfig() {
     try {
         const response = await fetch('gallery-index.json');
         galleryData = await response.json();
-        console.log('✅ Gallery config loaded:', galleryData);
+        
     } catch (error) {
         console.warn('⚠️ Could not load gallery config:', error);
         galleryData = { categories: [] };
@@ -114,7 +114,7 @@ function initGalleryEventListeners() {
         galleryEmailForm.addEventListener('submit', sendGalleryEmail);
     }
 
-    console.log('✅ Gallery event listeners initialized');
+    
 }
 
 /**
@@ -330,19 +330,19 @@ async function sendGalleryEmail(event) {
     
     try {
         // Convert gallery images to base64 format
-        console.log('🖼️ Converting gallery images to base64...');
+        
         const imagePaths = selectedItems.map(item => item.image);
-        console.log('📁 Image paths to convert:', imagePaths);
+        
         
         const galleryImages = await convertImagesToBase64(imagePaths);
         
         // Debug image conversion results
-        console.log('🔍 Image conversion results:', galleryImages);
+        
         const successfulImages = galleryImages.filter(img => img.imageData);
         const failedImages = galleryImages.filter(img => img.error);
         
-        console.log('✅ Successfully converted images:', successfulImages.length);
-        console.log('❌ Failed to convert images:', failedImages.length);
+        
+        
         
         if (failedImages.length > 0) {
             console.error('Failed image conversions:', failedImages);
@@ -376,9 +376,9 @@ async function sendGalleryEmail(event) {
         };
         
         // Send to Google Apps Script
-        console.log('📧 Sending gallery request to:', window.GOOGLE_SCRIPT_URL);
-        console.log('🖼️ Selected designs:', selectedItems.length);
-        console.log('🖼️ Images with data:', successfulImages.length);
+        
+        
+        
         
         const response = await fetch(window.GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -388,11 +388,11 @@ async function sendGalleryEmail(event) {
             body: JSON.stringify(emailData)
         });
         
-        console.log('Response status:', response.status);
+        
         
         // Read and parse response
         const resultText = await response.text();
-        console.log('Response from Google Apps Script:', resultText);
+        
         
         // Try to parse as JSON
         let resultData;
@@ -504,23 +504,23 @@ function convertImagesToBase64(imagePaths) {
         let processed = 0;
         const total = imagePaths.length;
         
-        console.log('🖼️ Starting image conversion for', total, 'images');
+        
         
         if (total === 0) {
-            console.log('🖼️ No images to convert');
+            
             resolve(results);
             return;
         }
         
         imagePaths.forEach((imagePath, index) => {
-            console.log(`🖼️ Converting image ${index + 1}/${total}:`, imagePath);
+            
             
             const img = new Image();
             img.crossOrigin = 'anonymous'; // Handle CORS issues
             
             img.onload = () => {
                 try {
-                    console.log(`🖼️ Image ${index + 1} loaded successfully, size: ${img.width}x${img.height}`);
+                    
                     
                     // Create canvas
                     const canvas = document.createElement('canvas');
@@ -538,7 +538,7 @@ function convertImagesToBase64(imagePaths) {
                     
                     // Log base64 data length for debugging
                     const base64Size = base64Data.length;
-                    console.log(`🖼️ Image ${index + 1} converted to base64, size: ${Math.round(base64Size / 1024)}KB`);
+                    
                     
                     results[index] = {
                         name: imagePath.split('/').pop(),
@@ -550,10 +550,10 @@ function convertImagesToBase64(imagePaths) {
                     };
                     
                     processed++;
-                    console.log(`🖼️ Processed ${processed}/${total} images`);
+                    
                     
                     if (processed === total) {
-                        console.log('✅ All images converted successfully');
+                        
                         resolve(results);
                     }
                 } catch (error) {
@@ -567,7 +567,7 @@ function convertImagesToBase64(imagePaths) {
                     };
                     processed++;
                     if (processed === total) {
-                        console.log('⚠️ Image conversion completed with errors');
+                        
                         resolve(results);
                     }
                 }
@@ -584,7 +584,7 @@ function convertImagesToBase64(imagePaths) {
                 };
                 processed++;
                 if (processed === total) {
-                    console.log('⚠️ Image conversion completed with load errors');
+                    
                     resolve(results);
                 }
             };

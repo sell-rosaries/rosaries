@@ -16,8 +16,8 @@ function getCurrentCameraViewportCenter() {
     const centerX = camera.position.x; // X position tells us the pan offset
     const centerZ = camera.position.z; // Z position tells us the pan offset
 
-    console.log('📊 Viewport dimensions:', { width: viewWidth, height: viewHeight });
-    console.log('📊 Camera position (pan offset):', { x: centerX, z: centerZ });
+    
+    
 
     return {
         x: centerX,
@@ -123,7 +123,7 @@ function translateDesignGeometry(translation) {
  * @param {number} options.verticalOffset - Z-axis offset to move design up/down (default: -1.2)
  */
 function performBasicSmartFraming(options = {}) {
-    console.log('🧪 TEST FIT: Smart framing with design repositioning to current view');
+    
 
     // Mode-based defaults (preset/mix-mode default)
     let screenCoverage = 0.415;
@@ -138,24 +138,24 @@ function performBasicSmartFraming(options = {}) {
     if (options.screenCoverage !== undefined) screenCoverage = options.screenCoverage;
     if (options.verticalOffset !== undefined) verticalOffset = options.verticalOffset;
 
-    console.log('⚙️ Fit options:', { screenCoverage, verticalOffset });
+    
 
     // Check if we have any design elements
     const hasDesign = (typeof stringPoints !== 'undefined' && stringPoints.length > 0) ||
         (typeof beads !== 'undefined' && beads.length > 0);
 
     if (!hasDesign) {
-        console.log('⚠️ No design elements to fit');
+        
         return;
     }
 
     // STEP 1: Get current camera viewport center in world coordinates
     const cameraCenter = getCurrentCameraViewportCenter();
-    console.log('📍 Camera viewport center:', cameraCenter);
+    
 
     // STEP 2: Calculate current design center
     const designCenter = calculateCurrentDesignCenter();
-    console.log('🎯 Current design center:', designCenter);
+    
 
     // Calculate scale multiplier from slider
     const sliderPercentage = window.currentStringScale || 0;
@@ -171,11 +171,11 @@ function performBasicSmartFraming(options = {}) {
         z: cameraCenter.z - designCenter.z + scaledVerticalOffset
     };
 
-    console.log('📐 Translation needed:', translation, `(Offset: ${verticalOffset} -> ${scaledVerticalOffset.toFixed(2)})`);
+    
 
     if (translation.x !== 0 || translation.z !== 0) {
         translateDesignGeometry(translation);
-        console.log('✅ Design geometry translated by:', translation);
+        
     }
 
     // STEP 4: Calculate optimal zoom using configured screen coverage
@@ -197,14 +197,14 @@ function performBasicSmartFraming(options = {}) {
     // for all shapes (Heart, Rosary, Circle, Pen). 
     // The bounding box scales by X, so the zoom divides by X, resulting in identical visual size.
 
-    console.log('📏 TEST FIT: Natural zoom:', optimalZoom.toFixed(2), `(slider: ${sliderPercentage.toFixed(0)}%)`);
+    
 
     // STEP 5: Apply zoom adjustment
     camera.zoom = optimalZoom;
     camera.updateProjectionMatrix();
 
-    console.log('✅ TEST FIT complete: Design positioned under camera view + zoom:', camera.zoom.toFixed(2));
-    console.log('🔒 Design now appears in current viewport - users can still pan for detail exploration');
+    
+    
 }
 
 // Global function exports

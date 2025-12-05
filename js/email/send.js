@@ -64,8 +64,8 @@ async function sendDesignEmail() {
         };
         
         // Send to Google Apps Script
-        console.log('Sending to:', GOOGLE_SCRIPT_URL);
-        console.log('Data size:', JSON.stringify(emailData).length, 'bytes');
+        
+        
         
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -75,11 +75,11 @@ async function sendDesignEmail() {
             body: JSON.stringify(emailData)
         });
         
-        console.log('Response status:', response.status);
+        
         
         // Read and parse response
         const resultText = await response.text();
-        console.log('Response from Google Apps Script:', resultText);
+        
         
         // Try to parse as JSON
         let resultData;

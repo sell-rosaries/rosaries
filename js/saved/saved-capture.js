@@ -14,22 +14,18 @@ function captureCanvasScreenshot() {
     }
     
     try {
-        console.log('📸 Smart fitting + capture...');
+        
         
         // Hidden operation: auto-fit design (user doesn't see this)
         const hasDesign = stringPoints.length > 0 || beads.length > 0;
         if (hasDesign) {
             // Use the same updated logic as TEST FIT - center design under current view
-            console.log('🎯 Screenshot: Centering design geometry...');
+            
             const stringType = window.getCurrentStringType ? window.getCurrentStringType() : 'preset';
             const mode = stringType === 'pen' ? 'pen-mode' : 'preset';
             performBasicSmartFraming({mode});
             
-            console.log('📊 Design centered - positions:', {
-                stringPoints: stringPoints.length,
-                beads: beads.length,
-                samplePoint: stringPoints.length > 0 ? { x: stringPoints[0].x, z: stringPoints[0].z } : 'none'
-            });
+            
         }
         
         // Force render to ensure geometry changes are visible
@@ -45,7 +41,7 @@ function captureCanvasScreenshot() {
         const canvas = renderer.domElement;
         const result = canvas.toDataURL('image/jpeg', 0.9);
         
-        console.log('✅ Screenshot captured with properly centered design');
+        
         
         return result;
     } catch (e) {
@@ -60,7 +56,7 @@ function captureCanvasScreenshot() {
 function createBeadFromData(beadData) {
     return new Promise((resolve) => {
         try {
-            console.log('🔵 Creating bead from data:', beadData);
+            
             
             if (typeof createBead === 'function') {
                 // Get the bead object using the objectId from userData
@@ -112,7 +108,7 @@ function createBeadFromData(beadData) {
                             createdBead.userData = { ...createdBead.userData, ...beadData.userData };
                         }
                         
-                        console.log('✅ Bead recreated successfully at position:', createdBead.position);
+                        
                         resolve(createdBead);
                     } else {
                         console.warn('⚠️ Failed to create bead - callback returned null');

@@ -25,14 +25,14 @@ function getCurrentStringType() {
  * Set the string type and save to localStorage
  */
 function setStringType(type) {
-    console.log(`🔄 String type changing from "${currentStringType}" to "${type}"`);
+    
     
     currentStringType = type;
     
     // Save to localStorage for persistence
     try {
         localStorage.setItem('sandboxStringType', type);
-        console.log(`💾 Saved string type "${type}" to localStorage`);
+        
     } catch (e) {
         console.warn('⚠️ Could not save to localStorage:', e);
     }
@@ -122,7 +122,7 @@ function resetStringTracking() {
     hasPresetImport = false;
     localStorage.removeItem('sandboxStringType');
     currentStringType = STRING_TYPES.NONE;
-    console.log('🔄 String tracking flags reset');
+    
     updateStringType();
 }
 
@@ -135,7 +135,7 @@ function initSandboxStringType() {
         const savedType = localStorage.getItem('sandboxStringType');
         if (savedType && Object.values(STRING_TYPES).includes(savedType)) {
             currentStringType = savedType;
-            console.log(`🔄 Loaded string type "${savedType}" from localStorage`);
+            
         } else {
             currentStringType = STRING_TYPES.NONE;
         }
@@ -146,7 +146,7 @@ function initSandboxStringType() {
     
     // Update UI
     updateStringType();
-    console.log('✅ Sandbox String Type Tracker initialized');
+    
 }
 
 /**

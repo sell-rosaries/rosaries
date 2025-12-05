@@ -57,7 +57,7 @@ function placeBead() {
     if (!obj) return;
 
     if (stringPoints.length < 2) {
-        console.log("No string drawn. Please draw a string first.");
+        
         return;
     }
 
@@ -69,7 +69,7 @@ function placeBead() {
         const stringInfo = findClosestPointOnString(clickPoint);
 
         if (!stringInfo) {
-            console.log("Click point is too far from string. Click closer to the string.");
+            
             return;
         }
 
@@ -86,7 +86,7 @@ function placeBead() {
                 updateBeadCount();
                 saveState();
             } else {
-                console.log("Collision detected, bead not placed.");
+                
             }
         });
     }

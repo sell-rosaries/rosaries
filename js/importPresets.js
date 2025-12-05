@@ -170,7 +170,7 @@ function closePresetImportConfirmation() {
  * Perform the actual import - replace string with preset
  */
 function performImport(preset) {
-    console.log('Importing preset:', preset.name);
+    
 
     // Clear everything first
     clearAllBeads();
@@ -178,13 +178,13 @@ function performImport(preset) {
     // Track that preset import has occurred
     if (typeof hasPresetImport !== 'undefined') {
         hasPresetImport = true;
-        console.log('🎯 Preset import started - tracking as preset activity');
+        
     }
 
     // Set rosary mode flag for fit adjustments
-    console.log('🔍 CHECKING PRESET:', preset.name, 'IS ROSARY?', preset.name === 'Rosary');
+    
     window.rosaryModeActive = (preset.name === 'Rosary');
-    console.log('📏 *** ROSARY MODE FLAG SET TO:', window.rosaryModeActive, '***');
+    
 
     // Parse the SVG path and convert to 3D points
     const newPoints = parseSVGPath(preset.path, preset.viewBox);
@@ -217,11 +217,11 @@ function performImport(preset) {
 
     // Automatically center the imported design in current viewport
     if (typeof window.performBasicSmartFraming === 'function') {
-        console.log('🎯 Auto-fitting imported preset to current view...');
+        
         window.performBasicSmartFraming();
     }
 
-    console.log(`✓ Imported ${preset.name} preset with ${newPoints.length} points`);
+    
 }
 
 /**

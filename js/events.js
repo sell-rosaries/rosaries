@@ -24,7 +24,7 @@ document.addEventListener('click', (event) => {
     
     // If we clicked anywhere else (e.g., other toolbar buttons, empty space outside canvas, etc.)
     // Exit String Mode (which also exits Eraser Mode)
-    console.log('🖱️ Clicked outside string tools - exiting string mode');
+    
     exitStringMode();
 }, true); // Use capture phase to handle it before other specific handlers if needed
 
@@ -110,7 +110,7 @@ function addEventListeners() {
     const savedToggle = document.getElementById('saved-toggle');
     if (savedToggle) {
         savedToggle.addEventListener('click', () => {
-            console.log('💾 Saved button clicked - opening saved modal');
+            
             openSavedModal();
             // Add visual feedback
             savedToggle.style.background = 'rgba(255, 255, 255, 0.4)';
@@ -125,9 +125,9 @@ function addEventListeners() {
     const zoomOutBtn = document.getElementById('zoom-out-btn');
 
     if (zoomInBtn) {
-        console.log('Zoom in button found, setting up event listener');
+        
         zoomInBtn.addEventListener('click', (e) => {
-            console.log('Zoom in button clicked');
+            
             e.preventDefault();
             e.stopPropagation();
             zoomIn();
@@ -137,9 +137,9 @@ function addEventListeners() {
     }
 
     if (zoomOutBtn) {
-        console.log('Zoom out button found, setting up event listener');
+        
         zoomOutBtn.addEventListener('click', (e) => {
-            console.log('Zoom out button clicked');
+            
             e.preventDefault();
             e.stopPropagation();
             zoomOut();
@@ -247,7 +247,7 @@ function activateDrawStringTool() {
         importPresetsBtn.style.display = 'flex';
         // Add event listener for import presets button
         importPresetsBtn.addEventListener('click', () => {
-            console.log('🎨 Import presets button clicked');
+            
             openImportPresetsModal();
         });
     }
@@ -275,7 +275,7 @@ function onWindowResize() {
  * Zoom in - moves camera closer to the scene
  */
 function zoomIn() {
-    console.log('Zoom in function called');
+    
 
     if (typeof camera === 'undefined' || camera === null) {
         console.error('Camera not available');
@@ -294,11 +294,11 @@ function zoomIn() {
 
         // Method 1: Try dollyIn if available
         if (typeof controls.dollyIn === 'function') {
-            console.log('Using dollyIn method');
+            
             controls.dollyIn(1.2);
         } else {
             // Method 2: Direct camera zoom modification for OrthographicCamera
-            console.log('Using direct camera zoom modification');
+            
             camera.zoom = Math.min(camera.zoom * 1.2, 50); // Zoom in by 20%, max zoom 50x (was 5x)
             camera.updateProjectionMatrix();
         }
@@ -306,7 +306,7 @@ function zoomIn() {
         controls.update();
         controls.enabled = wasEnabled; // Restore original state
 
-        console.log('Zoom in completed successfully, camera.zoom:', camera.zoom);
+        
     } catch (error) {
         console.error('Zoom in error:', error);
     }
@@ -316,7 +316,7 @@ function zoomIn() {
  * Zoom out - moves camera farther from the scene  
  */
 function zoomOut() {
-    console.log('Zoom out function called');
+    
 
     if (typeof camera === 'undefined' || camera === null) {
         console.error('Camera not available');
@@ -335,11 +335,11 @@ function zoomOut() {
 
         // Method 1: Try dollyOut if available
         if (typeof controls.dollyOut === 'function') {
-            console.log('Using dollyOut method');
+            
             controls.dollyOut(1.2);
         } else {
             // Method 2: Direct camera zoom modification for OrthographicCamera
-            console.log('Using direct camera zoom modification');
+            
             camera.zoom = Math.max(camera.zoom / 1.2, 0.01); // Zoom out by 20%, min zoom 0.01x (was 0.5x)
             camera.updateProjectionMatrix();
         }
@@ -347,7 +347,7 @@ function zoomOut() {
         controls.update();
         controls.enabled = wasEnabled; // Restore original state
 
-        console.log('Zoom out completed successfully, camera.zoom:', camera.zoom);
+        
     } catch (error) {
         console.error('Zoom out error:', error);
     }

@@ -7,7 +7,7 @@
  * Show confirmation dialog for importing a design
  */
 function showImportConfirmation(designId, designName) {
-    console.log('🗋️ Show import confirmation for:', designName);
+    
     
     // Create confirmation dialog
     const dialog = document.createElement('div');
@@ -67,20 +67,20 @@ function showImportConfirmation(designId, designName) {
     
     // Handle button clicks
     dialog.querySelector('#confirm-import-btn').addEventListener('click', () => {
-        console.log('✅ Confirmed import of design:', designName);
+        
         document.body.removeChild(dialog);
         importDesign(designId);
     });
     
     dialog.querySelector('#cancel-import-btn').addEventListener('click', () => {
-        console.log('❌ Cancelled import of design:', designName);
+        
         document.body.removeChild(dialog);
     });
     
     // Close on backdrop click
     dialog.addEventListener('click', (e) => {
         if (e.target === dialog) {
-            console.log('❌ Cancelled import (backdrop click)');
+            
             document.body.removeChild(dialog);
         }
     });
@@ -90,7 +90,7 @@ function showImportConfirmation(designId, designName) {
  * Show confirmation dialog for deleting a design
  */
 function showDeleteConfirmation(designId, designName) {
-    console.log('🗑️ Show delete confirmation for:', designName);
+    
     
     // Create confirmation dialog
     const dialog = document.createElement('div');
@@ -150,20 +150,20 @@ function showDeleteConfirmation(designId, designName) {
     
     // Handle button clicks
     dialog.querySelector('#confirm-delete-btn').addEventListener('click', () => {
-        console.log('✅ Confirmed delete of design:', designName);
+        
         document.body.removeChild(dialog);
         confirmDelete(designId);
     });
     
     dialog.querySelector('#cancel-delete-btn').addEventListener('click', () => {
-        console.log('❌ Cancelled delete of design:', designName);
+        
         document.body.removeChild(dialog);
     });
     
     // Close on backdrop click
     dialog.addEventListener('click', (e) => {
         if (e.target === dialog) {
-            console.log('❌ Cancelled delete (backdrop click)');
+            
             document.body.removeChild(dialog);
         }
     });
@@ -447,7 +447,7 @@ function showDesignPreviewModal(designId, designName) {
     // Store current preview data globally
     window.currentPreviewDesign = { id: designId, name: designName };
     
-    console.log('🎯 Preview modal opened for design:', designId);
+    
 }
 
 /**
@@ -458,7 +458,7 @@ function closeDesignPreviewModal() {
     if (modal) {
         modal.remove();
         window.currentPreviewDesign = null;
-        console.log('🔒 Preview modal closed');
+        
     }
 }
 
@@ -466,7 +466,7 @@ function closeDesignPreviewModal() {
  * Import design from preview modal
  */
 function importFromPreview(designId) {
-    console.log('📥 Import from preview clicked:', designId);
+    
     
     // Get design info for confirmation
     const savedDesigns = getSavedDesigns();

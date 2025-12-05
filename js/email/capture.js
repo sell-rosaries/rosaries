@@ -110,14 +110,14 @@ function captureDesignImage() {
             x: -appliedTranslation.x,
             z: -appliedTranslation.z
         });
-        console.log('↩️ Restored design position after capture');
+        
     }
 
     renderer.render(scene, camera);
 
     // Log size for debugging
     const imageSizeKB = (imageData.length * 0.75) / 1024;
-    console.log(`Image captured: ${imageSizeKB.toFixed(1)}KB at ${quality} quality (${newWidth}x${newHeight})`);
+    
 
     return imageData;
 }
@@ -144,8 +144,8 @@ function getCurrentCameraViewportCenter() {
     const centerX = camera.position.x; // X position tells us the pan offset
     const centerZ = camera.position.z; // Z position tells us the pan offset
 
-    console.log('📊 Viewport dimensions:', { width: viewWidth, height: viewHeight });
-    console.log('📊 Camera position (pan offset):', { x: centerX, z: centerZ });
+    
+    
 
     return {
         x: centerX,
@@ -261,24 +261,24 @@ function translateDesignGeometry(translation) {
  * Safe like preset imports - no rotation, no corruption
  */
 function frameDesignForCapture() {
-    console.log('🧪 EMAIL FRAMING: Smart framing with design repositioning to current view');
+    
 
     // Check if we have any design elements
     const hasDesign = (typeof stringPoints !== 'undefined' && stringPoints.length > 0) ||
         (typeof beads !== 'undefined' && beads.length > 0);
 
     if (!hasDesign) {
-        console.log('⚠️ No design elements to fit');
+        
         return;
     }
 
     // STEP 1: Get current camera viewport center in world coordinates
     const cameraCenter = getCurrentCameraViewportCenter();
-    console.log('📍 Camera viewport center:', cameraCenter);
+    
 
     // STEP 2: Calculate current design center
     const designCenter = calculateCurrentDesignCenter();
-    console.log('🎯 Current design center:', designCenter);
+    
 
     // STEP 3: Translate design geometry to center under camera view
     const translation = {
@@ -286,11 +286,11 @@ function frameDesignForCapture() {
         z: cameraCenter.z - designCenter.z
     };
 
-    console.log('📐 Translation needed:', translation);
+    
 
     if (translation.x !== 0 || translation.z !== 0) {
         translateDesignGeometry(translation);
-        console.log('✅ Design geometry translated by:', translation);
+        
     }
 
     // STEP 4: Calculate optimal zoom (20% screen coverage for "zoomed out" look) using new bounds
@@ -308,14 +308,14 @@ function frameDesignForCapture() {
     // FIX: Lowered min zoom from 0.5 to 0.1 to allow zooming out for large (5x) designs.
     const optimalZoom = Math.min(Math.max(camera.zoom * zoomRatio * 2.0, 0.1), 5.0);
 
-    console.log('📏 EMAIL FRAMING: Calculated optimal zoom:', optimalZoom.toFixed(2));
+    
 
     // STEP 5: Apply zoom adjustment
     camera.zoom = optimalZoom;
     camera.updateProjectionMatrix();
 
-    console.log('✅ EMAIL FRAMING complete: Design positioned under camera view + zoom:', camera.zoom.toFixed(2));
-    console.log('🔒 Design now appears in current viewport - users can still pan for detail exploration');
+    
+    
 
     return translation; // Return translation so it can be reversed if needed
 }

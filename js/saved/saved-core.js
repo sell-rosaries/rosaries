@@ -42,7 +42,7 @@ function openSavedModal() {
  * Close the saved designs modal - FULL CLEANUP
  */
 function closeSavedModal() {
-    console.log('🔄 Closing saved modal - cleaning up all delete mode state...');
+    
 
     // If import mode is active, fully exit it
     if (importModeActive) {
@@ -80,7 +80,7 @@ function closeSavedModal() {
         modal.classList.remove('active');
     }
 
-    console.log('✅ Saved modal closed and fully cleaned up');
+    
 }
 
 /**
@@ -113,9 +113,9 @@ function saveCurrentDesign(options = {}) {
         }
 
         setTimeout(() => {
-            console.log('🔍 Save: Starting capture process...');
-            console.log('📊 Save: Design has', stringPoints.length, 'string points,', beads.length, 'beads');
-            console.log('📍 Save: Current camera position:', { x: camera.position.x, z: camera.position.z });
+            
+            
+            
 
             const screenshot = captureCanvasScreenshot();
 
@@ -126,11 +126,8 @@ function saveCurrentDesign(options = {}) {
                 return;
             }
 
-            console.log('✅ Save: Screenshot captured successfully');
-            console.log('📊 Save: Current design positions after centering:', {
-                stringPoint0: stringPoints.length > 0 ? { x: stringPoints[0].x, z: stringPoints[0].z } : 'none',
-                bead0: beads.length > 0 ? { x: beads[0].position.x, z: beads[0].position.z } : 'none'
-            });
+            
+            
 
             const designData = {
                 id: generateUniqueId(),
@@ -162,7 +159,7 @@ function saveCurrentDesign(options = {}) {
             // Refresh the modal
             populateSavedModal();
 
-            console.log('✅ Design saved:', designData.name);
+            
 
         }, 100); // Small delay to ensure renderer is ready
 
@@ -397,7 +394,7 @@ function showComingSoon(message) {
 function generateThumbnailsForSavedDesigns() {
     // No need for manual generation since we're using actual screenshots
     // This function can remain for future enhancements if needed
-    console.log('✅ Thumbnail generation complete - using actual screenshots');
+    
 }
 
 // Make function globally available for language system

@@ -10,7 +10,7 @@ function updateBeadCount() {
 function updateSelectionIndicator() {
     const obj = getObjectById(selectedObjectId);
     if (obj && selectedSize) {
-        console.log(`Selected: ${obj.name} ${selectedSize}mm`);
+        
     }
 }
 

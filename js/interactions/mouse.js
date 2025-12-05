@@ -95,7 +95,7 @@ function onCanvasMouseDown(event) {
     // Stop gravity if active
     if (window.gravityState && window.gravityState.active) {
         window.gravityState.active = false;
-        console.log('🛑 Gravity interrupted by user interaction');
+        
     }
 
     const coords = getNormalizedCoords(event);
@@ -122,7 +122,7 @@ function onCanvasMouseDown(event) {
                 eraserDragOffset.y = 0;
 
                 hasErasedInThisStroke = false;
-                console.log('✏️ Grabbed Eraser Wand');
+                
             }
         }
         return;
@@ -160,7 +160,7 @@ function onCanvasMouseDown(event) {
             // Track that pen drawing has started AFTER adding the point
             if (typeof hasPenDrawing !== 'undefined') {
                 hasPenDrawing = true;
-                console.log('✏️ Pen drawing started - tracking as pen activity');
+                
                 if (typeof updateStringType === 'function') {
                     updateStringType();
                 }
@@ -443,7 +443,7 @@ function onCanvasMouseUp(event) {
     if (isDraggingEraser) {
         isDraggingEraser = false;
         controls.enabled = true;
-        console.log('✏️ Released Eraser Wand');
+        
         if (hasErasedInThisStroke) {
             shouldSave = true;
         }
@@ -468,15 +468,15 @@ function onCanvasMouseUp(event) {
 
                 // If click was NOT on canvas, let document handlers handle it
                 if (eventTarget !== canvas) {
-                    console.log('❌ Click was not on canvas - letting document handlers handle it');
+                    
                     return;
                 }
 
-                console.log('🧠 No bead clicked in delete mode - checking if should deactivate...');
+                
 
                 // Don't deactivate during active 2-finger gestures OR recently ended gestures
                 if (typeof touchGestureActive !== 'undefined' && touchGestureActive) {
-                    console.log('❌ No deactivation - touch gesture active (pinch/zoom)');
+                    
                     return;
                 }
 
@@ -486,23 +486,23 @@ function onCanvasMouseUp(event) {
                     const twoFingerGestureCooldown = 30; // 30ms cooldown
 
                     if (timeSinceTwoFingerGesture < twoFingerGestureCooldown) {
-                        console.log('❌ No deactivation - recent 2-finger gesture ended ' + timeSinceTwoFingerGesture + 'ms ago');
+                        
                         return;
                     }
                 }
 
                 // Raycast to check if click was on empty canvas space
                 const planeIntersects = raycaster.intersectObject(plane);
-                console.log('Canvas empty space check - plane intersects:', planeIntersects.length);
+                
 
                 if (planeIntersects.length > 0) {
                     // Clicked on empty canvas space - should deactivate
-                    console.log('✅ CLICKED ON EMPTY CANVAS - DEACTIVATING DELETE MODE');
+                    
                     exitDeleteMode();
                     showDeleteModeDeactivatedToast();
-                    console.log('🎉 Delete mode deactivated via canvas click');
+                    
                 } else {
-                    console.log('❌ Clicked outside canvas view - no action');
+                    
                 }
             } else {
                 hideRotationSlider();
@@ -530,7 +530,7 @@ function onCanvasMouseUp(event) {
     if (isDragging && hasDragged && draggedBead) {
         // SNAP ON RELEASE: Resolve collisions
         if (checkBeadCollision(draggedBead, [draggedBead])) {
-            console.log('💥 Collision detected on release - finding nearest free space...');
+            
 
             if (!currentPathData) {
                 currentPathData = calculatePathDataLocal();
@@ -567,7 +567,7 @@ function onCanvasMouseUp(event) {
                 }
 
                 if (found) {
-                    console.log('✅ Found free space!');
+                    
                 } else {
                     console.warn('⚠️ Could not find free space, reverting to previous position');
                     if (draggedBeadPreviousPosition) {

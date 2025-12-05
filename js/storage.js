@@ -35,7 +35,7 @@ function autoSaveDesign() {
         };
 
         localStorage.setItem(STORAGE_KEYS.AUTOSAVE, JSON.stringify(designData));
-        console.log('✓ Design auto-saved');
+        
     } catch (e) {
         console.warn('Could not auto-save design:', e);
     }
@@ -48,12 +48,12 @@ async function autoRestoreDesign() {
     try {
         const saved = localStorage.getItem(STORAGE_KEYS.AUTOSAVE);
         if (!saved) {
-            console.log('No saved design found');
+            
             return false;
         }
 
         const designData = JSON.parse(saved);
-        console.log('📂 Restoring saved design from:', designData.savedAt);
+        
 
         // Restore string points
         stringPoints = designData.stringPoints.map(p => new THREE.Vector3(p.x, p.y, p.z));
@@ -66,7 +66,7 @@ async function autoRestoreDesign() {
 
         // Restore rosary mode flag if available
         window.rosaryModeActive = designData.rosaryModeActive || false;
-        console.log('📏 Restored rosary mode flag:', window.rosaryModeActive);
+        
 
         // Clear existing beads before restoring to prevent duplication
         // We must do this because we are about to push new beads to the array
@@ -103,7 +103,7 @@ async function autoRestoreDesign() {
         await Promise.all(beadPromises);
 
         updateBeadCount();
-        console.log('✅ Design restored successfully');
+        
         return true;
 
     } catch (e) {
@@ -197,7 +197,7 @@ function getFavoriteBeads() {
 function clearAutoSave() {
     try {
         localStorage.removeItem(STORAGE_KEYS.AUTOSAVE);
-        console.log('Auto-save cleared');
+        
     } catch (e) {
         console.warn('Could not clear auto-save:', e);
     }

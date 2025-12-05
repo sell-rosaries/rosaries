@@ -37,13 +37,13 @@ window.gravityState = kinematicState;
  * Initialize the custom size interface
  */
 function initCustomSize() {
-    console.log('🎛️ Initializing custom size control...');
+    
     addCustomSizeHTML();
     addCustomSizeStyles();
     setupFitButtonEvents();
     setupToggleEvents(); // Add toggle events
     // Slider events are now handled by stringSize.js via initStringSlider()
-    console.log('✅ Custom size control initialized');
+    
 }
 
 /**
@@ -56,7 +56,7 @@ function setupToggleEvents() {
     if (toggleBtn && container) {
         toggleBtn.addEventListener('click', () => {
             container.classList.toggle('collapsed');
-            console.log('↔️ Size control toggled:', container.classList.contains('collapsed') ? 'Hidden' : 'Visible');
+            
         });
     }
 }
@@ -287,7 +287,7 @@ function setupFitButtonEvents() {
     const fitButton = document.getElementById('fit-button');
 
     fitButton.addEventListener('click', async () => {
-        console.log('🎯 Custom size FIT button clicked');
+        
         fitButton.style.transform = 'translateY(-2px) scale(0.95)';
         setTimeout(() => fitButton.style.transform = '', 150);
 
@@ -308,7 +308,7 @@ function setupFitButtonEvents() {
                     const speedMultiplier = 1 + (sliderPercentage / 100) * 4.0; // 1.0x to 5.0x
                     const gravitySpeed = 9.0 * speedMultiplier;
 
-                    console.log(`⚡ *** FIT GRAVITY SPEED: ${gravitySpeed.toFixed(1)} *** (slider: ${sliderPercentage.toFixed(0)}%, multiplier: ${speedMultiplier.toFixed(2)}x)`);
+                    
 
                     // Fit button uses scaled speed and saves on completion (auto-save)
                     await startGravitySimulation({ speed: gravitySpeed, saveOnComplete: true });
@@ -398,7 +398,7 @@ async function startGravitySimulation(options = {}) {
         return;
     }
 
-    console.log('🌍 Starting kinematic slide simulation...', options);
+    
 
     const path = calculatePathData();
     if (!path) return;
@@ -521,7 +521,7 @@ function updateGravitySimulation() {
     if (now - window.gravityStartTime > 10000) {
         kinematicState.active = false;
         if (kinematicState.saveOnComplete && typeof window.autoSaveDesign === 'function') {
-            console.log('💾 Gravity timeout - triggering auto-save');
+            
             window.autoSaveDesign();
         }
         return;
@@ -639,12 +639,12 @@ function updateGravitySimulation() {
                 window.syncBeadAttachmentData();
             }
 
-            console.log('💾 Gravity settled - scheduling save in 5s');
+            
 
             // Clear any existing timer
             if (sliderSaveTimer) {
                 clearTimeout(sliderSaveTimer);
-                console.log('🔄 Cancelled previous save timer');
+                
             }
 
             // Mark that we have a pending save from slider
@@ -654,7 +654,7 @@ function updateGravitySimulation() {
             sliderSaveTimer = setTimeout(() => {
                 // Only save if still pending (not cancelled by other save)
                 if (sliderSavePending) {
-                    console.log('💾 Executing delayed save');
+                    
                     window.autoSaveDesign();
                     sliderSavePending = false;
                 }
@@ -853,7 +853,7 @@ window.cancelSliderSave = function () {
         clearTimeout(sliderSaveTimer);
         sliderSaveTimer = null;
         sliderSavePending = false;
-        console.log('🚫 Slider save cancelled (save triggered elsewhere)');
+        
     }
 };
 

@@ -31,7 +31,7 @@ function initSettings() {
     // Apply initial translations
     updateSettingsLanguage();
 
-    console.log('⚙️ Settings module initialized');
+    
 }
 
 /**

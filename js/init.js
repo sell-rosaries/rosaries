@@ -67,7 +67,7 @@ async function main() {
         
         // Auto-fit design if one was restored
         if (restored && typeof window.performBasicSmartFraming === 'function') {
-            console.log('🎯 Auto-fitting restored design to viewport...');
+            
             setTimeout(() => {
                 const stringType = window.getCurrentStringType ? window.getCurrentStringType() : 'preset';
                 const mode = stringType === 'pen' ? 'pen-mode' : 'preset';

@@ -112,7 +112,7 @@ function performResetAll() {
         controls.target.set(0, 0, 0);
         controls.update();
 
-        console.log('📸 Camera and controls reset to default');
+        
     }
 
     // Force render to flush state
@@ -216,20 +216,20 @@ function enterDeleteMode() {
 }
 
 function exitDeleteMode() {
-    console.log('🔄 ENTERING exitDeleteMode()');
-    console.log('Before: isDeleteMode =', isDeleteMode);
-    console.log('Before: has delete-mode class?', document.body.classList.contains('delete-mode'));
+    
+    
+    
 
     isDeleteMode = false;
     document.body.classList.remove('delete-mode');
 
-    console.log('After setting isDeleteMode = false:', isDeleteMode);
-    console.log('After removing class, has delete-mode class?', document.body.classList.contains('delete-mode'));
+    
+    
 
-    console.log('Removing delete markers...');
+    
     removeDeleteMarkers();
 
-    console.log('Cleaning up event listeners...');
+    
     // Clean up delete mode event listeners
     cleanupDeleteModeEventListeners();
 
@@ -238,7 +238,7 @@ function exitDeleteMode() {
     touchCount = 0;
     twoFingerGestureTimestamp = 0;
 
-    console.log('✅ exitDeleteMode() completed');
+    
 }
 
 function showDeleteModeToast() {
@@ -355,19 +355,19 @@ function trackTouchGestures(event) {
 function shouldDeactivateDeleteMode(target, event) {
     // Don't deactivate during active 2-finger gestures
     if (typeof touchGestureActive !== 'undefined' && touchGestureActive) {
-        console.log('❌ No deactivation - touch gesture active');
+        
         return false;
     }
 
     // Never deactivate when clicking zoom buttons (+/-)
     if (target.closest('#zoom-in-btn') || target.closest('#zoom-out-btn')) {
-        console.log('No deactivation - clicked zoom button');
+        
         return false;
     }
 
     // Don't deactivate when clicking zoom controls container or nearby instruction areas
     if (target.closest('#canvas-zoom-controls') || target.closest('#canvas-info')) {
-        console.log('No deactivation - clicked zoom controls/info');
+        
         return false;
     }
 
@@ -377,16 +377,16 @@ function shouldDeactivateDeleteMode(target, event) {
 
         if (canvas && typeof mouse !== 'undefined' && typeof raycaster !== 'undefined' && typeof beads !== 'undefined') {
             // This is a canvas click - check if it hit a bead using raycasting
-            console.log('Canvas click detected - checking for beads...');
+            
             const coords = getNormalizedCoords(event);
             mouse.x = coords.x;
             mouse.y = coords.y;
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(beads);
 
-            console.log('Raycasting result - intersects:', intersects.length);
+            
             if (intersects.length > 0) {
-                console.log('Clicked on a bead - no deactivation');
+                
                 return false;
             } else {
                 // Additional protection for canvas clicks only: don't deactivate if a 2-finger gesture recently ended
@@ -395,22 +395,22 @@ function shouldDeactivateDeleteMode(target, event) {
                     const twoFingerGestureCooldown = 30; // 30ms cooldown
 
                     if (timeSinceTwoFingerGesture < twoFingerGestureCooldown) {
-                        console.log('❌ No deactivation - recent 2-finger gesture ended ' + timeSinceTwoFingerGesture + 'ms ago');
+                        
                         return false;
                     }
                 }
 
-                console.log('Clicked on empty canvas - should deactivate');
+                
                 return true;
             }
         } else {
             // Clicked in canvas container but no canvas element found - deactivate
-            console.log('Canvas container clicked but no canvas - should deactivate');
+            
             return true;
         }
     }
 
-    console.log('Non-canvas click - should deactivate');
+    
     // For all other clicks (menus, toolbars, empty space, etc.) - DEACTIVATE
     return true;
 }
@@ -421,33 +421,33 @@ function shouldDeactivateDeleteMode(target, event) {
  */
 function handleDeleteModeClick(event) {
     if (!isDeleteMode) {
-        console.log('Click ignored - delete mode not active');
+        
         return;
     }
 
     const target = event.target;
-    console.log('=== DELETE MODE CLICK DEBUG ===');
-    console.log('Target:', target.tagName, 'ID:', target.id, 'Class:', target.className);
-    console.log('Delete mode active:', isDeleteMode);
-    console.log('Touch gesture active:', touchGestureActive);
-    console.log('Event type:', event.type);
+    
+    
+    
+    
+    
 
     // Check if we should deactivate based on click target and event
     const shouldDeactivate = shouldDeactivateDeleteMode(target, event);
-    console.log('Should deactivate:', shouldDeactivate);
+    
 
     if (shouldDeactivate) {
-        console.log('✅ DEACTIVATING DELETE MODE - target:', target.tagName, target.id, target.className);
-        console.log('About to call exitDeleteMode()...');
+        
+        
         exitDeleteMode();
-        console.log('exitDeleteMode() completed, isDeleteMode is now:', isDeleteMode);
-        console.log('About to show deactivation toast...');
+        
+        
         showDeleteModeDeactivatedToast();
-        console.log('Deactivation toast shown');
+        
     } else {
-        console.log('❌ NOT deactivating - clicked on protected element:', target.tagName, target.id, target.className);
+        
     }
-    console.log('=== END DEBUG ===');
+    
 }
 
 /**

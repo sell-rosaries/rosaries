@@ -24,7 +24,7 @@ function generateDesignCardHTML(design, isPopulated = false) {
     const designLabel = window.getTranslation('design-singular') || 'Design';
     const localizedName = `${designLabel} ${designSlotNumber}`;
     
-    console.log('🎯 Generated card for design:', localizedName, 'isPopulated:', isPopulated);
+    
     
     return `
         <div class="${cardClass}" data-design-id="${design.id}" data-design-name="${design.name}">
@@ -96,7 +96,7 @@ function setupDesignCardClickListeners() {
             const designId = card.getAttribute('data-design-id');
             const designName = card.getAttribute('data-design-name');
             
-            console.log('🎯 Design card clicked:', designId, designName);
+            
             
             // Handle different modes
             if (importModeActive) {

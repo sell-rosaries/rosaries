@@ -24,7 +24,7 @@ window.initStringSlider = function () {
         }
     }
     isInitialized = true;
-    console.log('📏 String size slider initialized');
+    
 };
 
 /**
@@ -45,7 +45,7 @@ window.resetSliderBase = function () {
     baseStringPoints = stringPoints.map(p => p.clone());
     window.baseStringPoints = baseStringPoints; // Update global reference
 
-    console.log('📏 String size base reset. Points:', baseStringPoints.length);
+    
 };
 
 /**
@@ -56,7 +56,7 @@ window.resetSliderBase = function () {
 window.restoreSliderState = function (savedPercentage) {
     if (typeof stringPoints === 'undefined' || stringPoints.length === 0) return;
 
-    console.log(`📏 Restoring slider state: ${savedPercentage}%`);
+    
     window.currentStringScale = savedPercentage;
 
     // 1. Calculate the scale factor that was applied
@@ -236,7 +236,7 @@ function setupSliderEvents() {
         const speedMultiplier = 1 + (currentPercentage / 100) * 4.0; // 1.0x to 5.0x
         const gravitySpeed = 9.0 * speedMultiplier;
 
-        console.log(`⚡ Gravity Speed: ${gravitySpeed.toFixed(1)} (Size: ${currentPercentage.toFixed(0)}%)`);
+        
 
         if (typeof window.startGravitySimulation === 'function') {
             window.startGravitySimulation({ speed: gravitySpeed, saveOnComplete: true });
@@ -582,12 +582,7 @@ function calculateMinScale() {
     const minScale = currentScale * maxRequiredRatio;
 
     if (criticalPair && maxRequiredRatio > 1.1) {
-        console.log('🔴 Critical constraint:', {
-            ...criticalPair,
-            currentScale: currentScale.toFixed(3),
-            requiredRatio: maxRequiredRatio.toFixed(3),
-            minScale: minScale.toFixed(3)
-        });
+        
     }
 
     return minScale;
@@ -602,14 +597,14 @@ window.syncBeadAttachmentData = function () {
     if (typeof beads === 'undefined' || !beads || beads.length === 0) return;
     if (typeof stringPoints === 'undefined' || !stringPoints || stringPoints.length < 2) return;
 
-    console.log('🔄 Syncing bead attachment data for', beads.length, 'beads');
+    
 
     // Check if gravity state has distance info (preferred method)
     const hasGravityData = window.gravityState && window.gravityState.beads && window.gravityState.beads.length > 0;
 
     if (hasGravityData) {
         // Use gravity's distance values which already account for non-overlapping positions
-        console.log('Using gravity distance data for accurate positioning');
+        
 
         // Calculate total string length
         let totalLength = 0;
@@ -650,7 +645,7 @@ window.syncBeadAttachmentData = function () {
         });
     } else {
         // Fallback: Calculate from current positions (less accurate)
-        console.log('Using position-based calculation (gravity data not available)');
+        
 
         beads.forEach(bead => {
             const beadPos = bead.position;
@@ -685,7 +680,7 @@ window.syncBeadAttachmentData = function () {
         });
     }
 
-    console.log('✅ Bead attachment data synced');
+    
 };
 
 /**

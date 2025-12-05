@@ -7,11 +7,11 @@
  * Loads inventory automatically from Jularies folder structure.
  */
 async function loadConfig() {
-    console.log('🔍 Loading inventory...');
+    
     
     try {
         const url = 'inventory-index.json?t=' + Date.now();
-        console.log('Fetching from:', url);
+        
         
         const response = await fetch(url);
         
@@ -20,7 +20,7 @@ async function loadConfig() {
         }
         
         const index = await response.json();
-        console.log('✓ Loaded index:', index);
+        
         
         categories = [];
         objects = [];
@@ -34,7 +34,7 @@ async function loadConfig() {
                 createdAt: new Date().toISOString()
             });
             
-            console.log(`📂 Category: ${cat.name} (${cat.objects.length} objects)`);
+            
             
             for (const filename of cat.objects) {
                 // Try to parse filename with sizes (e.g., "gem_2,4,6.png")
@@ -71,22 +71,22 @@ async function loadConfig() {
                     createdAt: new Date().toISOString()
                 });
                 
-                console.log(`  ✓ ${objectName} (${sizes.join(', ')}mm) → ${imagePath}`);
+                
             }
         }
         
-        console.log(`✅ Loaded ${categories.length} categories, ${objects.length} objects`);
+        
         
     } catch (error) {
         console.error("❌ Error loading inventory:", error);
-        console.log('Trying fallback to beads-config.json...');
+        
         
         try {
             const response = await fetch('beads-config.json?t=' + Date.now());
             const data = await response.json();
             categories = data.categories || [];
             objects = data.objects || [];
-            console.log('✓ Loaded from beads-config.json:', categories.length, 'categories,', objects.length, 'objects');
+            
         } catch (e) {
             console.error("❌ Fallback also failed:", e);
             categories = [];
