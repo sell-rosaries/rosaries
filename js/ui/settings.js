@@ -31,7 +31,7 @@ function initSettings() {
     // Apply initial translations
     updateSettingsLanguage();
 
-
+    
 }
 
 /**
@@ -55,7 +55,7 @@ function updateSettingsLanguage() {
         // Assume first is General, second is Downloads based on order
         const generalTitle = sections[0].querySelector('.settings-section-title');
         if (generalTitle) generalTitle.textContent = window.getTranslation('settings-general');
-
+        
         const downloadsTitle = sections[1].querySelector('.settings-section-title');
         if (downloadsTitle) downloadsTitle.textContent = window.getTranslation('settings-downloads');
     }
@@ -64,7 +64,7 @@ function updateSettingsLanguage() {
     updateText('.settings-label', 'settings-language');
     updateText('.settings-desc', 'settings-downloads-desc');
     updateText('label[for="apk-version-select"]', 'settings-select-version');
-
+    
     // Update Download Button
     const downloadBtn = document.getElementById('download-apk-btn');
     if (downloadBtn) {
@@ -76,10 +76,10 @@ function updateSettingsLanguage() {
     // Update Loading Option if present
     const select = document.getElementById('apk-version-select');
     if (select && select.options.length > 0 && select.options[0].disabled) {
-        // Only update if it's the placeholder
-        if (select.options[0].value === "") {
-            select.options[0].textContent = window.getTranslation('settings-loading');
-        }
+         // Only update if it's the placeholder
+         if (select.options[0].value === "") {
+             select.options[0].textContent = window.getTranslation('settings-loading');
+         }
     }
 }
 
@@ -91,7 +91,7 @@ function openSettingsModal() {
     if (!modal) return;
 
     modal.classList.add('active');
-
+    
     // Load APK index if not loaded yet
     if (!apkIndex) {
         loadApkIndex();
@@ -118,7 +118,7 @@ async function loadApkIndex() {
     try {
         // Add cache buster to ensure fresh data
         const response = await fetch('apk-index.json?t=' + Date.now());
-
+        
         if (!response.ok) {
             throw new Error('Failed to load APK index');
         }
@@ -128,11 +128,10 @@ async function loadApkIndex() {
 
     } catch (error) {
         console.warn('⚠️ Could not load APK index:', error);
-
+        
         // Fallback UI
-        const noUpdatesText = window.getTranslation ? window.getTranslation('settings-no-updates') : 'No updates found';
-        select.innerHTML = `<option value="" disabled selected>${noUpdatesText}</option>`;
-
+        select.innerHTML = '<option value="" disabled selected>No updates found</option>';
+        
         // Check if directories exist by trying to fetch known files (blind guess)
         // or just show empty state.
         // For now, we assume if index fails, we can't reliably offer downloads.
@@ -153,8 +152,8 @@ function populateApkDropdown() {
     // Add Latest options
     if (apkIndex.latest && apkIndex.latest.length > 0) {
         const optGroup = document.createElement('optgroup');
-        optGroup.label = window.getTranslation ? window.getTranslation('settings-latest-version') : 'Latest Version';
-
+        optGroup.label = 'Latest Version';
+        
         apkIndex.latest.forEach(filename => {
             const option = document.createElement('option');
             option.value = `apk/latest/${filename}`;
@@ -163,15 +162,15 @@ function populateApkDropdown() {
             optGroup.appendChild(option);
             hasOptions = true;
         });
-
+        
         select.appendChild(optGroup);
     }
 
     // Add Old options
     if (apkIndex.old && apkIndex.old.length > 0) {
         const optGroup = document.createElement('optgroup');
-        optGroup.label = window.getTranslation ? window.getTranslation('settings-previous-versions') : 'Previous Versions';
-
+        optGroup.label = 'Previous Versions';
+        
         apkIndex.old.forEach(filename => {
             const option = document.createElement('option');
             option.value = `apk/old/${filename}`;
@@ -180,7 +179,7 @@ function populateApkDropdown() {
             optGroup.appendChild(option);
             hasOptions = true;
         });
-
+        
         select.appendChild(optGroup);
     }
 
@@ -188,8 +187,7 @@ function populateApkDropdown() {
         select.selectedIndex = 0; // Select first option
         updateDownloadButton(); // Update button state
     } else {
-        const noApksText = window.getTranslation ? window.getTranslation('settings-no-apks') : 'No APKs available';
-        select.innerHTML = `<option value="" disabled selected>${noApksText}</option>`;
+        select.innerHTML = '<option value="" disabled selected>No APKs available</option>';
         document.getElementById('download-apk-btn').disabled = true;
     }
 }
@@ -201,17 +199,16 @@ function updateDownloadButton() {
     const select = document.getElementById('apk-version-select');
     const btn = document.getElementById('download-apk-btn');
     const filenameDisplay = document.getElementById('apk-filename-display');
-
+    
     if (select && btn && select.value) {
         btn.disabled = false;
-
+        
         // Get selected option
         const option = select.options[select.selectedIndex];
         const filename = option.getAttribute('data-filename');
-
+        
         if (filenameDisplay) {
-            const fileText = window.getTranslation ? window.getTranslation('settings-file') : 'File';
-            filenameDisplay.textContent = `${fileText}: ${filename}`;
+            filenameDisplay.textContent = `File: ${filename}`;
         }
     } else {
         btn.disabled = true;
@@ -230,14 +227,13 @@ function handleApkDownload() {
     const link = document.createElement('a');
     link.href = filePath;
     link.download = ''; // Browser will auto-detect filename from URL usually
-
+    
     // For visual feedback
     const btn = document.getElementById('download-apk-btn');
     const originalText = btn.innerHTML;
-
-    const downloadingText = window.getTranslation ? window.getTranslation('settings-downloading') : 'Downloading...';
-    btn.innerHTML = `<span class="btn-text">${downloadingText}</span>`;
-
+    
+    btn.innerHTML = '<span class="btn-text">Downloading...</span>';
+    
     setTimeout(() => {
         btn.innerHTML = originalText;
     }, 2000);
@@ -252,4 +248,3 @@ window.initSettings = initSettings;
 window.openSettingsModal = openSettingsModal;
 window.closeSettingsModal = closeSettingsModal;
 window.updateSettingsLanguage = updateSettingsLanguage;
-
