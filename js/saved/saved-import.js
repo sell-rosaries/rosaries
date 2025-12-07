@@ -21,7 +21,7 @@ function toggleImportMode() {
             `;
             if (typeof updateImportButtonText === 'function') updateImportButtonText();
         }
-        showSaveSuccess('Import mode deactivated');
+        showSaveSuccess((typeof window.getTranslation === 'function' ? window.getTranslation('import-mode-deactivated') : null) || 'Import mode deactivated');
     } else {
         importModeActive = true;
         const importBtn = document.getElementById('import-design-btn');
@@ -39,7 +39,7 @@ function toggleImportMode() {
             `;
             if (typeof updateImportButtonText === 'function') updateImportButtonText();
         }
-        showSaveSuccess('Click saved design to import!');
+        showSaveSuccess((typeof window.getTranslation === 'function' ? window.getTranslation('import-mode-activated') : null) || 'Click saved design to import!');
     }
 }
 
@@ -47,7 +47,7 @@ function importDesign(designId) {
     const savedDesigns = getSavedDesigns();
     const design = savedDesigns.find(d => d.id === designId);
     if (!design) {
-        showSaveError('Design not found.');
+        showSaveError((typeof window.getTranslation === 'function' ? window.getTranslation('design-not-found') : null) || 'Design not found.');
         return;
     }
     clearCurrentDesign();
@@ -58,15 +58,17 @@ function startImportProcess(design) {
     if (typeof window.setStringType === 'function') {
         window.setStringType(design.stringType || 'preset');
     }
-    
-    // Import string
+
+    // Import string - MUST use THREE.Vector3 for proper interaction
     if (design.stringPoints) {
         stringPoints.length = 0;
-        design.stringPoints.forEach(point => stringPoints.push({ x: point.x || 0, y: point.y || 0, z: point.z || 0 }));
+        design.stringPoints.forEach(point => {
+            stringPoints.push(new THREE.Vector3(point.x || 0, point.y || 0, point.z || 0));
+        });
         if (typeof updateStringLine === 'function') updateStringLine();
         if (typeof window.updateStringType === 'function') window.updateStringType();
     }
-    
+
     // Import beads
     if (design.beads && design.beads.length > 0) {
         const promises = design.beads.map(beadData => createBeadFromData(beadData));
@@ -82,20 +84,26 @@ function startImportProcess(design) {
             }
             saveState();
             const fitMode = design.stringType === 'pen' ? 'pen-mode' : 'preset';
-            if (typeof window.performBasicSmartFraming === 'function') window.performBasicSmartFraming({mode: fitMode});
+            if (typeof window.performBasicSmartFraming === 'function') window.performBasicSmartFraming({ mode: fitMode });
             completeImport(design);
         });
     } else {
         saveState();
         const fitMode = design.stringType === 'pen' ? 'pen-mode' : 'preset';
-        if (typeof window.performBasicSmartFraming === 'function') window.performBasicSmartFraming({mode: fitMode});
+        if (typeof window.performBasicSmartFraming === 'function') window.performBasicSmartFraming({ mode: fitMode });
         completeImport(design);
     }
 }
 
 function completeImport(design) {
+    // CRITICAL FIX: Initialize slider base with imported string geometry
+    // This makes beads interactive immediately without triggering gravity
+    if (typeof window.resetSliderBase === 'function') {
+        window.resetSliderBase();
+    }
+
     closeSavedModal();
-    showSaveSuccess('Design imported!');
+    showSaveSuccess((typeof window.getTranslation === 'function' ? window.getTranslation('design-imported') : null) || 'Design imported!');
 }
 
 function clearCurrentDesign() {

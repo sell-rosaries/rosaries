@@ -10,7 +10,7 @@
 // Get it from: script.google.com after deploying your script
 // It should look like: https://script.google.com/macros/s/ABC...xyz/exec
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3nWmLCReAoEz22tCzmPdpXkYfjB2oW7hCyapdFLI8VQsKkoOZMhS9PLFCk1y1duzp/exec';  // Fresh Email System URL
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzE9Vyww1jTHo7l9-HQquz6SJNPONgW5mduLnXn7moa68DX-pjE4LHM1Pm-_hEsb7R4/exec';  // Fresh Email System URL
 
 // ============================================
 
@@ -24,11 +24,11 @@ function openEmailModal() {
     document.getElementById('customer-email').value = '';
     document.getElementById('customer-phone').value = '';
     document.getElementById('customer-notes').value = '';
-    
+
     // Remove any error highlights
     document.getElementById('customer-email').classList.remove('error-highlight');
     document.getElementById('customer-phone').classList.remove('error-highlight');
-    
+
     // Setup real-time validation
     setupRealTimeValidation();
 }
@@ -39,36 +39,36 @@ function openEmailModal() {
 function setupRealTimeValidation() {
     const emailInput = document.getElementById('customer-email');
     const phoneInput = document.getElementById('customer-phone');
-    
+
     // Combined validation function that considers OR logic
     function validateFieldsWithOrLogic() {
         const email = emailInput ? emailInput.value.trim() : '';
         const phone = phoneInput ? phoneInput.value.trim() : '';
-        
+
         // Clear both fields first
         if (emailInput) clearFieldError(emailInput);
         if (phoneInput) clearFieldError(phoneInput);
-        
+
         // Check if at least one field has content
         if (!email && !phone) {
             // Both empty - no validation needed
             return;
         }
-        
+
         // Check each field independently
         let emailValid = false;
         let phoneValid = false;
-        
+
         if (email && email !== 'Not provided') {
             const emailValidation = validateEmail(email);
             emailValid = emailValidation.valid;
         }
-        
+
         if (phone && phone !== 'Not provided') {
             const phoneValidation = validatePhone(phone);
             phoneValid = phoneValidation.valid;
         }
-        
+
         // Apply validation with OR logic:
         // If one field is valid and filled, the other becomes optional
         if (email && email !== 'Not provided') {
@@ -83,7 +83,7 @@ function setupRealTimeValidation() {
                 setFieldError(emailInput, validateEmail(email).message);
             }
         }
-        
+
         if (phone && phone !== 'Not provided') {
             if (phoneValid) {
                 setFieldSuccess(phoneInput);
@@ -97,13 +97,13 @@ function setupRealTimeValidation() {
             }
         }
     }
-    
+
     // Real-time email validation
     if (emailInput) {
         emailInput.addEventListener('input', validateFieldsWithOrLogic);
         emailInput.addEventListener('blur', validateFieldsWithOrLogic);
     }
-    
+
     // Real-time phone validation
     if (phoneInput) {
         phoneInput.addEventListener('input', validateFieldsWithOrLogic);
@@ -117,10 +117,10 @@ function setupRealTimeValidation() {
 function setFieldError(input, message) {
     input.classList.remove('success-highlight');
     input.classList.add('error-highlight');
-    
+
     // Remove existing error message
     removeFieldErrorMessage(input);
-    
+
     // Add error message below input
     const errorDiv = document.createElement('div');
     errorDiv.className = 'field-error-message';

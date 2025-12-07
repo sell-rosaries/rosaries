@@ -9,7 +9,7 @@
 async function main() {
     try {
         init3DScene();
-        
+
         try {
             await loadConfig();
             loadSizePreferences(); // Load saved size preferences
@@ -19,14 +19,14 @@ async function main() {
             categories = [];
             objects = [];
         }
-        
+
         createBeadSelection();
         addEventListeners();
         initSettings(); // Initialize settings module (new)
         initGalleryEventListeners(); // Initialize gallery event listeners
         injectSavedStyles(); // Inject styles for saved designs delete mode
 
-        
+
         // Wait for language manager to be initialized before initializing import presets
         if (typeof languageManager !== 'undefined') {
             initImportPresets(); // Initialize import presets functionality
@@ -38,7 +38,7 @@ async function main() {
                     initImportPresets();
                 }
             }, 100);
-            
+
             // Timeout after 5 seconds
             setTimeout(() => {
                 clearInterval(checkLanguageManager);
@@ -46,7 +46,7 @@ async function main() {
                 initImportPresets();
             }, 5000);
         }
-        
+
         // Initialize custom size control (new feature)
         if (typeof initCustomSize === 'function') {
             initCustomSize();
@@ -56,33 +56,33 @@ async function main() {
         if (typeof window.initStringSlider === 'function') {
             window.initStringSlider();
         }
-        
+
         // Initialize sandbox string type tracker
         initSandboxStringType();
-        
+
         updateBeadCount();
-        
+
         // Auto-restore saved design (must be after config is loaded, BEFORE saveState)
         const restored = await autoRestoreDesign();
-        
+
         // Auto-fit design if one was restored
         if (restored && typeof window.performBasicSmartFraming === 'function') {
-            
+
             setTimeout(() => {
                 const stringType = window.getCurrentStringType ? window.getCurrentStringType() : 'preset';
                 const mode = stringType === 'pen' ? 'pen-mode' : 'preset';
-                window.performBasicSmartFraming({mode});
+                window.performBasicSmartFraming({ mode });
             }, 100); // Small delay to ensure all elements are loaded
         }
-        
+
         // Save initial state (or restored state if exists)
         saveState();
-        
+
         animate();
     } catch (error) {
         console.error('Critical error during initialization:', error);
-        alert('Error starting application. Please refresh the page.\n\nError: ' + error.message);
-        
+        showCustomAlert(((typeof window.getTranslation === 'function' ? window.getTranslation('app-error-start') : null) || 'Error starting application. Please refresh the page.') + '\n\nError: ' + error.message, 'error');
+
         try {
             categories = [];
             objects = [];

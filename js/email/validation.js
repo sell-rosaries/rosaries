@@ -12,26 +12,26 @@ function validateEmail(email) {
     }
 
     const emailLower = email.toLowerCase().trim();
-    
+
     // Check allowed domains
     const allowedDomains = ['@gmail.com', '@yahoo.com', '@hotmail.com', '@proton.me'];
     const domainMatch = allowedDomains.find(domain => emailLower.endsWith(domain));
-    
+
     if (!domainMatch) {
         return {
             valid: false,
-            message: '⚠️ Invalid email domain.\n\nOnly Gmail (@gmail.com), Yahoo (@yahoo.com), Hotmail (@hotmail.com), and Proton (@proton.me) are allowed.'
+            message: (typeof window.getTranslation === 'function' ? window.getTranslation('validation-email-domain') : null) || 'Invalid email domain.\n\nOnly Gmail (@gmail.com), Yahoo (@yahoo.com), Hotmail (@hotmail.com), and Proton (@proton.me) are allowed.'
         };
     }
 
     // Extract username part (before @)
     const username = emailLower.split('@')[0];
-    
+
     // Check username length (max 20 characters)
     if (username.length > 20) {
         return {
             valid: false,
-            message: '⚠️ Username too long.\n\nUsername must be maximum 20 characters before the @ symbol.'
+            message: (typeof window.getTranslation === 'function' ? window.getTranslation('validation-email-username-length') : null) || 'Username too long.\n\nUsername must be maximum 20 characters before the @ symbol.'
         };
     }
 
@@ -39,11 +39,11 @@ function validateEmail(email) {
     // Allowed: English letters (a-z, A-Z), dot (.), dash (-), underscore (_)
     // Max one of each symbol
     const usernameRegex = /^[a-zA-Z]+([.\-_][a-zA-Z]+)*$/;
-    
+
     if (!usernameRegex.test(username)) {
         return {
             valid: false,
-            message: '⚠️ Invalid username format.\n\nUsername can only contain English letters with optional dot (.), dash (-), or underscore (_) - maximum one of each symbol.'
+            message: (typeof window.getTranslation === 'function' ? window.getTranslation('validation-email-username-format') : null) || 'Invalid username format.\n\nUsername can only contain English letters with optional dot (.), dash (-), or underscore (_) - maximum one of each symbol.'
         };
     }
 
@@ -60,25 +60,25 @@ function validatePhone(phone) {
 
     // Remove whitespace for validation
     const cleanPhone = phone.trim();
-    
+
     // Check if contains only allowed characters: numbers, parentheses, plus sign
     const allowedCharsRegex = /^[0-9()+\-\s]+$/;
-    
+
     if (!allowedCharsRegex.test(cleanPhone)) {
         return {
             valid: false,
-            message: '⚠️ Invalid phone number format.\n\nOnly numbers are required (7-13 digits). Optional formatting: spaces, dashes (-), parentheses (), and plus sign (+). Plain numbers like "0410930309" are perfectly fine.'
+            message: (typeof window.getTranslation === 'function' ? window.getTranslation('validation-phone-format') : null) || 'Invalid phone number format.\n\nOnly numbers are required (7-13 digits). Optional formatting: spaces, dashes (-), parentheses (), and plus sign (+). Plain numbers like "0410930309" are perfectly fine.'
         };
     }
 
     // Extract only numbers to count digit count
     const digitsOnly = cleanPhone.replace(/[^\d]/g, '');
-    
+
     // Check digit count (minimum 7, maximum 13)
     if (digitsOnly.length < 7 || digitsOnly.length > 13) {
         return {
             valid: false,
-            message: '⚠️ Invalid phone number length.\n\nPhone number must contain 7-13 digits.'
+            message: (typeof window.getTranslation === 'function' ? window.getTranslation('validation-phone-length') : null) || 'Invalid phone number length.\n\nPhone number must contain 7-13 digits.'
         };
     }
 
@@ -89,25 +89,25 @@ function validateContactInfo(email, phone) {
     // Remove whitespace for validation
     const cleanEmail = email ? email.trim() : '';
     const cleanPhone = phone ? phone.trim() : '';
-    
+
     // Check if both fields are filled
     if (!cleanEmail || !cleanPhone) {
         return {
             valid: false,
-            message: '⚠️ Both Email Address and Phone Number are required.\n\nPlease fill in both fields to send your email.',
+            message: (typeof window.getTranslation === 'function' ? window.getTranslation('validation-both-required') : null) || 'Both Email Address and Phone Number are required.\n\nPlease fill in both fields to send your email.',
             fieldsToHighlight: ['customer-email', 'customer-phone', 'gallery-customer-email', 'gallery-customer-phone']
         };
     }
-    
+
     // Check if fields are filled and validate them
     const emailIsFilled = cleanEmail && cleanEmail !== 'Not provided';
     const phoneIsFilled = cleanPhone && cleanPhone !== 'Not provided';
-    
+
     let emailValid = false;
     let phoneValid = false;
     const invalidFields = [];
     const fieldsToHighlight = [];
-    
+
     // Validate email if provided
     if (emailIsFilled) {
         const emailValidation = validateEmail(cleanEmail);
@@ -141,12 +141,12 @@ function validateContactInfo(email, phone) {
             }
         }
     }
-    
+
     // SUCCESS: Both fields are valid and filled
     if ((emailIsFilled && emailValid) && (phoneIsFilled && phoneValid)) {
         return { valid: true, message: '', fieldsToHighlight: [] };
     }
-    
+
     // FAILURE: No valid filled fields
     return {
         valid: false,
@@ -160,26 +160,26 @@ function validateContactInfo(email, phone) {
  */
 function calculateObjectStatistics() {
     const total = beads.length;
-    
+
     if (total === 0) {
         return {
             total: 0,
             breakdown: '<p style="color: #999;">No objects placed in design</p>'
         };
     }
-    
+
     // Count objects by name and size
     const objectCounts = {};
     const categoryCounts = {};
-    
+
     beads.forEach(bead => {
         if (bead.userData && bead.userData.objectId) {
             const obj = getObjectById(bead.userData.objectId);
-            
+
             if (obj) {
                 const size = bead.userData.size;
                 const key = `${obj.name} (${size}mm)`;
-                
+
                 // Count individual objects
                 if (!objectCounts[key]) {
                     objectCounts[key] = {
@@ -188,7 +188,7 @@ function calculateObjectStatistics() {
                     };
                 }
                 objectCounts[key].count++;
-                
+
                 // Count by category
                 const category = getCategoryById(obj.categoryId);
                 const categoryName = category ? category.name : 'Unknown';
@@ -199,37 +199,37 @@ function calculateObjectStatistics() {
             }
         }
     });
-    
+
     // Format breakdown grouped by category with nice formatting
     let breakdown = '<div style="line-height: 1.6;">';
-    
+
     // Group objects by category
     const objectsByCategory = {};
     for (const [objectName, data] of Object.entries(objectCounts)) {
         const category = getCategoryById(data.categoryId);
         const categoryName = category ? category.name : 'Unknown';
-        
+
         if (!objectsByCategory[categoryName]) {
             objectsByCategory[categoryName] = [];
         }
         objectsByCategory[categoryName].push({ name: objectName, count: data.count });
     }
-    
+
     // Display each category with its objects
     for (const [categoryName, count] of Object.entries(categoryCounts)) {
         breakdown += `<p style="margin: 10px 0 5px 0;"><b>${categoryName}:</b> ${count} total</p>`;
         breakdown += '<ul style="margin: 0 0 10px 20px;">';
-        
+
         const items = objectsByCategory[categoryName] || [];
         for (const item of items) {
             breakdown += `<li>${item.name} × ${item.count}</li>`;
         }
-        
+
         breakdown += '</ul>';
     }
-    
+
     breakdown += '</div>';
-    
+
     return {
         total: total,
         breakdown: breakdown

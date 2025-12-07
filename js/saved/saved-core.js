@@ -42,7 +42,7 @@ function openSavedModal() {
  * Close the saved designs modal - FULL CLEANUP
  */
 function closeSavedModal() {
-    
+
 
     // If import mode is active, fully exit it
     if (importModeActive) {
@@ -80,7 +80,7 @@ function closeSavedModal() {
         modal.classList.remove('active');
     }
 
-    
+
 }
 
 /**
@@ -113,9 +113,9 @@ function saveCurrentDesign(options = {}) {
         }
 
         setTimeout(() => {
-            
-            
-            
+
+
+
 
             const screenshot = captureCanvasScreenshot();
 
@@ -126,8 +126,8 @@ function saveCurrentDesign(options = {}) {
                 return;
             }
 
-            
-            
+
+
 
             const designData = {
                 id: generateUniqueId(),
@@ -159,7 +159,7 @@ function saveCurrentDesign(options = {}) {
             // Refresh the modal
             populateSavedModal();
 
-            
+
 
         }, 100); // Small delay to ensure renderer is ready
 
@@ -385,7 +385,7 @@ function showSaveError(message) {
  * Show "coming soon" placeholder message
  */
 function showComingSoon(message) {
-    alert(message);
+    showCustomAlert(message, 'info');
 }
 
 /**
@@ -394,7 +394,7 @@ function showComingSoon(message) {
 function generateThumbnailsForSavedDesigns() {
     // No need for manual generation since we're using actual screenshots
     // This function can remain for future enhancements if needed
-    
+
 }
 
 // Make function globally available for language system

@@ -17,7 +17,7 @@ async function loadGalleryConfig() {
     try {
         const response = await fetch('gallery-index.json');
         galleryData = await response.json();
-        
+
     } catch (error) {
         console.warn('⚠️ Could not load gallery config:', error);
         galleryData = { categories: [] };
@@ -48,11 +48,11 @@ function getGalleryItemsByCategory(categoryFilter) {
     // Sort to show favorites first (when in "all" category)
     if (categoryFilter === 'all' && items.length > 0) {
         const favoriteIds = JSON.parse(localStorage.getItem('rosary-favorites') || '[]');
-        
+
         // Separate favorite and non-favorite items
         const favoriteItems = items.filter(item => favoriteIds.includes(item.id));
         const nonFavoriteItems = items.filter(item => !favoriteIds.includes(item.id));
-        
+
         // Combine: favorites first, then others
         items = [...favoriteItems, ...nonFavoriteItems];
     }
@@ -73,11 +73,11 @@ function initGalleryEventListeners() {
     // Gallery close buttons - use correct IDs from HTML
     const closeGalleryBtn = document.getElementById('close-gallery-btn');
     const galleryPanelBackdrop = document.getElementById('gallery-panel-backdrop');
-    
+
     if (closeGalleryBtn) {
         closeGalleryBtn.addEventListener('click', closeGalleryModal);
     }
-    
+
     if (galleryPanelBackdrop) {
         galleryPanelBackdrop.addEventListener('click', closeGalleryModal);
     }
@@ -85,7 +85,7 @@ function initGalleryEventListeners() {
     // Gallery overlay click to close
     const galleryOverlay = document.getElementById('gallery-modal-overlay');
     if (galleryOverlay) {
-        galleryOverlay.addEventListener('click', function(e) {
+        galleryOverlay.addEventListener('click', function (e) {
             if (e.target === galleryOverlay) {
                 closeGalleryModal();
             }
@@ -93,7 +93,7 @@ function initGalleryEventListeners() {
     }
 
     // Keyboard shortcuts for gallery
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         const galleryPanel = document.getElementById('gallery-panel');
         if (galleryPanel && galleryPanel.classList.contains('open')) {
             if (e.key === 'Escape') {
@@ -114,7 +114,7 @@ function initGalleryEventListeners() {
         galleryEmailForm.addEventListener('submit', sendGalleryEmail);
     }
 
-    
+
 }
 
 /**
@@ -149,7 +149,7 @@ function toggleGallerySelection(itemId) {
             if (checkbox) {
                 checkbox.checked = false;
             }
-            alert('❌ You can only select up to 5 designs at a time.\n\nPlease deselect some designs before selecting more.');
+            showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-max-designs') : null) || 'You can only select up to 5 designs at a time.\n\nPlease deselect some designs before selecting more.', 'error');
             return;
         }
         selectedGalleryImages.add(itemId);
@@ -162,18 +162,18 @@ function toggleGallerySelection(itemId) {
  */
 function openGalleryEmailModal() {
     if (selectedGalleryImages.size === 0) {
-        alert('Please select at least one design to send');
+        showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-select-at-least-one') : null) || 'Please select at least one design to send', 'warning');
         return;
     }
-    
+
     if (selectedGalleryImages.size > 5) {
-        alert('❌ You can only select up to 5 designs at a time.\n\nPlease deselect some designs before sending.');
+        showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-max-designs') : null) || 'You can only select up to 5 designs at a time.\n\nPlease deselect some designs before sending.', 'error');
         return;
     }
-    
+
     const modal = document.getElementById('gallery-email-modal');
     modal.classList.add('active');
-    
+
     // Setup real-time validation for gallery inputs
     setupGalleryRealTimeValidation();
 }
@@ -192,36 +192,36 @@ function closeGalleryEmailModal() {
 function setupGalleryRealTimeValidation() {
     const emailInput = document.getElementById('gallery-customer-email');
     const phoneInput = document.getElementById('gallery-customer-phone');
-    
+
     // Combined validation function that considers OR logic
     function validateGalleryFieldsWithOrLogic() {
         const email = emailInput ? emailInput.value.trim() : '';
         const phone = phoneInput ? phoneInput.value.trim() : '';
-        
+
         // Clear both fields first
         if (emailInput) clearFieldError(emailInput);
         if (phoneInput) clearFieldError(phoneInput);
-        
+
         // Check if at least one field has content
         if (!email && !phone) {
             // Both empty - no validation needed
             return;
         }
-        
+
         // Check each field independently
         let emailValid = false;
         let phoneValid = false;
-        
+
         if (email && email !== 'Not provided') {
             const emailValidation = validateEmail(email);
             emailValid = emailValidation.valid;
         }
-        
+
         if (phone && phone !== 'Not provided') {
             const phoneValidation = validatePhone(phone);
             phoneValid = phoneValidation.valid;
         }
-        
+
         // Apply validation with OR logic:
         // If one field is valid and filled, the other becomes optional
         if (email && email !== 'Not provided') {
@@ -236,7 +236,7 @@ function setupGalleryRealTimeValidation() {
                 setFieldError(emailInput, validateEmail(email).message);
             }
         }
-        
+
         if (phone && phone !== 'Not provided') {
             if (phoneValid) {
                 setFieldSuccess(phoneInput);
@@ -250,13 +250,13 @@ function setupGalleryRealTimeValidation() {
             }
         }
     }
-    
+
     // Real-time email validation
     if (emailInput) {
         emailInput.addEventListener('input', validateGalleryFieldsWithOrLogic);
         emailInput.addEventListener('blur', validateGalleryFieldsWithOrLogic);
     }
-    
+
     // Real-time phone validation
     if (phoneInput) {
         phoneInput.addEventListener('input', validateGalleryFieldsWithOrLogic);
@@ -269,18 +269,18 @@ function setupGalleryRealTimeValidation() {
  */
 async function sendGalleryEmail(event) {
     event.preventDefault();
-    
+
     // Check if Google Apps Script URL is configured
     if (window.GOOGLE_SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') {
-        alert('⚠️ Google Apps Script is not configured yet!\n\nPlease update the GOOGLE_SCRIPT_URL in js/email.js with your Web App URL from Google Apps Script.');
+        showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-script-not-configured') : null) || 'Google Apps Script is not configured yet!\n\nPlease update the GOOGLE_SCRIPT_URL in js/email.js with your Web App URL from Google Apps Script.', 'warning');
         return;
     }
-    
+
     const customerName = document.getElementById('gallery-customer-name').value.trim() || 'Anonymous';
     const customerEmail = document.getElementById('gallery-customer-email').value.trim();
     const customerPhone = document.getElementById('gallery-customer-phone').value.trim();
     const customerNotes = document.getElementById('gallery-customer-notes').value.trim() || 'No additional notes';
-    
+
     // Validate contact info using the same function as sandbox email
     const validation = validateContactInfo(customerEmail, customerPhone);
     if (!validation.valid) {
@@ -292,26 +292,26 @@ async function sendGalleryEmail(event) {
                 setTimeout(() => field.classList.remove('error-highlight'), 3000);
             }
         });
-        
-        alert(validation.message);
+
+        showCustomAlert(validation.message, 'error');
         return;
     }
-    
+
     if (selectedGalleryImages.size === 0) {
-        alert('Please select at least one design');
+        showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-select-at-least-one') : null) || 'Please select at least one design', 'warning');
         return;
     }
-    
+
     // Check 5-image limit
     if (selectedGalleryImages.size > 5) {
-        alert('❌ You can only select up to 5 designs at a time.');
+        showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-max-designs') : null) || 'You can only select up to 5 designs at a time.', 'error');
         return;
     }
-    
+
     // Get selected items
     const allItems = getGalleryItemsByCategory('all');
     const selectedItems = allItems.filter(item => selectedGalleryImages.has(item.id));
-    
+
     // Create gallery items HTML for email
     let galleryItemsHTML = '<div style="line-height: 1.8;">';
     galleryItemsHTML += '<p><b>Selected Designs:</b></p>';
@@ -321,52 +321,52 @@ async function sendGalleryEmail(event) {
     });
     galleryItemsHTML += '</ul>';
     galleryItemsHTML += '</div>';
-    
+
     // Show loading state
     const sendBtn = document.getElementById('send-gallery-email-btn');
     const originalText = sendBtn.innerHTML;
     sendBtn.disabled = true;
     sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Processing images...';
-    
+
     try {
         // Convert gallery images to base64 format
-        
+
         const imagePaths = selectedItems.map(item => item.image);
-        
-        
+
+
         const galleryImages = await convertImagesToBase64(imagePaths);
-        
+
         // Debug image conversion results
-        
+
         const successfulImages = galleryImages.filter(img => img.imageData);
         const failedImages = galleryImages.filter(img => img.error);
-        
-        
-        
-        
+
+
+
+
         if (failedImages.length > 0) {
             console.error('Failed image conversions:', failedImages);
             console.warn('⚠️ Some images failed to convert. Email will be sent but images may be missing.');
         }
-        
+
         // Warn user if no images could be converted
         if (successfulImages.length === 0) {
-            alert('⚠️ Warning: None of the selected images could be converted for email sending.\n\nThe email will be sent but will not contain images.\n\nPlease check your internet connection and try again.');
+            showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-no-images-converted') : null) || 'Warning: None of the selected images could be converted for email sending.\n\nThe email will be sent but will not contain images.\n\nPlease check your internet connection and try again.', 'warning');
         }
-        
+
         // Update loading text
         sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Sending email...';
-        
+
         // **ENHANCED SCRIPT SUPPORT**: Send multiple images in gallery format
         // Prepare data for enhanced Google Apps Script that supports multiple attachments
-        
+
         // Prepare data for FRESH Google Apps Script
         const emailData = {
             name: customerName,
             email: customerEmail || 'Not provided',
             phone: customerPhone || 'Not provided',
             notes: customerNotes,
-            
+
             // Send gallery designs with image data
             selected_designs: successfulImages.map((img, index) => ({
                 id: selectedItems[index].id,
@@ -374,12 +374,12 @@ async function sendGalleryEmail(event) {
                 image_data: img.imageData
             }))
         };
-        
+
         // Send to Google Apps Script
-        
-        
-        
-        
+
+
+
+
         const response = await fetch(window.GOOGLE_SCRIPT_URL, {
             method: 'POST',
             headers: {
@@ -387,13 +387,13 @@ async function sendGalleryEmail(event) {
             },
             body: JSON.stringify(emailData)
         });
-        
-        
-        
+
+
+
         // Read and parse response
         const resultText = await response.text();
-        
-        
+
+
         // Try to parse as JSON
         let resultData;
         try {
@@ -402,38 +402,40 @@ async function sendGalleryEmail(event) {
             console.error('Failed to parse response as JSON:', e);
             throw new Error('Invalid response from server');
         }
-        
+
         // Check if email actually sent
         if (!resultData.success) {
             throw new Error(resultData.message || 'Failed to send email');
         }
-        
-        // Success! Provide detailed feedback about images
-        let successMessage = '✅ Gallery request sent successfully!\n\n';
-        successMessage += `Your selected designs have been sent (${selectedItems.length} designs).\n\n`;
-        
+
+        // Success! Provide detailed feedback about images - use translations
+        const isArabic = (typeof languageManager !== 'undefined' && languageManager.currentLanguage === 'ar') || (typeof currentLanguage !== 'undefined' && currentLanguage === 'ar');
+        const gallerySuccessBase = (typeof window.getTranslation === 'function' ? window.getTranslation('gallery-send-success') : null) || 'Gallery request sent successfully!\n\nYour selected designs have been sent. We will contact you soon!';
+        let successMessage = '✅ ' + gallerySuccessBase.split('\n')[0] + '\n\n';
+        successMessage += `${isArabic ? 'تم إرسال تصاميمك المحددة' : 'Your selected designs have been sent'} (${selectedItems.length} ${isArabic ? 'تصاميم' : 'designs'}).\n\n`;
+
         if (successfulImages.length > 0) {
-            successMessage += `✅ All ${successfulImages.length} selected images included in email.\n`;
+            successMessage += `✅ ${isArabic ? `تم تضمين جميع ${successfulImages.length} صور محددة في البريد الإلكتروني` : `All ${successfulImages.length} selected images included in email`}.\n`;
         } else {
-            successMessage += `⚠️ No images could be included in the email.\n`;
+            successMessage += `⚠️ ${isArabic ? 'لم يتم تضمين أي صور في البريد الإلكتروني' : 'No images could be included in the email'}.\n`;
         }
-        
-        successMessage += 'We will contact you soon!';
-        
-        alert(successMessage);
-        
+
+        successMessage += isArabic ? 'سنتواصل معك قريباً!' : 'We will contact you soon!';
+
+        showCustomAlert(successMessage, 'success');
+
         // Close modals and reset
         closeGalleryEmailModal();
         closeGalleryModal();
         selectedGalleryImages.clear();
-        
+
         // Reset form
         document.getElementById('gallery-email-form').reset();
-        
+
     } catch (error) {
         console.error('Gallery email send error:', error);
-        alert('❌ Failed to send gallery request.\n\nPlease try again or contact us directly.\n\nError: ' + error.message);
-        
+        showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-send-failed') : null) || 'Failed to send gallery request.\n\nPlease try again or contact us directly.\n\nError: ' + error.message, 'error');
+
     } finally {
         // Restore button
         sendBtn.disabled = false;
@@ -467,11 +469,11 @@ function validateContactInfo(email, phone) {
             fieldsToHighlight: ['customer-email', 'customer-phone']
         };
     }
-    
+
     // Validate email format
     const emailLower = email.toLowerCase().trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     if (!emailRegex.test(emailLower)) {
         return {
             valid: false,
@@ -479,11 +481,11 @@ function validateContactInfo(email, phone) {
             fieldsToHighlight: ['customer-email']
         };
     }
-    
+
     // Validate phone format
     const phoneRegex = /^[\d\s\-\(\)\+]{7,20}$/;
     const digitCount = (phone.match(/\d/g) || []).length;
-    
+
     if (!phoneRegex.test(phone) || digitCount < 7 || digitCount > 13) {
         return {
             valid: false,
@@ -491,7 +493,7 @@ function validateContactInfo(email, phone) {
             fieldsToHighlight: ['customer-phone']
         };
     }
-    
+
     return { valid: true, message: '', fieldsToHighlight: [] };
 }
 
@@ -503,43 +505,47 @@ function convertImagesToBase64(imagePaths) {
         const results = [];
         let processed = 0;
         const total = imagePaths.length;
-        
-        
-        
+
+
+
         if (total === 0) {
-            
+
             resolve(results);
             return;
         }
-        
+
         imagePaths.forEach((imagePath, index) => {
-            
-            
+
+
             const img = new Image();
             img.crossOrigin = 'anonymous'; // Handle CORS issues
-            
+
             img.onload = () => {
+                // Clear timeout on successful load
+                if (img.loadTimeout) {
+                    clearTimeout(img.loadTimeout);
+                }
                 try {
-                    
-                    
+
+
                     // Create canvas
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    
+
                     // Set canvas size to image size
                     canvas.width = img.width;
                     canvas.height = img.height;
-                    
+
                     // Draw image to canvas
                     ctx.drawImage(img, 0, 0);
-                    
+
                     // Convert to base64 with high quality
                     const base64Data = canvas.toDataURL('image/jpeg', 0.9);
-                    
+
                     // Log base64 data length for debugging
                     const base64Size = base64Data.length;
-                    
-                    
+
+
                     results[index] = {
                         name: imagePath.split('/').pop(),
                         imageData: base64Data,
@@ -548,12 +554,12 @@ function convertImagesToBase64(imagePaths) {
                         height: img.height,
                         base64Size: Math.round(base64Size / 1024) + 'KB'
                     };
-                    
+
                     processed++;
-                    
-                    
+
+
                     if (processed === total) {
-                        
+
                         resolve(results);
                     }
                 } catch (error) {
@@ -567,12 +573,12 @@ function convertImagesToBase64(imagePaths) {
                     };
                     processed++;
                     if (processed === total) {
-                        
+
                         resolve(results);
                     }
                 }
             };
-            
+
             img.onerror = (error) => {
                 console.error(`❌ Failed to load image ${index + 1}:`, imagePath, error);
                 results[index] = {
@@ -584,17 +590,17 @@ function convertImagesToBase64(imagePaths) {
                 };
                 processed++;
                 if (processed === total) {
-                    
+
                     resolve(results);
                 }
             };
-            
+
             // Set a timeout for image loading
-            img.onloadTimeout = setTimeout(() => {
+            img.loadTimeout = setTimeout(() => {
                 console.error(`⏰ Timeout loading image ${index + 1}:`, imagePath);
                 img.onerror('Timeout loading image');
             }, 10000); // 10 second timeout
-            
+
             img.src = imagePath;
         });
     });
