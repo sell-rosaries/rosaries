@@ -23,6 +23,7 @@
     --neutral-300: #D1D5DB;
     --neutral-400: #9CA3AF;
     --neutral-600: #4B5563;
+    --neutral-700: #374151;
     --neutral-800: #1F2937;
     --neutral-900: #111827;
     
@@ -40,9 +41,11 @@
     
     /* Colors - Backgrounds */
     --bg-app: #FAFBFC;
-    --bg-canvas: #F4F5F7;
+    --bg-canvas: #FFFFFF; /* Pure White for Light Mode */
     --bg-modal: rgba(0, 0, 0, 0.4);
-    
+    --bg-card: #FFFFFF;
+    --bg-button: #FAFBFC; 
+
     /* Typography */
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-size-heading-lg: 28px;
@@ -105,14 +108,15 @@
     --header-height: 56px;
     --button-height-mobile: 48px;
     --input-height: 48px;
-    
-    /* Missing variables */
-    --bg-card: #FFFFFF;
-    --neutral-700: #374151;
-    --bg-button: #FAFBFC; /* Default button background */
 }
 
 /* ==================== DARK MODE THEMES ==================== */
+/* 
+   UNIFIED CANVAS BACKGROUND FOR ALL DARK MODES 
+   Color: #444444 (Deep Dark Grey)
+   - Much darker than previous silver (#AAAAAA)
+   - Not pure black, so black strings are still somewhat visible
+*/
 
 /* Theme 1: Standard Material Dark (Grey) - "Classic" */
 [data-theme='dark-classic'] {
@@ -123,18 +127,18 @@
     
     --neutral-50: #121212;
     --neutral-100: #1e1e1e;
-    --neutral-200: #333333;
-    --neutral-300: #404040;
-    --neutral-400: #9ca3af;
+    --neutral-200: #a0a0a0;
+    --neutral-300: #b0b0b0;
+    --neutral-400: #cccccc;
     --neutral-600: #e5e5e5;
     --neutral-700: #f5f5f5;
     --neutral-800: #ffffff;
     --neutral-900: #ffffff;
     
     --bg-app: #121212;
-    --bg-canvas: #121212;
+    --bg-canvas: #444444; /* Unified Dark Mode Canvas */
     --bg-card: #1e1e1e;
-    --bg-button: #2d2d2d; /* Distinct button color */
+    --bg-button: #2d2d2d; 
     --bg-modal: rgba(0, 0, 0, 0.7);
     
     --glass-light: rgba(30, 30, 30, 0.9);
@@ -152,24 +156,24 @@
 /* Theme 2: OLED Pure Black - "Midnight" */
 [data-theme='dark-oled'] {
     --primary-50: #000000;
-    --primary-500: #60a5fa; /* Brighter Blue */
+    --primary-500: #60a5fa; 
     --primary-600: #3b82f6;
     --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
     
     --neutral-50: #000000;
     --neutral-100: #000000;
-    --neutral-200: #333333; /* Stark borders */
-    --neutral-300: #525252;
-    --neutral-400: #a3a3a3;
+    --neutral-200: #a0a0a0;
+    --neutral-300: #c0c0c0;
+    --neutral-400: #d4d4d4;
     --neutral-600: #e5e5e5;
     --neutral-700: #ffffff;
     --neutral-800: #ffffff;
     --neutral-900: #ffffff;
     
     --bg-app: #000000;
-    --bg-canvas: #000000;
+    --bg-canvas: #444444; /* Unified Dark Mode Canvas */
     --bg-card: #000000;
-    --bg-button: #1a1a1a; /* Distinct button color */
+    --bg-button: #1a1a1a; 
     --bg-modal: rgba(0, 0, 0, 0.9);
     
     --glass-light: rgba(0, 0, 0, 0.9);
@@ -178,7 +182,7 @@
     --glass-border: rgba(255, 255, 255, 0.2);
     
     --shadow-sm: none;
-    --shadow-md: 0 0 0 1px #333; /* Use borders instead of shadows */
+    --shadow-md: 0 0 0 1px #333; 
     --shadow-lg: 0 0 0 1px #333;
     --shadow-xl: 0 0 0 1px #333;
     --shadow-glass: 0 0 0 1px #333;
@@ -187,24 +191,24 @@
 /* Theme 3: Deep Navy Blue - "Ocean" */
 [data-theme='dark-blue'] {
     --primary-50: #0f172a;
-    --primary-500: #38bdf8; /* Cyan-400 */
+    --primary-500: #38bdf8;
     --primary-600: #0ea5e9;
     --gradient-primary: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%);
     
-    --neutral-50: #020617; /* Slate-950 */
-    --neutral-100: #0f172a; /* Slate-900 */
-    --neutral-200: #1e293b; /* Slate-800 */
-    --neutral-300: #334155; /* Slate-700 */
-    --neutral-400: #94a3b8;
-    --neutral-600: #e2e8f0;
-    --neutral-700: #f1f5f9;
+    --neutral-50: #020617; 
+    --neutral-100: #0f172a; 
+    --neutral-200: #94a3b8; 
+    --neutral-300: #cbd5e1;
+    --neutral-400: #e2e8f0;
+    --neutral-600: #f1f5f9;
+    --neutral-700: #f8fafc;
     --neutral-800: #f8fafc;
     --neutral-900: #ffffff;
     
     --bg-app: #020617;
-    --bg-canvas: #020617;
+    --bg-canvas: #444444; /* Unified Dark Mode Canvas */
     --bg-card: #0f172a;
-    --bg-button: #1e293b; /* Distinct button color */
+    --bg-button: #1e293b; 
     --bg-modal: rgba(2, 6, 23, 0.8);
     
     --glass-light: rgba(15, 23, 42, 0.9);
@@ -218,4 +222,3 @@
     --shadow-xl: 0 20px 25px rgba(0,0,0,0.6);
     --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
-

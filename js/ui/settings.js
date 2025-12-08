@@ -97,6 +97,11 @@ function applyTheme(themeId) {
         const key = getThemeTranslationKey(themeId);
         themeBtn.textContent = window.getTranslation ? window.getTranslation(key) : 'Theme';
     }
+
+    // Update 3D string color
+    if (typeof window.updateStringColor === 'function') {
+        window.updateStringColor();
+    }
 }
 
 /**

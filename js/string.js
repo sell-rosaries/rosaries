@@ -67,7 +67,12 @@ function updateStringLine() {
     }
     if (stringPoints.length > 1) {
         const geometry = new THREE.BufferGeometry().setFromPoints(stringPoints);
-        const material = new THREE.LineBasicMaterial({ color: 0x5d4037, linewidth: 2 });
+        
+        // Determine color based on theme
+        const isDarkMode = document.documentElement.hasAttribute('data-theme');
+        const stringColor = isDarkMode ? 0x000000 : 0x5d4037;
+        
+        const material = new THREE.LineBasicMaterial({ color: stringColor, linewidth: 2 });
         stringLine = new THREE.Line(geometry, material);
         stringLine.position.y = 0.05;
         scene.add(stringLine);
@@ -78,3 +83,19 @@ function updateStringLine() {
         }
     }
 }
+
+/**
+ * Updates just the string color based on current theme.
+ * Called when theme changes.
+ */
+function updateStringColor() {
+    if (!stringLine) return;
+    
+    const isDarkMode = document.documentElement.hasAttribute('data-theme');
+    const stringColor = isDarkMode ? 0x000000 : 0x5d4037;
+    
+    stringLine.material.color.setHex(stringColor);
+}
+
+// Make globally accessible
+window.updateStringColor = updateStringColor;

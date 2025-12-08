@@ -17,7 +17,8 @@ function init3DScene() {
     }
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf5f7fa); // Light gray background
+    // Background handled by CSS for theme support (transparent canvas)
+    // scene.background = new THREE.Color(0xf5f7fa); 
 
     const aspect = container.clientWidth / container.clientHeight;
     camera = new THREE.OrthographicCamera(-10 * aspect, 10 * aspect, 10, -10, 0.1, 1000);
@@ -26,7 +27,7 @@ function init3DScene() {
     camera.zoom = 1; // Initialize zoom level for OrthographicCamera
     camera.updateProjectionMatrix();
 
-    renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize for mobile
     container.appendChild(renderer.domElement);

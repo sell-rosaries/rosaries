@@ -4,7 +4,7 @@
 */
 
 function captureDesignImage() {
-    const originalBackgroundColor = scene.background.clone();
+    const originalBackgroundColor = scene.background ? scene.background.clone() : null;
     const originalCameraPosition = {
         x: camera.position.x,
         y: camera.position.y,
@@ -555,7 +555,7 @@ function generateDesignHTML() {
                     positions.push(p.x, p.y, p.z);
                 });
                 stringGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-                const stringMaterial = new THREE.LineBasicMaterial({ color: 0x333333, linewidth: 3 });
+                const stringMaterial = new THREE.LineBasicMaterial({ color: 0x5d4037, linewidth: 2 });
                 const stringLine = new THREE.Line(stringGeometry, stringMaterial);
                 scene.add(stringLine);
             }
