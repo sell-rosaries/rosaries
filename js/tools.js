@@ -115,15 +115,23 @@ function exitStringMode() {
     isSelectMode = true;
     controls.enabled = true;
 
-    if (isEraseMode) {
-        exitEraserMode();
-    }
-
-    // Update UI
+    // Force reset icons to ensure Normal Pen is shown when deactivated
     const drawBtn = document.getElementById('draw-string-btn');
     if (drawBtn) {
+        const normalIcon = drawBtn.querySelector('.draw-icon-normal');
+        const eraserIcon = drawBtn.querySelector('.draw-icon-eraser');
+        const eraserBtn = document.getElementById('eraser-btn');
+
+        if (normalIcon) normalIcon.style.display = 'block';
+        if (eraserIcon) eraserIcon.style.display = 'none';
+        if (eraserBtn) eraserBtn.classList.remove('active');
+
         drawBtn.classList.remove('active');
         drawBtn.blur(); // Remove focus
+    }
+
+    if (isEraseMode) {
+        exitEraserMode();
     }
 
     const menu = document.getElementById('pen-options-menu');

@@ -14,7 +14,8 @@
     position: relative;
     z-index: 100;
     flex-shrink: 0;
-    overflow: hidden; /* Prevent overflow */
+    overflow: hidden;
+    /* Prevent overflow */
 }
 
 /* Default H1 style */
@@ -42,15 +43,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3));
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3));
     border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 
-        4px 4px 10px rgba(0, 0, 0, 0.05), 
+    box-shadow:
+        4px 4px 10px rgba(0, 0, 0, 0.05),
         -4px -4px 10px rgba(255, 255, 255, 0.8),
         inset 0 0 0 1px rgba(255, 255, 255, 0.5);
     border-radius: 16px;
     height: 40px;
-    padding: 0 16px; /* Increased padding for text */
+    padding: 0 16px;
+    /* Increased padding for text */
     color: var(--neutral-700);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -59,24 +61,26 @@
 
 .header-info button:active {
     transform: scale(0.96);
-    box-shadow: 
+    box-shadow:
         inset 4px 4px 8px rgba(0, 0, 0, 0.05),
         inset -4px -4px 8px rgba(255, 255, 255, 0.8);
 }
 
 .header-info button svg {
-    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.1));
 }
 
 /* Specific adjustments */
 .saved-toggle {
-    gap: 8px; /* Increased gap */
+    gap: 8px;
+    /* Increased gap */
 }
 
 .saved-label {
     font-size: 13px;
     font-weight: 700;
-    display: block; /* Always show text */
+    display: block;
+    /* Always show text */
     color: var(--neutral-800);
 }
 
@@ -96,63 +100,74 @@
 /* ==================== FLOATING BUTTONS (Zoom & Import) ==================== */
 
 /* Shared Floating Button Style */
-.canvas-zoom-btn, .import-presets-btn {
+.canvas-zoom-btn,
+.import-presets-btn {
     width: 56px;
     height: 56px;
     border-radius: 50%;
     border: none;
-    background: var(--bg-card); /* Fallback */
+    background: var(--bg-card);
+    /* Fallback */
     background: linear-gradient(145deg, #ffffff, #e6e6e6);
     color: var(--neutral-700);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 
-        8px 8px 16px rgba(0, 0, 0, 0.1), 
+    box-shadow:
+        8px 8px 16px rgba(0, 0, 0, 0.1),
         -8px -8px 16px rgba(255, 255, 255, 0.8),
         inset 2px 2px 4px rgba(255, 255, 255, 1);
     transition: all 0.3s ease;
     z-index: 10;
-    position: relative; /* For pseudo-elements */
+    position: relative;
+    /* For pseudo-elements */
 }
 
 /* Let's use a "Glassy/3D" Gradient for the active/primary look */
-.canvas-zoom-btn::after, .import-presets-btn::after {
+.canvas-zoom-btn::after,
+.import-presets-btn::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     border-radius: 50%;
     background: var(--gradient-primary);
-    opacity: 0.1; /* Subtle tint */
+    opacity: 0.1;
+    /* Subtle tint */
     z-index: -1;
     transition: opacity 0.3s ease;
 }
 
-.canvas-zoom-btn:hover, .import-presets-btn:hover {
+.canvas-zoom-btn:hover,
+.import-presets-btn:hover {
     transform: translateY(-4px);
-    box-shadow: 
-        12px 12px 24px rgba(0, 0, 0, 0.15), 
+    box-shadow:
+        12px 12px 24px rgba(0, 0, 0, 0.15),
         -12px -12px 24px rgba(255, 255, 255, 0.9);
     color: var(--primary-600);
 }
 
-.canvas-zoom-btn:active, .import-presets-btn:active {
+.canvas-zoom-btn:active,
+.import-presets-btn:active {
     transform: translateY(0) scale(0.95);
-    box-shadow: 
-        inset 6px 6px 12px rgba(0, 0, 0, 0.1), 
+    box-shadow:
+        inset 6px 6px 12px rgba(0, 0, 0, 0.1),
         inset -6px -6px 12px rgba(255, 255, 255, 0.8);
 }
 
 /* Import Presets Button Specifics */
 .import-presets-btn {
     position: absolute;
-    top: 80px; 
+    top: 80px;
     left: 20px;
     flex-direction: column;
 }
 
-.import-text, .presets-text {
+.import-text,
+.presets-text {
     font-size: 10px;
     font-weight: 700;
     line-height: 1;
@@ -165,7 +180,7 @@
 /* Zoom Controls Positioning */
 .canvas-zoom-controls {
     position: absolute;
-    top: 80px; 
+    top: 80px;
     right: 20px;
     display: flex;
     flex-direction: column;
@@ -272,17 +287,21 @@
 /* The Glass Sphere Shell */
 .fab-glass-orb {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     border-radius: 50%;
     /* Glass Effect */
-    background: radial-gradient(circle at 30% 30%, 
-        rgba(255, 255, 255, 0.1) 0%, 
-        rgba(255, 255, 255, 0.05) 40%, 
-        rgba(255, 255, 255, 0.01) 100%);
+    background: radial-gradient(circle at 30% 30%,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 40%,
+            rgba(255, 255, 255, 0.01) 100%);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 
+    box-shadow:
         inset 0 0 20px rgba(255, 255, 255, 0.2),
-        0 10px 20px rgba(0, 0, 0, 0.15); /* Soft drop shadow */
+        0 10px 20px rgba(0, 0, 0, 0.15);
+    /* Soft drop shadow */
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     z-index: 2;
@@ -292,12 +311,12 @@
 [data-theme='dark-classic'] .fab-glass-orb,
 [data-theme='dark-oled'] .fab-glass-orb,
 [data-theme='dark-blue'] .fab-glass-orb {
-    background: radial-gradient(circle at 30% 30%, 
-        rgba(255, 255, 255, 0.15) 0%, 
-        rgba(255, 255, 255, 0.05) 50%, 
-        rgba(0, 0, 0, 0.2) 100%);
+    background: radial-gradient(circle at 30% 30%,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            rgba(0, 0, 0, 0.2) 100%);
     border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 
+    box-shadow:
         inset 0 0 20px rgba(255, 255, 255, 0.05),
         0 10px 30px rgba(0, 0, 0, 0.5);
 }
@@ -305,7 +324,8 @@
 /* Inner Glow Core */
 .fab-glow {
     position: absolute;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
     width: 40%;
     height: 40%;
@@ -318,8 +338,17 @@
 }
 
 @keyframes pulse-glow {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
-    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; }
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.6;
+    }
 }
 
 /* Floating Beads */
@@ -329,7 +358,7 @@
     height: 14px;
     border-radius: 50%;
     z-index: 3;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Bead 1: Red - Chaotic Bounce */
@@ -358,26 +387,65 @@
 
 /* Chaotic Bouncing Animations (Simulating wall hits) */
 @keyframes bounce-1 {
-    0%   { transform: translate(-20px, -20px); }
-    25%  { transform: translate(20px, -10px); }
-    50%  { transform: translate(10px, 20px); }
-    75%  { transform: translate(-15px, 15px); }
-    100% { transform: translate(-20px, -20px); }
+    0% {
+        transform: translate(-20px, -20px);
+    }
+
+    25% {
+        transform: translate(20px, -10px);
+    }
+
+    50% {
+        transform: translate(10px, 20px);
+    }
+
+    75% {
+        transform: translate(-15px, 15px);
+    }
+
+    100% {
+        transform: translate(-20px, -20px);
+    }
 }
 
 @keyframes bounce-2 {
-    0%   { transform: translate(15px, -15px); }
-    33%  { transform: translate(-20px, 0px); }
-    66%  { transform: translate(15px, 20px); }
-    100% { transform: translate(15px, -15px); }
+    0% {
+        transform: translate(15px, -15px);
+    }
+
+    33% {
+        transform: translate(-20px, 0px);
+    }
+
+    66% {
+        transform: translate(15px, 20px);
+    }
+
+    100% {
+        transform: translate(15px, -15px);
+    }
 }
 
 @keyframes bounce-3 {
-    0%   { transform: translate(0px, 20px); }
-    25%  { transform: translate(20px, 0px); }
-    50%  { transform: translate(0px, -20px); }
-    75%  { transform: translate(-20px, 0px); }
-    100% { transform: translate(0px, 20px); }
+    0% {
+        transform: translate(0px, 20px);
+    }
+
+    25% {
+        transform: translate(20px, 0px);
+    }
+
+    50% {
+        transform: translate(0px, -20px);
+    }
+
+    75% {
+        transform: translate(-20px, 0px);
+    }
+
+    100% {
+        transform: translate(0px, 20px);
+    }
 }
 
 /* Remove old SVG styles if present */
@@ -391,17 +459,19 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 80px; 
-    
+    height: 80px;
+
     /* Glassmorphism Panel */
-    background: rgba(255, 255, 255, 0.9); /* Increased opacity */
+    background: rgba(255, 255, 255, 0.9);
+    /* Increased opacity */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.08); /* Darker shadow */
-    
-    border-radius: 24px 24px 0 0; 
-    
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.08);
+    /* Darker shadow */
+
+    border-radius: 24px 24px 0 0;
+
     display: flex;
     align-items: center;
     justify-content: space-evenly;
@@ -423,7 +493,8 @@
     justify-content: center;
     gap: 4px;
     cursor: pointer;
-    color: var(--neutral-700); /* Darker color for visibility */
+    color: var(--neutral-700);
+    /* Darker color for visibility */
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     overflow: hidden;
@@ -438,9 +509,12 @@
 }
 
 .toolbar-label {
-    font-size: 11px; /* Slightly larger */
-    font-weight: 700; /* Bolder */
-    opacity: 1; /* Full opacity */
+    font-size: 11px;
+    /* Slightly larger */
+    font-weight: 700;
+    /* Bolder */
+    opacity: 1;
+    /* Full opacity */
     transition: all 0.3s ease;
     color: var(--neutral-600);
 }
@@ -462,9 +536,20 @@
 
 /* Pulse Animation for Button Presses */
 @keyframes btn-pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
-    50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+    }
 }
 
 .btn-pulse {
@@ -472,10 +557,11 @@
 }
 
 /* Base Active/Pressed State for Standard Toolbar Buttons */
-.toolbar-btn:active, .toolbar-btn.active:not(#draw-string-btn) {
+.toolbar-btn:active,
+.toolbar-btn.active:not(#draw-string-btn) {
     color: var(--primary-600);
-    background: linear-gradient(145deg, rgba(0,0,0,0.05), rgba(255,255,255,0.1));
-    box-shadow: 
+    background: linear-gradient(145deg, rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.1));
+    box-shadow:
         inset 2px 2px 5px rgba(0, 0, 0, 0.05),
         inset -2px -2px 5px rgba(255, 255, 255, 0.8);
     transform: scale(0.95);
@@ -485,7 +571,8 @@
 /* Forces blue color and background when active, regardless of theme */
 #draw-string-btn.active {
     color: var(--primary-600) !important;
-    background: rgba(99, 102, 241, 0.15) !important; /* Visible light blue bg */
+    background: rgba(99, 102, 241, 0.15) !important;
+    /* Visible light blue bg */
     border: 1px solid var(--primary-600) !important;
     box-shadow: 0 0 10px rgba(99, 102, 241, 0.2) !important;
     transform: scale(0.98);
@@ -500,8 +587,10 @@
 
 /* Dark Mode Overrides for Draw Button - Ensure visibility against dark backgrounds */
 [data-theme^='dark'] #draw-string-btn.active {
-    background: rgba(99, 102, 241, 0.25) !important; /* Slightly stronger bg for dark mode */
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4) !important; /* Glow effect */
+    background: rgba(99, 102, 241, 0.25) !important;
+    /* Slightly stronger bg for dark mode */
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4) !important;
+    /* Glow effect */
     border-color: var(--primary-500) !important;
     color: var(--primary-500) !important;
 }
@@ -516,6 +605,17 @@
     cursor: not-allowed;
     box-shadow: none !important;
     background: transparent !important;
+}
+
+/* FIX: Ensure no persistent focus box/highlight ("silver box") remains after clicking */
+.toolbar-btn:focus {
+    outline: none;
+}
+
+/* Remove background on focus if not active or hovered - prevents sticky focus styles */
+.toolbar-btn:focus:not(:active):not(:hover) {
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 
@@ -567,8 +667,9 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: var(--bg-card); /* Theme aware */
-    border: 1px solid rgba(0,0,0,0.05);
+    background: var(--bg-card);
+    /* Theme aware */
+    border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
@@ -580,12 +681,14 @@
 
 .pen-option-btn:hover {
     background: var(--neutral-100);
-    color: var(--error); /* Red for eraser hover */
+    color: var(--error);
+    /* Red for eraser hover */
     transform: translateY(-2px);
 }
 
 .pen-option-btn.active {
-    background: var(--error); /* Red background when active */
+    background: var(--error);
+    /* Red background when active */
     color: white;
     border-color: var(--error);
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
@@ -623,7 +726,8 @@
 [data-theme='dark-classic'] #header,
 [data-theme='dark-oled'] #header,
 [data-theme='dark-blue'] #header {
-    background: rgba(18, 18, 18, 0.95); /* Much darker and more opaque */
+    background: rgba(18, 18, 18, 0.95);
+    /* Much darker and more opaque */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
@@ -635,14 +739,16 @@
     background: linear-gradient(145deg, #2d2d2d, #1a1a1a);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: none;
-    color: white !important; /* Force White Text */
+    color: white !important;
+    /* Force White Text */
 }
 
 /* Header Text - Ensure visibility */
 [data-theme='dark-classic'] .saved-label,
 [data-theme='dark-oled'] .saved-label,
 [data-theme='dark-blue'] .saved-label {
-    color: white !important; /* Force White Text */
+    color: white !important;
+    /* Force White Text */
 }
 
 [data-theme='dark-classic'] .header-info button:active,
@@ -652,12 +758,15 @@
 }
 
 /* FLOATING BUTTONS - Solid Dark Theme */
-[data-theme='dark-classic'] .canvas-zoom-btn, [data-theme='dark-classic'] .import-presets-btn,
-[data-theme='dark-oled'] .canvas-zoom-btn, [data-theme='dark-oled'] .import-presets-btn,
-[data-theme='dark-blue'] .canvas-zoom-btn, [data-theme='dark-blue'] .import-presets-btn {
-    background: linear-gradient(145deg, #404040, #2d2d2d); 
-    box-shadow: 
-        5px 5px 10px rgba(0, 0, 0, 0.5), 
+[data-theme='dark-classic'] .canvas-zoom-btn,
+[data-theme='dark-classic'] .import-presets-btn,
+[data-theme='dark-oled'] .canvas-zoom-btn,
+[data-theme='dark-oled'] .import-presets-btn,
+[data-theme='dark-blue'] .canvas-zoom-btn,
+[data-theme='dark-blue'] .import-presets-btn {
+    background: linear-gradient(145deg, #404040, #2d2d2d);
+    box-shadow:
+        5px 5px 10px rgba(0, 0, 0, 0.5),
         -5px -5px 10px rgba(255, 255, 255, 0.05);
     color: var(--neutral-200);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -669,7 +778,7 @@
 [data-theme='dark-blue'] .fab {
     background: linear-gradient(135deg, #333, #111);
     border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 
+    box-shadow:
         0 10px 25px -5px rgba(0, 0, 0, 0.6),
         inset 0 0 20px rgba(255, 255, 255, 0.05);
 }
@@ -677,22 +786,23 @@
 [data-theme='dark-classic'] .fab svg,
 [data-theme='dark-oled'] .fab svg,
 [data-theme='dark-blue'] .fab svg {
-    color: var(--primary-500); 
+    color: var(--primary-500);
 }
 
 /* TOOLBAR - Dark, Opaque, Solid */
 [data-theme='dark-classic'] .bottom-toolbar,
 [data-theme='dark-oled'] .bottom-toolbar,
 [data-theme='dark-blue'] .bottom-toolbar {
-    background: rgba(18, 18, 18, 0.98); /* Almost solid black/grey */
+    background: rgba(18, 18, 18, 0.98);
+    /* Almost solid black/grey */
     border-top: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
 }
 
 [data-theme='dark-classic'] .toolbar-btn,
 [data-theme='dark-oled'] .toolbar-btn,
 [data-theme='dark-blue'] .toolbar-btn {
-    color: var(--neutral-400); 
+    color: var(--neutral-400);
 }
 
 [data-theme='dark-classic'] .toolbar-label,
@@ -701,18 +811,23 @@
     color: var(--neutral-400);
 }
 
-[data-theme='dark-classic'] .toolbar-btn:hover,
-[data-theme='dark-oled'] .toolbar-btn:hover,
-[data-theme='dark-blue'] .toolbar-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--primary-400);
+/* FIX: Only apply hover on devices that support it to prevent sticky state on touch */
+@media (hover: hover) {
+
+    [data-theme='dark-classic'] .toolbar-btn:hover,
+    [data-theme='dark-oled'] .toolbar-btn:hover,
+    [data-theme='dark-blue'] .toolbar-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        /* Reduced opacity for subtler look */
+        color: var(--primary-400);
+    }
 }
 
 [data-theme='dark-classic'] .toolbar-btn.active,
 [data-theme='dark-oled'] .toolbar-btn.active,
 [data-theme='dark-blue'] .toolbar-btn.active {
     background: rgba(0, 0, 0, 0.6);
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8);
     color: var(--primary-500);
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -723,10 +838,32 @@
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 360px) {
-    #header h1 { font-size: 16px; }
-    .header-info button { height: 36px; padding: 0 8px; }
-    .canvas-zoom-btn, .import-presets-btn { width: 48px; height: 48px; }
-    .canvas-zoom-controls, .import-presets-btn { top: 70px; }
-    .bottom-toolbar { height: 70px; }
-    .toolbar-btn { max-width: 50px; height: 50px; }
+    #header h1 {
+        font-size: 16px;
+    }
+
+    .header-info button {
+        height: 36px;
+        padding: 0 8px;
+    }
+
+    .canvas-zoom-btn,
+    .import-presets-btn {
+        width: 48px;
+        height: 48px;
+    }
+
+    .canvas-zoom-controls,
+    .import-presets-btn {
+        top: 70px;
+    }
+
+    .bottom-toolbar {
+        height: 70px;
+    }
+
+    .toolbar-btn {
+        max-width: 50px;
+        height: 50px;
+    }
 }
