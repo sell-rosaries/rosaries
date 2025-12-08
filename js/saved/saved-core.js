@@ -21,7 +21,7 @@ function updateImportButtonText() {
     if (importBtn) {
         const textSpan = importBtn.querySelector('.btn-text');
         if (textSpan) {
-            const importText = currentLanguage === 'ar' ? 'استيراد' : 'Import Design';
+            const importText = currentLanguage === 'ar' ? 'استيراد' : 'Import';
             textSpan.textContent = importText;
         }
     }
@@ -236,7 +236,7 @@ function populateSavedModal() {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                 </svg>
-                <span class="btn-text">${window.getTranslation('save-design') || 'Save Design'}</span>
+                <span class="btn-text">${window.getTranslation('save') || 'Save'}</span>
             </button>
             
             <button class="saved-action-btn" id="import-design-btn">
@@ -245,7 +245,7 @@ function populateSavedModal() {
                     <polyline points="7,10 12,15 17,10"/>
                     <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                <span class="btn-text">${window.getTranslation('import-design') || 'Import Design'}</span>
+                <span class="btn-text">${window.getTranslation('import') || 'Import'}</span>
             </button>
             
             <button class="saved-action-btn" id="delete-design-btn" data-disabled="true">
@@ -253,7 +253,7 @@ function populateSavedModal() {
                     <polyline points="3,6 5,6 21,6"/>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 </svg>
-                <span class="btn-text">${window.getTranslation('delete-design') || 'Delete Design'}</span>
+                <span class="btn-text">${window.getTranslation('delete') || 'Delete'}</span>
             </button>
         </div>
     `;

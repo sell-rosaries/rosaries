@@ -121,7 +121,7 @@
     max-width: 480px;
     /* Increased from 400px for better fit */
     max-height: 85vh;
-    background: white;
+    background: var(--bg-card); /* Ensure this variable is defined in variables.css */
     border-radius: var(--radius-xl);
     padding: var(--space-8);
     box-shadow: var(--shadow-xl);

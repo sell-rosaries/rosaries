@@ -90,17 +90,7 @@
     box-sizing: border-box;
 }
 
-.saved-actions-bottom .saved-action-btn {
-    flex: 1;
-    margin: 0;
-    min-width: 0; /* Allow buttons to shrink if needed */
-    /* Ensure button text fits properly - shorter text, better spacing */
-    font-size: var(--font-size-body-sm);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
+/* REMOVED DUPLICATE .saved-action-btn STYLES THAT WERE CONFLICTING WITH MODALS.CSS */
 .saved-action-btn {
     width: 100%;
     display: flex;
@@ -108,7 +98,7 @@
     justify-content: center;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-2);
-    background: var(--neutral-50);
+    background: var(--bg-button); /* Updated for Theme Support */
     border: 1px solid var(--neutral-200);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -143,6 +133,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--neutral-800); /* Updated for Theme Support */
 }
 
 .saved-action-btn:hover svg {

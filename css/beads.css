@@ -183,7 +183,7 @@
 .object-card {
     width: 100px;
     height: 100px;
-    background: white;
+    background: var(--bg-card);
     border: 1px solid var(--neutral-200);
     border-radius: var(--radius-md);
     padding: var(--space-2);

@@ -5,6 +5,7 @@
 
 // State
 let apkIndex = null;
+let saveTimeout = null;
 
 /**
  * Initialize settings module
@@ -28,8 +29,74 @@ function initSettings() {
         downloadBtn.addEventListener('click', handleApkDownload);
     }
 
+    // Theme Toggle Button
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', cycleTheme);
+        // Initialize theme from storage
+        const savedTheme = localStorage.getItem('app-theme') || '';
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        }
+    }
+
     // Apply initial translations
     updateSettingsLanguage();
+}
+
+/**
+ * Helper to get translation key for a theme ID
+ */
+function getThemeTranslationKey(themeId) {
+    const map = {
+        '': 'theme-light',
+        'dark-classic': 'theme-dark-classic',
+        'dark-oled': 'theme-dark-oled',
+        'dark-blue': 'theme-dark-blue'
+    };
+    return map[themeId] || 'theme-light';
+}
+
+/**
+ * Cycle through app themes
+ */
+function cycleTheme() {
+    const themes = ['', 'dark-classic', 'dark-oled', 'dark-blue'];
+    
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme') || '';
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const nextThemeId = themes[nextIndex];
+    
+    applyTheme(nextThemeId);
+}
+
+/**
+ * Apply a specific theme
+ */
+function applyTheme(themeId) {
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    
+    // Set attribute immediately for visual feedback
+    if (themeId) {
+        html.setAttribute('data-theme', themeId);
+    } else {
+        html.removeAttribute('data-theme');
+    }
+    
+    // Debounce save to storage (5 seconds delay)
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        localStorage.setItem('app-theme', themeId);
+    }, 5000);
+    
+    // Update button text
+    if (themeBtn) {
+        const key = getThemeTranslationKey(themeId);
+        themeBtn.textContent = window.getTranslation ? window.getTranslation(key) : 'Theme';
+    }
 }
 
 /**
@@ -51,6 +118,15 @@ function updateSettingsLanguage() {
             }
         }
     });
+
+    // Update Theme Button Text manually
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme') || '';
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    if (themeBtn) {
+        const key = getThemeTranslationKey(currentTheme);
+        themeBtn.textContent = window.getTranslation(key);
+    }
 
     // Handle Contact Modal translations as well
     const contactElements = document.querySelectorAll('#contact-modal [data-translate]');

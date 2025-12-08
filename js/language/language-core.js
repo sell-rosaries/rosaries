@@ -38,6 +38,11 @@ const translations = {
         'settings-title': 'Settings',
         'settings-general': 'General',
         'settings-language': 'Language',
+        'settings-theme': 'Theme',
+        'theme-light': '☀️ Light Mode',
+        'theme-dark-classic': '🌑 Dark (Classic)',
+        'theme-dark-oled': '🖤 Dark (OLED)',
+        'theme-dark-blue': '🌌 Dark (Blue)',
         'settings-downloads': 'App Downloads',
         'settings-downloads-desc': 'Download the Android app to use offline.',
         'settings-select-version': 'Select Version',
@@ -94,7 +99,12 @@ const translations = {
         'settings-title': 'الإعدادات',
         'settings-general': 'عام',
         'settings-language': 'اللغة',
-        'settings-downloads': 'تنزيل التطبيق',
+        'settings-theme': 'السمة',
+        'theme-light': '☀️ الوضع الفاتح',
+        'theme-dark-classic': '🌑 داكن (كلاسيكي)',
+        'theme-dark-oled': '🖤 داكن (OLED)',
+        'theme-dark-blue': '🌌 داكن (أزرق)',
+        'settings-downloads': 'تنزيلات التطبيق',
         'settings-downloads-desc': 'قم بتنزيل تطبيق الأندرويد للاستخدام دون اتصال.',
         'settings-select-version': 'اختر الإصدار',
         'settings-download-btn': 'تحميل APK',
@@ -125,9 +135,10 @@ let currentLanguage = 'en';
 // Language Manager class
 class LanguageManager {
     constructor() {
-        this.currentLanguage = 'en';
-        currentLanguage = 'en'; // Initialize global variable too
+        this.currentLanguage = localStorage.getItem('app-language') || 'en'; // Load from storage
+        currentLanguage = this.currentLanguage; // Initialize global variable too
         this.rtlLanguages = ['ar']; // Arabic and other RTL languages
+        this.saveTimeout = null; // Timeout for debounced saving
         this.init();
     }
 
@@ -135,8 +146,8 @@ class LanguageManager {
         // Initialize language toggle button
         this.setupLanguageToggle();
 
-        // Set initial language to English
-        this.setLanguage('en');
+        // Set initial language (UI update only, no save needed)
+        this.setLanguage(this.currentLanguage, true);
     }
 
     setupLanguageToggle() {
@@ -155,7 +166,7 @@ class LanguageManager {
         this.setLanguage(newLang);
     }
 
-    setLanguage(lang) {
+    setLanguage(lang, skipSave = false) {
         if (!translations[lang]) {
             console.warn(`Language ${lang} not supported`);
             return;
@@ -170,6 +181,14 @@ class LanguageManager {
         // Update import button text if it exists (managed by saved.js)
         if (typeof window.updateImportButtonText === 'function') {
             window.updateImportButtonText();
+        }
+
+        // Debounce save to storage (5 seconds delay)
+        if (!skipSave) {
+            if (this.saveTimeout) clearTimeout(this.saveTimeout);
+            this.saveTimeout = setTimeout(() => {
+                localStorage.setItem('app-language', lang);
+            }, 5000);
         }
     }
 

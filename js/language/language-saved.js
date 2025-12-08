@@ -8,6 +8,9 @@ if (typeof window.translations !== 'undefined') {
     window.translations.en = {
         ...window.translations.en,
         // ===== SAVED MENU TRANSLATIONS =====
+        'save': 'Save',
+        'import': 'Import',
+        'delete': 'Delete',
 
         // Header & Modal Elements
         'saved-menu-btn': 'Saved',
@@ -101,6 +104,9 @@ if (typeof window.translations !== 'undefined') {
     window.translations.ar = {
         ...window.translations.ar,
         // ===== SAVED MENU TRANSLATIONS =====
+        'save': 'حفظ',
+        'import': 'استيراد',
+        'delete': 'حذف',
 
         // Header & Modal Elements
         'saved-menu-btn': 'محفوظ',
@@ -208,9 +214,9 @@ if (typeof LanguageManager !== 'undefined') {
             '#bead-details-subtitle': langData['bead-details-subtitle'],
 
             // Action Buttons
-            '#save-design-btn .btn-text': langData['save-design'],
-            // '#import-design-btn .btn-text': langData['import-design'], // Managed dynamically by saved.js
-            '#delete-design-btn .btn-text': langData['delete-design'],
+            '#save-design-btn .btn-text': langData['save'],
+            // '#import-design-btn .btn-text': langData['import'], // Managed dynamically by saved.js
+            '#delete-design-btn .btn-text': langData['delete'],
 
             // Placeholders and Empty States
             '.saved-designs-empty': langData['no-saved-designs'],

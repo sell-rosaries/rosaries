@@ -59,7 +59,7 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    background: var(--gradient-primary);
     border: none;
     display: flex;
     flex-direction: column;
@@ -110,7 +110,7 @@
     justify-content: center;
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    background: var(--gradient-primary);
     border: none;
     border-radius: 50%;
     color: white;
