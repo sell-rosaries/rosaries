@@ -288,6 +288,7 @@ function selectObjectSize(objectId, size) {
  */
 function updateFABIcon() {
     const fabIcon = document.getElementById('fab-icon');
+    if (!fabIcon) return; // Exit if icon element doesn't exist (e.g. new FAB design)
     
     if (isStringMode) {
         // String tool icon

@@ -8,6 +8,7 @@
  */
 function updateFABIcon() {
     const fabIcon = document.getElementById('fab-icon');
+    if (!fabIcon) return; // Exit if icon element doesn't exist
     
     if (isStringMode) {
         // String tool icon

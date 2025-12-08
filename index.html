@@ -43,12 +43,6 @@
           <div class="crt-measure" id="crt-measure"></div>
         </div>
 
-        <!-- Import Presets Button (shown underneath title when string mode is active) -->
-        <button class="import-presets-btn" id="import-presets-btn" style="display: none;" aria-label="Import Presets">
-            <span class="import-text">import</span>
-            <span class="presets-text">presets</span>
-        </button>
-
         <div class="header-info">
             <button class="saved-toggle" id="saved-toggle" aria-label="Saved Designs">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -85,6 +79,12 @@
         </button>
     </div>
 
+    <!-- Import Presets Button (floating in canvas) -->
+    <button class="import-presets-btn" id="import-presets-btn" style="display: none;" aria-label="Import Presets">
+        <span class="import-text">import</span>
+        <span class="presets-text">presets</span>
+    </button>
+
     <!-- Main Canvas Container -->
     <div id="canvas-container">
         <!-- Canvas info overlay -->
@@ -110,12 +110,15 @@
     </div>
 
 
-    <!-- Floating Action Button (FAB) - Tool Selector -->
-    <button id="fab" class="fab" aria-label="Select tool">
-        <svg id="fab-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2">
-            <path d="M3 12h18M12 3v18" />
-        </svg>
+    <!-- Floating Action Button (FAB) - Bead Inventory -->
+    <button id="fab" class="fab" aria-label="Open Bead Library">
+        <div class="fab-orb-container">
+            <div class="fab-glass-orb"></div>
+            <div class="fab-bead fab-bead-1"></div>
+            <div class="fab-bead fab-bead-2"></div>
+            <div class="fab-bead fab-bead-3"></div>
+            <div class="fab-glow"></div>
+        </div>
     </button>
 
     <!-- Bottom Toolbar -->

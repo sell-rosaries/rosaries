@@ -121,7 +121,10 @@ function exitStringMode() {
 
     // Update UI
     const drawBtn = document.getElementById('draw-string-btn');
-    if (drawBtn) drawBtn.classList.remove('active');
+    if (drawBtn) {
+        drawBtn.classList.remove('active');
+        drawBtn.blur(); // Remove focus
+    }
 
     const menu = document.getElementById('pen-options-menu');
     if (menu) menu.classList.remove('active');

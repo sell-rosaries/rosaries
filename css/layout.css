@@ -237,53 +237,152 @@
     position: fixed;
     bottom: calc(var(--toolbar-height) + 24px);
     right: 24px;
-    width: 72px; /* Larger */
+    width: 72px;
     height: 72px;
-    border-radius: 28px; /* Squircle */
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    
-    /* "Crystal/Jewel" Look - White/Glassy base with iridescence */
-    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,240,255,0.8));
-    box-shadow: 
-        0 15px 35px -5px rgba(0, 0, 0, 0.1),
-        0 8px 10px -6px rgba(0, 0, 0, 0.05),
-        inset 0 0 20px rgba(255, 255, 255, 1),
-        inset 0 -4px 6px rgba(0, 0, 0, 0.05);
-        
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 90;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    -webkit-tap-highlight-color: transparent;
+    perspective: 1000px;
 }
 
 .fab:hover {
-    transform: translateY(-4px) scale(1.05);
-    background: linear-gradient(135deg, #ffffff, #f0f4ff);
-    box-shadow: 
-        0 20px 40px -5px rgba(99, 102, 241, 0.25), /* Blue glow on hover */
-        0 8px 15px -6px rgba(0, 0, 0, 0.1),
-        inset 0 0 20px rgba(255, 255, 255, 1);
+    transform: scale(1.1);
 }
 
 .fab:active {
     transform: scale(0.95);
+}
+
+/* Container for the 3D Orb effect */
+.fab-orb-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+/* The Glass Sphere Shell */
+.fab-glass-orb {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    /* Glass Effect */
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        rgba(255, 255, 255, 0.05) 40%, 
+        rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 
-        0 5px 15px -5px rgba(0, 0, 0, 0.1);
+        inset 0 0 20px rgba(255, 255, 255, 0.2),
+        0 10px 20px rgba(0, 0, 0, 0.15); /* Soft drop shadow */
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 2;
 }
 
+/* Dark Mode Adjustment for Glass */
+[data-theme='dark-classic'] .fab-glass-orb,
+[data-theme='dark-oled'] .fab-glass-orb,
+[data-theme='dark-blue'] .fab-glass-orb {
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        rgba(255, 255, 255, 0.05) 50%, 
+        rgba(0, 0, 0, 0.2) 100%);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        inset 0 0 20px rgba(255, 255, 255, 0.05),
+        0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Inner Glow Core */
+.fab-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    height: 40%;
+    border-radius: 50%;
+    background: var(--primary-500);
+    filter: blur(15px);
+    opacity: 0.4;
+    z-index: 1;
+    animation: pulse-glow 3s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; }
+}
+
+/* Floating Beads */
+.fab-bead {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    z-index: 3;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Bead 1: Red - Chaotic Bounce */
+.fab-bead-1 {
+    top: 50%;
+    left: 50%;
+    background: radial-gradient(circle at 30% 30%, #ff4d4d, #cc0000);
+    animation: bounce-1 2s linear infinite;
+}
+
+/* Bead 2: Yellow - Chaotic Bounce */
+.fab-bead-2 {
+    top: 50%;
+    left: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+    animation: bounce-2 2.3s linear infinite;
+}
+
+/* Bead 3: Blue - Chaotic Bounce */
+.fab-bead-3 {
+    top: 50%;
+    left: 50%;
+    background: radial-gradient(circle at 30% 30%, #4da6ff, #0066cc);
+    animation: bounce-3 1.8s linear infinite;
+}
+
+/* Chaotic Bouncing Animations (Simulating wall hits) */
+@keyframes bounce-1 {
+    0%   { transform: translate(-20px, -20px); }
+    25%  { transform: translate(20px, -10px); }
+    50%  { transform: translate(10px, 20px); }
+    75%  { transform: translate(-15px, 15px); }
+    100% { transform: translate(-20px, -20px); }
+}
+
+@keyframes bounce-2 {
+    0%   { transform: translate(15px, -15px); }
+    33%  { transform: translate(-20px, 0px); }
+    66%  { transform: translate(15px, 20px); }
+    100% { transform: translate(15px, -15px); }
+}
+
+@keyframes bounce-3 {
+    0%   { transform: translate(0px, 20px); }
+    25%  { transform: translate(20px, 0px); }
+    50%  { transform: translate(0px, -20px); }
+    75%  { transform: translate(-20px, 0px); }
+    100% { transform: translate(0px, 20px); }
+}
+
+/* Remove old SVG styles if present */
 .fab svg {
-    color: var(--primary-600); /* Icon color blue */
-    width: 36px;
-    height: 36px;
-    filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.2));
-    transition: all 0.3s ease;
-}
-
-.fab:hover svg {
-    transform: rotate(90deg);
-    color: var(--primary-500);
+    display: none;
 }
 
 /* ==================== BOTTOM TOOLBAR ==================== */
@@ -347,16 +446,33 @@
 }
 
 /* Active / Hover States */
-.toolbar-btn:hover {
-    color: var(--primary-600);
-    background: rgba(255, 255, 255, 0.5);
+/* FIX: Only apply hover on devices that support it to prevent sticky state on touch */
+@media (hover: hover) {
+    .toolbar-btn:hover {
+        color: var(--primary-600);
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .toolbar-btn:hover .toolbar-label {
+        color: var(--primary-600);
+    }
 }
 
-.toolbar-btn:hover .toolbar-label {
-    color: var(--primary-600);
+/* ==================== BUTTON ANIMATIONS & ACTIVE STATES ==================== */
+
+/* Pulse Animation for Button Presses */
+@keyframes btn-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+    50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
 }
 
-.toolbar-btn:active, .toolbar-btn.active {
+.btn-pulse {
+    animation: btn-pulse 0.4s ease-out;
+}
+
+/* Base Active/Pressed State for Standard Toolbar Buttons */
+.toolbar-btn:active, .toolbar-btn.active:not(#draw-string-btn) {
     color: var(--primary-600);
     background: linear-gradient(145deg, rgba(0,0,0,0.05), rgba(255,255,255,0.1));
     box-shadow: 
@@ -365,9 +481,34 @@
     transform: scale(0.95);
 }
 
-.toolbar-btn.active svg {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.3));
+/* SPECIALIZED DRAW BUTTON ACTIVE STATE (High Visibility) */
+/* Forces blue color and background when active, regardless of theme */
+#draw-string-btn.active {
+    color: var(--primary-600) !important;
+    background: rgba(99, 102, 241, 0.15) !important; /* Visible light blue bg */
+    border: 1px solid var(--primary-600) !important;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.2) !important;
+    transform: scale(0.98);
+}
+
+/* Ensure Icon & Text inherit the active color strongly */
+#draw-string-btn.active svg,
+#draw-string-btn.active .toolbar-label {
+    color: var(--primary-600) !important;
+    filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.3));
+}
+
+/* Dark Mode Overrides for Draw Button - Ensure visibility against dark backgrounds */
+[data-theme^='dark'] #draw-string-btn.active {
+    background: rgba(99, 102, 241, 0.25) !important; /* Slightly stronger bg for dark mode */
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4) !important; /* Glow effect */
+    border-color: var(--primary-500) !important;
+    color: var(--primary-500) !important;
+}
+
+[data-theme^='dark'] #draw-string-btn.active svg,
+[data-theme^='dark'] #draw-string-btn.active .toolbar-label {
+    color: var(--primary-500) !important;
 }
 
 .toolbar-btn:disabled {
@@ -393,13 +534,15 @@
     flex: none;
 }
 
+/* Pen Options Menu - Theme Aware */
 .pen-options-menu {
     position: absolute;
     bottom: 90px;
     left: 50%;
     transform: translateX(-50%) scale(0.9);
-    background: rgba(255, 255, 255, 0.95); /* More opaque */
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     padding: 8px;
     border-radius: 50px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -410,6 +553,7 @@
     pointer-events: none;
     opacity: 0;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .pen-options-menu.active {
@@ -418,12 +562,13 @@
     transform: translateX(-50%) scale(1);
 }
 
+/* Eraser Button Styles */
 .pen-option-btn {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: #fff;
-    border: none;
+    background: var(--bg-card); /* Theme aware */
+    border: 1px solid rgba(0,0,0,0.05);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
@@ -434,15 +579,40 @@
 }
 
 .pen-option-btn:hover {
-    background: var(--primary-50);
-    color: var(--primary-500);
+    background: var(--neutral-100);
+    color: var(--error); /* Red for eraser hover */
     transform: translateY(-2px);
 }
 
 .pen-option-btn.active {
-    background: var(--primary-500);
+    background: var(--error); /* Red background when active */
     color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    border-color: var(--error);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Dark Mode Overrides for Menu & Eraser */
+[data-theme^='dark'] .pen-options-menu {
+    background: var(--glass-medium);
+    border-color: var(--glass-border);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme^='dark'] .pen-option-btn {
+    background: var(--bg-button);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--neutral-300);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme^='dark'] .pen-option-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--error);
+}
+
+[data-theme^='dark'] .pen-option-btn.active {
+    background: var(--error);
+    color: white;
 }
 
 /* ==================== DARK MODE OVERRIDES ==================== */

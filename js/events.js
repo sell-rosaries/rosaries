@@ -188,6 +188,12 @@ function activateDrawStringTool() {
     const drawBtn = document.getElementById('draw-string-btn');
     const menu = document.getElementById('pen-options-menu');
 
+    // Trigger Pulse Animation
+    drawBtn.classList.remove('btn-pulse');
+    void drawBtn.offsetWidth; // Trigger reflow
+    drawBtn.classList.add('btn-pulse');
+    setTimeout(() => drawBtn.classList.remove('btn-pulse'), 400);
+
     // If in Eraser Mode, clicking the button exits Eraser Mode
     if (isEraseMode) {
         exitEraserMode();
@@ -197,27 +203,12 @@ function activateDrawStringTool() {
 
     // Logic for Normal Pen Button Click
     if (isStringMode) {
-        // Already in string mode. 
-        // If menu is open, maybe close it? Or just keep it open?
-        // User says "when i click on pen button, a new icon slides just above it".
-        // So let's toggle the menu.
-        if (menu) {
-            if (menu.classList.contains('active')) {
-                menu.classList.remove('active');
-                // Optionally exit string mode if they click again?
-                // "if i click on it, it exits the eraser mode and the icon goes back to normal." 
-                // For normal pen mode, repeated clicks usually exit or toggle menu.
-                // Let's make it toggle menu. If menu is visible, clicking again closes it.
-                // But if we want to EXIT string mode, maybe we need a long press or logic check.
-                // Existing logic was "toggle off".
-                // Let's assume: Click -> Show Menu. If Menu Active -> Hide Menu & Exit Mode?
-                exitStringMode();
-            } else {
-                menu.classList.add('active');
-            }
-        } else {
-            exitStringMode();
-        }
+        // Toggle OFF if already on. 
+        // We ignore the menu state here to ensure consistent "Click -> Off" behavior.
+        exitStringMode();
+        // Explicitly remove active class and blur to fix persistent visual state
+        drawBtn.classList.remove('active');
+        drawBtn.blur(); 
         return;
     }
 

@@ -60,27 +60,32 @@ function findClosestPointOnString(clickPoint, maxDistance = 0.5) {
  * Updates the visual representation of the string.
  */
 function updateStringLine() {
-    if (stringLine) {
-        scene.remove(stringLine);
-        stringLine.geometry.dispose();
-        stringLine.material.dispose();
-    }
     if (stringPoints.length > 1) {
-        const geometry = new THREE.BufferGeometry().setFromPoints(stringPoints);
-        
-        // Determine color based on theme
-        const isDarkMode = document.documentElement.hasAttribute('data-theme');
-        const stringColor = isDarkMode ? 0x000000 : 0x5d4037;
-        
-        const material = new THREE.LineBasicMaterial({ color: stringColor, linewidth: 2 });
-        stringLine = new THREE.Line(geometry, material);
-        stringLine.position.y = 0.05;
-        scene.add(stringLine);
+        if (stringLine) {
+            // Optimize: Update geometry only, don't recreate material/mesh
+            stringLine.geometry.setFromPoints(stringPoints);
+        } else {
+            const geometry = new THREE.BufferGeometry().setFromPoints(stringPoints);
+            
+            // Determine color based on theme
+            const isDarkMode = document.documentElement.hasAttribute('data-theme');
+            const stringColor = isDarkMode ? 0x000000 : 0x5d4037;
+            
+            const material = new THREE.LineBasicMaterial({ color: stringColor, linewidth: 2 });
+            stringLine = new THREE.Line(geometry, material);
+            stringLine.position.y = 0.05;
+            scene.add(stringLine);
+        }
 
         // Trigger string type update if we have pen drawing
         if (typeof updateStringType === 'function') {
             updateStringType();
         }
+    } else if (stringLine) {
+        scene.remove(stringLine);
+        stringLine.geometry.dispose();
+        stringLine.material.dispose();
+        stringLine = null;
     }
 }
 
