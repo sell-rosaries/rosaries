@@ -12,8 +12,8 @@ const translations = {
         'presets': 'presets',
 
         // Language Toggle
-        'lang-en': 'EN',
-        'lang-ar': 'AR',
+        'lang-en': 'English',
+        'lang-ar': 'العربية',
 
         // Toolbar Buttons
         'undo': 'Undo',
@@ -73,8 +73,8 @@ const translations = {
         'presets': 'إعدادات مسبقة',
 
         // Language Toggle
-        'lang-en': 'إن',
-        'lang-ar': 'ع',
+        'lang-en': 'English',
+        'lang-ar': 'العربية',
 
         // Toolbar Buttons
         'undo': 'تراجع',
@@ -331,6 +331,10 @@ class LanguageManager {
                 btnEn.classList.remove('active');
                 btnAr.classList.add('active');
             }
+
+            // Ensure text is always correct explicitly
+            btnEn.textContent = 'English';
+            btnAr.textContent = 'العربية';
         }
     }
 

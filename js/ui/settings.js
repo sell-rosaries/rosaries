@@ -62,13 +62,13 @@ function getThemeTranslationKey(themeId) {
  */
 function cycleTheme() {
     const themes = ['', 'dark-classic', 'dark-oled', 'dark-blue'];
-    
+
     const html = document.documentElement;
     const currentTheme = html.getAttribute('data-theme') || '';
     const currentIndex = themes.indexOf(currentTheme);
     const nextIndex = (currentIndex + 1) % themes.length;
     const nextThemeId = themes[nextIndex];
-    
+
     applyTheme(nextThemeId);
 }
 
@@ -78,20 +78,20 @@ function cycleTheme() {
 function applyTheme(themeId) {
     const html = document.documentElement;
     const themeBtn = document.getElementById('theme-toggle-btn');
-    
+
     // Set attribute immediately for visual feedback
     if (themeId) {
         html.setAttribute('data-theme', themeId);
     } else {
         html.removeAttribute('data-theme');
     }
-    
+
     // Debounce save to storage (5 seconds delay)
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
         localStorage.setItem('app-theme', themeId);
     }, 5000);
-    
+
     // Update button text
     if (themeBtn) {
         const key = getThemeTranslationKey(themeId);
@@ -360,7 +360,9 @@ function copyToClipboard(text, type) {
             document.execCommand('copy');
             showShareSuccess(type);
         } catch (err) {
-            showCustomAlert('Failed to copy link', 'error');
+            const isArabic = (typeof languageManager !== 'undefined' && languageManager.currentLanguage === 'ar') ||
+                (typeof currentLanguage !== 'undefined' && currentLanguage === 'ar');
+            showCustomAlert(isArabic ? 'فشل نسخ الرابط' : 'Failed to copy link', 'error');
         }
         document.body.removeChild(textarea);
         return;
@@ -369,7 +371,9 @@ function copyToClipboard(text, type) {
     navigator.clipboard.writeText(text).then(() => {
         showShareSuccess(type);
     }).catch(err => {
-        showCustomAlert('Failed to copy link', 'error');
+        const isArabic = (typeof languageManager !== 'undefined' && languageManager.currentLanguage === 'ar') ||
+            (typeof currentLanguage !== 'undefined' && currentLanguage === 'ar');
+        showCustomAlert(isArabic ? 'فشل نسخ الرابط' : 'Failed to copy link', 'error');
     });
 }
 
@@ -377,11 +381,11 @@ function showShareSuccess(type) {
     const isArabic = (typeof languageManager !== 'undefined' && languageManager.currentLanguage === 'ar') ||
         (typeof currentLanguage !== 'undefined' && currentLanguage === 'ar');
 
-    let msg = 'Link copied to clipboard!';
+    let msg = 'Link copied! Paste it anywhere to share.';
     if (type === 'website') {
-        msg = isArabic ? 'تم نسخ رابط الموقع!' : 'Website link copied!';
+        msg = isArabic ? 'تم نسخ رابط الموقع! الصقه في أي مكان للمشاركة.' : 'Website link copied! Paste it anywhere to share.';
     } else if (type === 'app') {
-        msg = isArabic ? 'تم نسخ رابط التطبيق!' : 'App download link copied!';
+        msg = isArabic ? 'تم نسخ رابط التطبيق! الصقه في أي مكان للمشاركة.' : 'App download link copied! Paste it anywhere to share.';
     }
 
     if (typeof showCustomAlert === 'function') {
