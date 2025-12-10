@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-11-13T07:43:15Z",
+  "lastUpdated": "2025-12-10T11:09:12Z",
   "categories": [
     {
       "id": "rosaries",
@@ -7,48 +7,27 @@
       "items": [
         {
           "id": "rosaries_001",
-          "name": "1000296993",
-          "image": "gallery/rosaries/1000296993.jpg",
+          "name": "roro-nano",
+          "image": "gallery/rosaries/roro-nano.png",
           "description": "Beautiful rosaries design"
         }
 ,
         {
           "id": "rosaries_002",
-          "name": "1000296994",
-          "image": "gallery/rosaries/1000296994.jpg",
-          "description": "Beautiful rosaries design"
-        }
-,
-        {
-          "id": "rosaries_003",
-          "name": "1000297254",
-          "image": "gallery/rosaries/1000297254.jpg",
-          "description": "Beautiful rosaries design"
-        }
-,
-        {
-          "id": "rosaries_004",
-          "name": "1000297255",
-          "image": "gallery/rosaries/1000297255.jpg",
-          "description": "Beautiful rosaries design"
-        }
-,
-        {
-          "id": "rosaries_005",
           "name": "1000297367",
           "image": "gallery/rosaries/1000297367.jpg",
           "description": "Beautiful rosaries design"
         }
 ,
         {
-          "id": "rosaries_006",
+          "id": "rosaries_003",
           "name": "rosary1",
           "image": "gallery/rosaries/rosary1.jpg",
           "description": "Beautiful rosaries design"
         }
 ,
         {
-          "id": "rosaries_007",
+          "id": "rosaries_004",
           "name": "rosary2",
           "image": "gallery/rosaries/rosary2.jpg",
           "description": "Beautiful rosaries design"
