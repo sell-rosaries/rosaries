@@ -1,9 +1,4 @@
 {
-    "nano_banana": {
-        "api_key": "",
-        "folder_path": "",
-        "default_prompt": ""
-    },
     "bg_remover": {
         "folder_path": ""
     },
@@ -26,5 +21,21 @@
     "apk_updater": {
         "git_repo_dir": "",
         "apk_dir": ""
+    },
+    "nano_banana": {
+        "profiles": {
+            "PRO": {
+                "api_key": "",
+                "model": "",
+                "input_path": "",
+                "prompt": "",
+                "resolution": "",
+                "aspect_ratio": "",
+                "grounding": ,
+                "format": "",
+                "max_workers": ""
+            }
+        },
+        "last_profile": ""
     }
 }

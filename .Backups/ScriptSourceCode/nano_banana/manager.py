@@ -1,169 +1,276 @@
 import os
 import threading
-from PIL import Image
-from io import BytesIO
-from google import genai
-from google.genai import types
 import tkinter as tk
 from tkinter import messagebox
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from .core.api_handler import GeminiAPIHandler
+from .core.image_processor import ImageProcessor
+from .config.models import MODELS
 
 class NanoBananaManager:
     def __init__(self, parent, config_manager):
         self.parent = parent
         self.config_manager = config_manager
-        self.config = self.config_manager.get_tool_config('nano_banana')
-        self.process = None
-        self.stop_processing_flag = threading.Event()
+        
+        self.tool_config = self.config_manager.get_tool_config('nano_banana') or {}
+        self.profiles = self.tool_config.get('profiles', {})
+        self.current_profile_name = self.tool_config.get('last_profile', 'Default')
+        self.config = self.profiles.get(self.current_profile_name, {})
+        
+        self.api_handler = None
+        self.image_processor = ImageProcessor()
+        self.stop_flag = threading.Event()
 
-    def save_config(self, config_data):
-        if self.config_manager.set_tool_config('nano_banana', config_data):
-            self.config = config_data
-            return True
+    # --- Profile Management ---
+    def get_profile_names(self):
+        return list(self.profiles.keys())
+
+    def load_profile(self, name):
+        if name in self.profiles:
+            self.current_profile_name = name
+            self.config = self.profiles[name]
+            self._save_tool_config()
+            return self.config
+        return None
+
+    def save_profile(self, name, config_data):
+        self.profiles[name] = config_data
+        self.current_profile_name = name
+        self.config = config_data
+        return self._save_tool_config()
+
+    def delete_profile(self, name):
+        if name in self.profiles:
+            del self.profiles[name]
+            if self.current_profile_name == name:
+                if self.profiles:
+                    self.current_profile_name = list(self.profiles.keys())[0]
+                    self.config = self.profiles[self.current_profile_name]
+                else:
+                    self.current_profile_name = "Default"
+                    self.config = {}
+            return self._save_tool_config()
         return False
 
+    def _save_tool_config(self):
+        self.tool_config['profiles'] = self.profiles
+        self.tool_config['last_profile'] = self.current_profile_name
+        return self.config_manager.set_tool_config('nano_banana', self.tool_config)
+
+    # --- Processing ---
     def stop_process(self):
-        self.stop_processing_flag.set()
+        self.stop_flag.set()
 
-    def process_images(self, api_key, prompt, folder_path, log_callback, 
-                       thinking_level="low", media_resolution="media_resolution_medium", 
-                       output_resolution="1024x1024", use_grounding=False, use_advanced_text=False):
-        log_callback("=== Starting Nano Banana Process ===")
-        self.stop_processing_flag.clear() # Clear flag at the start
+    def _process_single_image(self, 
+                              img_info, 
+                              prompt, 
+                              model_name_api, 
+                              image_size_str, 
+                              aspect_ratio_str, 
+                              reference_images, 
+                              use_grounding, 
+                              output_format, 
+                              output_folder, 
+                              log_callback):
         
+        if self.stop_flag.is_set():
+            return False
+
+        filename = img_info['name'] + img_info['extension']
+        
+        # 1. Determine Output Filename EARLY
+        base_name = img_info['name']
+        suffix = "-nano-pro" if "pro" in model_name_api else "-nano"
+        target_filename = f"{base_name}{suffix}.{output_format}"
+        target_path = os.path.join(output_folder, target_filename)
+        
+        # 2. Check for existence (Strict Skip Logic)
+        if os.path.exists(target_path):
+            log_callback(f"-> Skipping {filename} (Already processed: {target_filename})")
+            return True # Treat skip as success to not count as failure
+
+        log_callback(f"-> Processing {filename}...")
+        
+        current_inputs = [img_info['path']]
+        if reference_images:
+            for ref in reference_images:
+                if os.path.exists(ref['path']):
+                    current_inputs.append(ref['path'])
+
         try:
-            # Initialize client with new SDK
-            client = genai.Client(api_key=api_key)
-            log_callback("   AI Client initialized (google-genai).")
+            # Check for Flash model limitations
+            is_flash = "flash" in model_name_api
+            current_grounding = use_grounding and not is_flash
+            
+            # Context at START of prompt
+            final_prompt = f"(Context: Input filename is '{filename}')\n{prompt}"
+            
+            generated_data = self.api_handler.generate_image(
+                prompt=final_prompt,
+                model_name=model_name_api,
+                image_size=image_size_str,
+                aspect_ratio=aspect_ratio_str,
+                input_images=current_inputs,
+                number_of_images=1,
+                enable_grounding=current_grounding
+            )
+
+            if generated_data:
+                image_obj, _ = generated_data[0]
+                
+                # Double check before saving (though race conditions are rare in this context)
+                if os.path.exists(target_path):
+                     # Fallback to counter if created during processing? 
+                     # User wanted strict skip, but if we generated it, we should probably save it.
+                     # Let's stick to the strict target_filename as primary.
+                     pass
+
+                save_fmt = 'JPEG' if output_format.lower() in ['jpg', 'jpeg'] else 'PNG'
+                image_obj.save(target_path, format=save_fmt)
+                
+                log_callback(f"   ✓ Saved: {target_filename}")
+                return True
+            else:
+                log_callback(f"   ✗ Failed: No image generated for {filename}.")
+                return False
+
         except Exception as e:
-            log_callback(f"   CRITICAL ERROR: Failed to initialize AI client: {str(e)}")
-            self.parent.after(0, lambda: messagebox.showerror("AI Error", f"Failed to initialize AI client.\n{str(e)}"))
-            return
+            log_callback(f"   ✗ Error ({filename}): {str(e)}")
+            return False
 
-        if not os.path.isdir(folder_path):
-            log_callback(f"   ERROR: Folder not found at '{folder_path}'")
-            self.parent.after(0, lambda: messagebox.showerror("Error", f"The specified folder does not exist:\n{folder_path}"))
-            return
-
-        image_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff')
-        files_to_process = [f for f in os.listdir(folder_path) if f.lower().endswith(image_extensions) and "_semiprocessed" not in f.lower()]
+    def process_images(self, 
+                       api_key, 
+                       prompt, 
+                       input_path, 
+                       model_id, 
+                       resolution, 
+                       aspect_ratio, 
+                       reference_images, 
+                       use_grounding, 
+                       output_format, 
+                       max_workers,
+                       log_callback):
         
-        if not files_to_process:
-            log_callback("   No supported image files found in the folder.")
-            self.parent.after(0, lambda: messagebox.showinfo("Info", "No supported image files found in the selected folder."))
+        log_callback("=== Starting Nano Banana Process ===")
+        self.stop_flag.clear()
+
+        # 1. Initialize API Handler
+        try:
+            self.api_handler = GeminiAPIHandler(api_key)
+            if not self.api_handler.validate_api_key():
+                log_callback("ERROR: Invalid API Key or Connection Failed.")
+                self.parent.after(0, lambda: messagebox.showerror("Error", "Invalid API Key or Connection Failed."))
+                return
+            log_callback("✓ API Client initialized.")
+        except Exception as e:
+            log_callback(f"CRITICAL ERROR: Failed to initialize AI client: {str(e)}")
             return
 
-        log_callback(f"   Found {len(files_to_process)} images to process.")
+        # 2. Validate Input & Scan
+        images = []
+        output_folder = ""
         
-        # Prepare configuration
-        tools = []
-        if use_grounding:
-            # Fix: Use google_search tool as per error message
-            tools.append(types.Tool(google_search=types.GoogleSearch()))
-
-        # Map Output Resolution to Image Size
-        image_size = "1K" # Default
-        if output_resolution == "2048x2048":
-            image_size = "2K"
-        elif output_resolution == "4096x4096":
-            image_size = "4K"
+        if os.path.isfile(input_path):
+            if not self.image_processor.validate_image_file(input_path)['valid']:
+                 log_callback(f"ERROR: Invalid image file: {input_path}")
+                 return
+            path_obj = os.path.splitext(input_path)
+            images = [
+                {
+                    'path': input_path,
+                    'name': os.path.basename(path_obj[0]),
+                    'extension': path_obj[1]
+                }
+            ]
+            output_folder = os.path.join(os.path.dirname(input_path), "processed")
             
-        # Augment prompt for features not directly in config or as best effort
-        full_prompt = prompt
-        if use_advanced_text:
-             full_prompt += "\n\n(Ensure high legibility and advanced text rendering for any text in the image.)"
-
-        log_callback(f"   Settings:")
-        log_callback(f"     - Thinking Process: Enabled (Default)")
-        log_callback(f"     - Grounding: {'Enabled' if use_grounding else 'Disabled'}")
-        log_callback(f"     - Output Resolution: {image_size}")
-        if use_advanced_text:
-            log_callback(f"     - Advanced Text: Enabled (Prompt augmented)")
-        if media_resolution:
-             log_callback(f"     - Media Resolution: {media_resolution} (Note: Not currently mapped in new SDK)")
-
-        for i, filename in enumerate(files_to_process):
-            if self.stop_processing_flag.is_set():
-                log_callback("\n!!! STOP REQUESTED: Halting image processing. !!!")
-                break
-            
-            try:
-                log_callback(f"\n-> Processing {filename} ({i+1}/{len(files_to_process)})...")
-                image_path = os.path.join(folder_path, filename)
-                
-                image = Image.open(image_path)
-                
-                # Use generate_content with multimodal input (text + image)
-                # This is how the documentation describes "Image editing (text-and-image-to-image)"
-                
-                response = client.models.generate_content(
-                    model='gemini-3-pro-image-preview',
-                    contents=[full_prompt, image],
-                    config=types.GenerateContentConfig(
-                        response_modalities=['IMAGE'], # We primarily want the image
-                        image_config=types.ImageConfig(
-                            image_size=image_size,
-                            # aspect_ratio="1:1" # Defaulting to 1:1 or letting model decide based on input
-                        ),
-                        safety_settings=[types.SafetySetting(
-                            category="HARM_CATEGORY_DANGEROUS_CONTENT",
-                            threshold="BLOCK_ONLY_HIGH"
-                        )],
-                        tools=tools if tools else None
-                    )
-                )
-                
-                processed_image = None
-                # Check for generated images in parts
-                if response.parts:
-                    for part in response.parts:
-                        if part.inline_data: # Old SDK style, but check just in case
-                             processed_image = Image.open(BytesIO(part.inline_data.data))
-                             break
-                        # New SDK might have a helper or different structure.
-                        # The doc says: `elif image:= part.as_image(): image.save(...)`
-                        try:
-                            img = part.as_image()
-                            if img:
-                                processed_image = img
-                                break
-                        except:
-                            pass
-                
-                # Fallback: check candidates if parts didn't yield
-                if not processed_image and response.candidates:
-                     for part in response.candidates[0].content.parts:
-                         try:
-                            img = part.as_image()
-                            if img:
-                                processed_image = img
-                                break
-                         except:
-                             pass
-
-                if processed_image:
-                    base_name, ext = os.path.splitext(filename)
-                    new_filename = f"{base_name}_semiprocessed{ext}"
-                    new_path = os.path.join(folder_path, new_filename)
-                    processed_image.save(new_path)
-                    log_callback(f"   ✓ Saved: {new_filename}")
-                else:
-                    log_callback(f"   ✗ Failed: No image generated for {filename}")
-                    # Debug info
-                    if response.parts:
-                        for part in response.parts:
-                            if part.text:
-                                log_callback(f"     [Model Text]: {part.text}")
-
-            except Exception as e:
-                log_callback(f"   ✗ Error processing {filename}: {str(e)}")
-        
-        if self.stop_processing_flag.is_set():
-            log_callback("\n" + "!" * 60)
-            log_callback("✗ PROCESS STOPPED BY USER.")
-            log_callback("!" * 60)
-            self.parent.after(0, lambda: messagebox.showwarning("Stopped", "The Nano Banana process was stopped."))
+        elif os.path.isdir(input_path):
+            images = self.image_processor.scan_input_folder(input_path)
+            output_folder = os.path.join(input_path, "processed")
         else:
-            log_callback("\n" + "=" * 60)
-            log_callback("✓ Processing complete!")
-            log_callback("=" * 60)
-            self.parent.after(0, lambda: messagebox.showinfo("Success", "Image processing complete!"))
+             log_callback(f"ERROR: Invalid input path: {input_path}")
+             return
+
+        if not images:
+            log_callback("No supported image files found.")
+            return
+        
+        log_callback(f"Found {len(images)} images to process.")
+
+        # 3. Setup Output Folder
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+            log_callback(f"Created output folder: {output_folder}")
+
+        # 4. Prepare API Arguments
+        model_name_api = MODELS.get(model_id, {}).get('id', 'gemini-3-pro-image-preview')
+        
+        image_size_str = "1K"
+        if resolution:
+            if "(" in resolution:
+                 if "4K" in resolution: image_size_str = "4K"
+                 elif "2K" in resolution: image_size_str = "2K"
+                 else: image_size_str = "1K"
+            else:
+                 try:
+                    w = int(resolution.split('x')[0])
+                    if w >= 4096: image_size_str = "4K"
+                    elif w >= 2048: image_size_str = "2K"
+                 except: pass
+
+        aspect_ratio_str = "1:1"
+        if aspect_ratio:
+            aspect_ratio_str = aspect_ratio.split(' ')[0]
+
+        # 5. Process Loop (Parallel or Sequential)
+        success_count = 0
+        try:
+            # Ensure max_workers is a valid integer between 1 and 5
+            try:
+                workers = int(max_workers)
+                workers = max(1, min(5, workers))
+            except (ValueError, TypeError):
+                workers = 1
+                
+            log_callback(f"Processing with {workers} parallel worker(s).")
+
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                futures = []
+                for img_info in images:
+                    if self.stop_flag.is_set():
+                        break
+                    
+                    # Submit task
+                    future = executor.submit(
+                        self._process_single_image,
+                        img_info,
+                        prompt,
+                        model_name_api,
+                        image_size_str,
+                        aspect_ratio_str,
+                        reference_images,
+                        use_grounding,
+                        output_format,
+                        output_folder,
+                        log_callback
+                    )
+                    futures.append(future)
+                
+                # Wait for all submitted tasks
+                for future in as_completed(futures):
+                    if self.stop_flag.is_set():
+                        # We can't easily cancel running threads, but we stop submitting new ones
+                        # and individual threads check the flag.
+                        break
+                    if future.result():
+                        success_count += 1
+
+        except Exception as e:
+            log_callback(f"CRITICAL LOOP ERROR: {str(e)}")
+
+        if self.stop_flag.is_set():
+            log_callback("\n!!! Process stopped by user. !!!")
+            self.parent.after(0, lambda: messagebox.showwarning("Stopped", "Process stopped by user."))
+        else:
+            log_callback(f"\n=== Finished. Processed {success_count}/{len(images)} images. ===")
+            self.parent.after(0, lambda: messagebox.showinfo("Success", f"Processing Complete!\nProcessed {success_count} images."))

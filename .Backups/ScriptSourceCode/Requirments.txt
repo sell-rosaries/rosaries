@@ -4,3 +4,4 @@
 rembg
 pillow
 google-genai
+rich

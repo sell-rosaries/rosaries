@@ -1,25 +1,31 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, simpledialog
 import threading
+import os
+import json
 from .manager import NanoBananaManager
+from .config.models import MODELS, ASPECT_RATIOS
 
 class NanoBananaUI:
     def __init__(self, parent, switch_to_main_callback, config_manager):
         self.parent = parent
         self.switch_to_main_callback = switch_to_main_callback
-        self.parent.title("Nano Banana")
-        self.parent.geometry("800x720")
+        self.parent.title("Nano Banana Pro")
+        self.parent.geometry("900x750")
         
         self.style = ttk.Style()
         self.style.theme_use('clam')
         self.bg_color = "#f0f0f0"
         self.parent.configure(bg=self.bg_color)
         
-        self.nano_manager = NanoBananaManager(self.parent, config_manager)
+        self.manager = NanoBananaManager(self.parent, config_manager)
         self.is_processing = False
         
+        # Data vars
+        self.reference_images = [] # List of dicts {path, name}
+        
         self.create_widgets()
-        self.load_config_to_ui()
+        self.load_current_profile_to_ui()
 
     def create_widgets(self):
         for widget in self.parent.winfo_children():
@@ -28,172 +34,319 @@ class NanoBananaUI:
         main_frame = ttk.Frame(self.parent, padding="15")
         main_frame.pack(fill=tk.BOTH, expand=True)
         
+        # Header
         title_frame = ttk.Frame(main_frame)
         title_frame.pack(fill=tk.X, pady=(0, 15))
         
         back_button = ttk.Button(title_frame, text="← Back", command=self.switch_to_main_callback)
         back_button.pack(side=tk.LEFT, padx=(0, 10))
         
-        title_label = ttk.Label(title_frame, text="Nano Banana", font=("Arial", 18, "bold"))
+        title_label = ttk.Label(title_frame, text="Nano Banana Pro", font=("Arial", 18, "bold"))
         title_label.pack(side=tk.LEFT)
         
+        # Tabs
         notebook = ttk.Notebook(main_frame)
         notebook.pack(fill=tk.BOTH, expand=True)
         self.style.configure("TNotebook", background=self.bg_color)
-        self.style.configure("TNotebook.Tab", padding=[20, 10], font=("Arial", 11))
         
-        config_tab = ttk.Frame(notebook); notebook.add(config_tab, text="Configuration"); self.create_config_tab(config_tab)
-        log_tab = ttk.Frame(notebook); notebook.add(log_tab, text="Log"); self.create_log_tab(log_tab)
+        tab_main = ttk.Frame(notebook, padding=15); notebook.add(tab_main, text="Main")
+        tab_refs = ttk.Frame(notebook, padding=15); notebook.add(tab_refs, text="References")
+        tab_adv = ttk.Frame(notebook, padding=15); notebook.add(tab_adv, text="Advanced")
+        tab_log = ttk.Frame(notebook, padding=15); notebook.add(tab_log, text="Log")
         self.notebook = notebook
+        
+        self.setup_main_tab(tab_main)
+        self.setup_refs_tab(tab_refs)
+        self.setup_adv_tab(tab_adv)
+        self.setup_log_tab(tab_log)
+        
+        # Footer Actions
+        action_frame = ttk.Frame(main_frame, padding=(0, 10, 0, 0))
+        action_frame.pack(fill=tk.X, side=tk.BOTTOM)
+        
+        self.btn_run = ttk.Button(action_frame, text="Start Processing", command=self.start_processing)
+        self.btn_run.pack(side=tk.RIGHT, padx=5)
+        
+        self.btn_stop = ttk.Button(action_frame, text="Stop", command=self.stop_processing, state=tk.DISABLED)
+        self.btn_stop.pack(side=tk.RIGHT, padx=5)
 
-    def create_config_tab(self, parent):
-        # Pack Action Frame FIRST to the BOTTOM to ensure it's always visible
-        action_frame = ttk.Frame(parent)
-        action_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
-        self.process_button = ttk.Button(action_frame, text="Process Images", command=self.start_processing_thread)
-        self.process_button.pack(side=tk.LEFT, padx=(0, 10))
-        self.stop_button = ttk.Button(action_frame, text="Stop", command=self.stop_process, state=tk.DISABLED)
-        self.stop_button.pack(side=tk.LEFT)
+    def setup_main_tab(self, parent):
+        # API Key
+        ttk.Label(parent, text="API Key:").grid(row=0, column=0, sticky=tk.W, pady=5)
+        self.var_api_key = tk.StringVar()
+        ttk.Entry(parent, textvariable=self.var_api_key, show="*", width=50).grid(row=0, column=1, columnspan=2, sticky=tk.EW, pady=5)
+        
+        # Model
+        ttk.Label(parent, text="Model:").grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.var_model = tk.StringVar()
+        model_names = list(MODELS.keys())
+        self.cb_model = ttk.Combobox(parent, textvariable=self.var_model, values=model_names, state="readonly")
+        self.cb_model.grid(row=1, column=1, columnspan=2, sticky=tk.EW, pady=5)
+        self.cb_model.bind("<<ComboboxSelected>>", self.on_model_change)
+        
+        # Input Path (Folder or File)
+        ttk.Label(parent, text="Input Path:").grid(row=2, column=0, sticky=tk.W, pady=5)
+        self.var_input_path = tk.StringVar()
+        ttk.Entry(parent, textvariable=self.var_input_path, width=50).grid(row=2, column=1, sticky=tk.EW, pady=5)
+        
+        btn_box = ttk.Frame(parent)
+        btn_box.grid(row=2, column=2, padx=5, pady=5)
+        ttk.Button(btn_box, text="File", command=self.browse_file).pack(side=tk.LEFT, padx=2)
+        ttk.Button(btn_box, text="Folder", command=self.browse_folder).pack(side=tk.LEFT, padx=2)
+        
+        # Prompt
+        ttk.Label(parent, text="Prompt:").grid(row=3, column=0, sticky=tk.NW, pady=5)
+        self.txt_prompt = tk.Text(parent, height=5, width=50, font=("Arial", 10))
+        self.txt_prompt.grid(row=3, column=1, columnspan=2, sticky=tk.EW, pady=5)
+        
+        # Resolution
+        ttk.Label(parent, text="Resolution:").grid(row=4, column=0, sticky=tk.W, pady=5)
+        self.var_res = tk.StringVar()
+        self.cb_res = ttk.Combobox(parent, textvariable=self.var_res, state="readonly")
+        self.cb_res.grid(row=4, column=1, sticky=tk.W, pady=5)
+        
+        # Aspect Ratio
+        ttk.Label(parent, text="Aspect Ratio:").grid(row=5, column=0, sticky=tk.W, pady=5)
+        self.var_ratio = tk.StringVar()
+        self.cb_ratio = ttk.Combobox(parent, textvariable=self.var_ratio, state="readonly")
+        self.cb_ratio.grid(row=5, column=1, sticky=tk.W, pady=5)
+        
+        # Populate initial values
+        self.update_resolution_options()
+        self.update_ratio_options()
+        
+        parent.columnconfigure(1, weight=1)
 
-        # Config Frame
-        config_frame = ttk.LabelFrame(parent, text="Nano Banana Configuration", padding="15")
-        config_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
-        self.style.configure("TLabelframe.Label", font=("Arial", 12, "bold"))
+    def setup_refs_tab(self, parent):
+        self.lst_refs = tk.Listbox(parent, height=10)
+        self.lst_refs.pack(fill=tk.BOTH, expand=True, pady=5)
         
-        ttk.Label(config_frame, text="API Key:").grid(row=0, column=0, sticky=tk.W, pady=8)
-        self.api_key_var = tk.StringVar()
-        ttk.Entry(config_frame, textvariable=self.api_key_var, show="*", width=60).grid(row=0, column=1, sticky=tk.EW, pady=8, padx=(5, 0))
-        
-        ttk.Label(config_frame, text="Image Folder:").grid(row=1, column=0, sticky=tk.W, pady=8)
-        self.folder_path_var = tk.StringVar()
-        ttk.Entry(config_frame, textvariable=self.folder_path_var, width=60).grid(row=1, column=1, sticky=tk.EW, pady=8, padx=(5, 0))
-        ttk.Button(config_frame, text="Browse", command=self.browse_folder).grid(row=1, column=2, pady=8, padx=(5, 0))
-        
-        ttk.Label(config_frame, text="Prompt:").grid(row=2, column=0, sticky=tk.NW, pady=8)
-        self.prompt_text = tk.Text(config_frame, height=5, width=60, font=("Arial", 10), wrap=tk.WORD)
-        self.prompt_text.grid(row=2, column=1, columnspan=2, sticky=tk.EW, pady=8, padx=(5, 0))
-        
-        ttk.Button(config_frame, text="Save Configuration", command=self.save_config).grid(row=3, column=0, columnspan=3, pady=15)
-        config_frame.columnconfigure(1, weight=1)
+        btn_frame = ttk.Frame(parent)
+        btn_frame.pack(fill=tk.X, pady=5)
+        ttk.Button(btn_frame, text="Add Image", command=self.add_ref).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Remove Selected", command=self.remove_ref).pack(side=tk.LEFT, padx=5)
+        ttk.Label(parent, text="Note: Reference images are used for style/content context.").pack(pady=5)
 
-        # Advanced Settings Frame
-        advanced_frame = ttk.LabelFrame(parent, text="Advanced Settings (Per Run)", padding="15")
-        advanced_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=(0, 10))
+    def setup_adv_tab(self, parent):
+        # Grounding
+        self.var_grounding = tk.BooleanVar(value=False)
+        self.chk_grounding = ttk.Checkbutton(parent, text="Enable Google Search Grounding", variable=self.var_grounding)
+        self.chk_grounding.pack(anchor=tk.W, pady=5)
         
-        # Row 1: Thinking Level & Media Resolution
-        ttk.Label(advanced_frame, text="Thinking Level:").grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
-        self.thinking_var = tk.StringVar(value="low")
-        ttk.Combobox(advanced_frame, textvariable=self.thinking_var, values=["low", "high"], state="readonly", width=10).grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        # Output Format
+        ttk.Label(parent, text="Output Format:").pack(anchor=tk.W, pady=(10,0))
+        self.var_format = tk.StringVar(value="png")
+        ttk.Combobox(parent, textvariable=self.var_format, values=["png", "jpg", "webp"], state="readonly", width=10).pack(anchor=tk.W, pady=5)
         
-        ttk.Label(advanced_frame, text="Media Resolution:").grid(row=0, column=2, sticky=tk.W, padx=(0, 5))
-        self.media_res_var = tk.StringVar(value="media_resolution_medium")
-        ttk.Combobox(advanced_frame, textvariable=self.media_res_var, values=["media_resolution_low", "media_resolution_medium", "media_resolution_high"], state="readonly", width=25).grid(row=0, column=3, sticky=tk.W)
+        # Parallel Processing
+        ttk.Label(parent, text="Parallel Processing (Images at once):").pack(anchor=tk.W, pady=(10,0))
+        self.var_workers = tk.StringVar(value="1")
+        workers_cb = ttk.Combobox(parent, textvariable=self.var_workers, values=["1", "2", "3", "4", "5"], state="readonly", width=5)
+        workers_cb.pack(anchor=tk.W, pady=5)
+        ttk.Label(parent, text="(Note: Higher values are faster but may hit API rate limits)", font=("Arial", 8)).pack(anchor=tk.W)
 
-        # Row 2: Output Resolution & Checkboxes
-        ttk.Label(advanced_frame, text="Output Resolution:").grid(row=1, column=0, sticky=tk.W, padx=(0, 5), pady=(10, 0))
-        self.output_res_var = tk.StringVar(value="1024x1024")
-        ttk.Combobox(advanced_frame, textvariable=self.output_res_var, values=["1024x1024", "2048x2048", "4096x4096"], state="readonly", width=15).grid(row=1, column=1, sticky=tk.W, padx=(0, 20), pady=(10, 0))
+        # Configuration Management
+        ttk.Label(parent, text="Configuration Profiles:").pack(anchor=tk.W, pady=(20,5))
+        cfg_frame = ttk.Frame(parent)
+        cfg_frame.pack(fill=tk.X)
         
-        self.grounding_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(advanced_frame, text="Enable Grounding (Google Search)", variable=self.grounding_var).grid(row=1, column=2, columnspan=2, sticky=tk.W, pady=(10, 0))
+        ttk.Button(cfg_frame, text="Save As...", command=self.save_config_as).pack(side=tk.LEFT, padx=5)
+        ttk.Button(cfg_frame, text="Load Profile", command=self.open_load_dialog).pack(side=tk.LEFT, padx=5)
+        ttk.Button(cfg_frame, text="Delete Profile", command=self.open_delete_dialog).pack(side=tk.LEFT, padx=5)
         
-        self.adv_text_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(advanced_frame, text="Advanced Text Rendering", variable=self.adv_text_var).grid(row=2, column=0, columnspan=4, sticky=tk.W, pady=(10, 0))
+        self.lbl_current_profile = ttk.Label(parent, text="Current: Default", font=("Arial", 9, "italic"))
+        self.lbl_current_profile.pack(anchor=tk.W, padx=5, pady=5)
 
-    def create_log_tab(self, parent):
-        log_frame = ttk.Frame(parent); log_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        self.log_text = tk.Text(log_frame, state=tk.DISABLED, wrap=tk.WORD, bg="#1e1e1e", fg="#f0f0f0", font=("Consolas", 9))
-        log_scrollbar = ttk.Scrollbar(log_frame, orient=tk.VERTICAL, command=self.log_text.yview)
-        self.log_text.configure(yscrollcommand=log_scrollbar.set)
-        self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True); log_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        ttk.Button(log_frame, text="Clear Log", command=self.clear_log).pack(pady=10)
+    def setup_log_tab(self, parent):
+        self.txt_log = tk.Text(parent, state=tk.DISABLED, bg="#1e1e1e", fg="#f0f0f0", font=("Consolas", 9))
+        self.txt_log.pack(fill=tk.BOTH, expand=True)
 
-    def browse_folder(self): 
-        path = filedialog.askdirectory()
-        self.folder_path_var.set(path) if path else None
-    
-    def load_config_to_ui(self):
-        config = self.nano_manager.config
-        self.api_key_var.set(config.get('api_key', ''))
-        self.folder_path_var.set(config.get('folder_path', ''))
-        self.prompt_text.delete("1.0", tk.END)
-        self.prompt_text.insert("1.0", config.get('default_prompt', 'make the background pure red'))
-        self.log_message("Configuration loaded.")
-    
-    def save_config(self):
-        config_data = {
-            'api_key': self.api_key_var.get(),
-            'folder_path': self.folder_path_var.get(),
-            'default_prompt': self.prompt_text.get("1.0", "end-1c")
-        }
-        if self.nano_manager.save_config(config_data):
-            self.log_message("Configuration saved.")
-            messagebox.showinfo("Success", "Configuration saved successfully.")
+    # --- Logic ---
+
+    def update_resolution_options(self):
+        model = self.var_model.get()
+        if "flash" in model:
+            values = ["1024x1024 (1K)", "Custom"]
+            if self.var_res.get() and "4096" in self.var_res.get():
+                self.var_res.set("1024x1024 (1K)")
         else:
-            self.log_message("Error: Failed to save configuration.")
-            messagebox.showerror("Error", "Failed to save configuration.")
-    
-    def start_processing_thread(self):
-        if self.is_processing:
-            messagebox.showinfo("Busy", "Processing is already in progress.")
-            return
-        prompt_text = self.prompt_text.get("1.0", "end-1c")
-        if not all([self.api_key_var.get(), self.folder_path_var.get(), prompt_text]):
-            messagebox.showwarning("Missing Information", "Please complete all configuration fields.")
-            return
-        self.is_processing = True
-        self.process_button.config(state=tk.DISABLED)
-        self.stop_button.config(state=tk.NORMAL)
-        self.clear_log()
-        self.notebook.select(1)
-        
-        # Gather advanced settings
-        thinking_level = self.thinking_var.get()
-        media_resolution = self.media_res_var.get()
-        output_resolution = self.output_res_var.get()
-        use_grounding = self.grounding_var.get()
-        use_advanced_text = self.adv_text_var.get()
+            values = ["1024x1024 (1K)", "2048x2048 (2K)", "4096x4096 (4K)", "Custom"]
+        self.cb_res.config(values=values)
+        if not self.var_res.get(): self.cb_res.current(0)
 
-        thread = threading.Thread(
-            target=self.nano_manager.process_images,
-            args=(
-                self.api_key_var.get(),
-                prompt_text,
-                self.folder_path_var.get(),
-                self.log_message,
-                thinking_level,
-                media_resolution,
-                output_resolution,
-                use_grounding,
-                use_advanced_text
-            ),
-            daemon=True
-        )
+    def update_ratio_options(self):
+        # Descriptive options
+        options = [
+            "1:1 (Square)", "16:9 (Widescreen)", "9:16 (Vertical)", 
+            "4:3 (Standard)", "3:2 (Photo)", "21:9 (Ultra-wide)"
+        ]
+        self.cb_ratio.config(values=options)
+        if not self.var_ratio.get(): self.cb_ratio.current(0)
+
+    def on_model_change(self, event=None):
+        model = self.var_model.get()
+        
+        # Grounding check
+        if "gemini_3_pro" in model:
+            self.chk_grounding.config(state=tk.NORMAL)
+        else:
+            self.var_grounding.set(False)
+            self.chk_grounding.config(state=tk.DISABLED)
+                
+        self.update_resolution_options()
+
+    def browse_folder(self):
+        path = filedialog.askdirectory()
+        if path: self.var_input_path.set(path)
+
+    def browse_file(self):
+        path = filedialog.askopenfilename(filetypes=[("Images", "*.png *.jpg *.jpeg *.webp *.bmp")])
+        if path: self.var_input_path.set(path)
+
+    def add_ref(self):
+        paths = filedialog.askopenfilenames(filetypes=[("Images", "*.png *.jpg *.jpeg *.webp")])
+        if paths:
+            for p in paths:
+                self.reference_images.append({'path': p, 'name': os.path.basename(p)})
+                self.lst_refs.insert(tk.END, os.path.basename(p))
+
+    def remove_ref(self):
+        sel = self.lst_refs.curselection()
+        if sel:
+            idx = sel[0]
+            self.lst_refs.delete(idx)
+            del self.reference_images[idx]
+
+    def log(self, msg):
+        self.txt_log.config(state=tk.NORMAL)
+        self.txt_log.insert(tk.END, msg + "\n")
+        self.txt_log.see(tk.END)
+        self.txt_log.config(state=tk.DISABLED)
+
+    # --- Configuration ---
+    def get_ui_config(self):
+        return {
+            'api_key': self.var_api_key.get(),
+            'model': self.var_model.get(),
+            'input_path': self.var_input_path.get(),
+            'prompt': self.txt_prompt.get("1.0", tk.END).strip(),
+            'resolution': self.var_res.get(),
+            'aspect_ratio': self.var_ratio.get(),
+            'grounding': self.var_grounding.get(),
+            'format': self.var_format.get(),
+            'max_workers': self.var_workers.get()
+        }
+
+    def set_ui_config(self, cfg):
+        self.var_api_key.set(cfg.get('api_key', ''))
+        self.var_model.set(cfg.get('model', 'gemini_3_pro'))
+        self.var_input_path.set(cfg.get('input_path', ''))
+        self.txt_prompt.delete("1.0", tk.END)
+        self.txt_prompt.insert("1.0", cfg.get('prompt', ''))
+        self.var_res.set(cfg.get('resolution', '1024x1024 (1K)'))
+        self.var_ratio.set(cfg.get('aspect_ratio', '1:1 (Square)'))
+        self.var_grounding.set(cfg.get('grounding', False))
+        self.var_format.set(cfg.get('format', 'png'))
+        self.var_workers.set(cfg.get('max_workers', '1'))
+        self.on_model_change() # Update UI states
+
+    def save_config_as(self):
+        name = simpledialog.askstring("Save Profile", "Enter profile name:")
+        if name:
+            cfg = self.get_ui_config()
+            if self.manager.save_profile(name, cfg):
+                self.lbl_current_profile.config(text=f"Current: {name}")
+                messagebox.showinfo("Success", f"Profile '{name}' saved.")
+
+    def open_load_dialog(self):
+        names = self.manager.get_profile_names()
+        if not names:
+            messagebox.showinfo("Info", "No saved profiles found.")
+            return
+            
+        win = tk.Toplevel(self.parent)
+        win.title("Load Profile")
+        lb = tk.Listbox(win); lb.pack(fill=tk.BOTH, expand=True)
+        for n in names: lb.insert(tk.END, n)
+        
+        def load():
+            sel = lb.curselection()
+            if sel:
+                name = lb.get(sel[0])
+                cfg = self.manager.load_profile(name)
+                if cfg:
+                    self.set_ui_config(cfg)
+                    self.lbl_current_profile.config(text=f"Current: {name}")
+                    win.destroy()
+        ttk.Button(win, text="Load", command=load).pack()
+
+    def open_delete_dialog(self):
+        names = self.manager.get_profile_names()
+        if not names: return
+        
+        win = tk.Toplevel(self.parent)
+        win.title("Delete Profile")
+        lb = tk.Listbox(win); lb.pack(fill=tk.BOTH, expand=True)
+        for n in names: lb.insert(tk.END, n)
+        
+        def delete():
+            sel = lb.curselection()
+            if sel:
+                name = lb.get(sel[0])
+                if messagebox.askyesno("Confirm", f"Delete '{name}'?"):
+                    self.manager.delete_profile(name)
+                    self.lbl_current_profile.config(text=f"Current: {self.manager.current_profile_name}")
+                    win.destroy()
+        ttk.Button(win, text="Delete", command=delete).pack()
+
+    def load_current_profile_to_ui(self):
+        self.set_ui_config(self.manager.config)
+        self.lbl_current_profile.config(text=f"Current: {self.manager.current_profile_name}")
+
+    # --- Processing ---
+    def start_processing(self):
+        if self.is_processing: return
+        cfg = self.get_ui_config()
+        
+        if not all([cfg['api_key'], cfg['input_path'], cfg['prompt']]):
+            messagebox.showwarning("Missing Info", "Please provide API Key, Input Path, and Prompt.")
+            return
+
+        self.is_processing = True
+        self.btn_run.config(state=tk.DISABLED)
+        self.btn_stop.config(state=tk.NORMAL)
+        self.notebook.select(3)
+        self.txt_log.config(state=tk.NORMAL); self.txt_log.delete("1.0", tk.END); self.txt_log.config(state=tk.DISABLED)
+        
+        thread = threading.Thread(target=self.run_thread, args=(cfg,))
+        thread.daemon = True
         thread.start()
-        self.parent.after(100, self.check_thread, thread)
-    
-    def stop_process(self):
-        self.nano_manager.stop_process()
-        self.log_message("Stop request sent. Waiting for current image to finish...")
-        self.stop_button.config(state=tk.DISABLED)
-    
+        self.parent.after(100, lambda: self.check_thread(thread))
+
+    def run_thread(self, cfg):
+        self.manager.process_images(
+            api_key=cfg['api_key'],
+            prompt=cfg['prompt'],
+            input_path=cfg['input_path'],
+            model_id=cfg['model'],
+            resolution=cfg['resolution'],
+            aspect_ratio=cfg['aspect_ratio'],
+            reference_images=self.reference_images,
+            use_grounding=cfg['grounding'],
+            output_format=cfg['format'],
+            max_workers=int(cfg['max_workers']),
+            log_callback=self.log
+        )
+
+    def stop_processing(self):
+        self.manager.stop_process()
+        self.log("Stopping...")
+
     def check_thread(self, thread):
         if thread.is_alive():
-            self.parent.after(100, self.check_thread, thread)
+            self.parent.after(100, lambda: self.check_thread(thread))
         else:
             self.is_processing = False
-            self.process_button.config(state=tk.NORMAL)
-            self.stop_button.config(state=tk.DISABLED)
-            self.log_message("\nOperation finished.")
-    
-    def log_message(self, message):
-        self.log_text.config(state=tk.NORMAL)
-        self.log_text.insert(tk.END, message + "\n")
-        self.log_text.see(tk.END)
-        self.log_text.config(state=tk.DISABLED)
-        self.parent.update_idletasks()
-    
-    def clear_log(self):
-        self.log_text.config(state=tk.NORMAL)
-        self.log_text.delete(1.0, tk.END)
-        self.log_text.config(state=tk.DISABLED)
+            self.btn_run.config(state=tk.NORMAL)
+            self.btn_stop.config(state=tk.DISABLED)
+            self.log("Done.")
