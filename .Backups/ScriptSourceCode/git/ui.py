@@ -22,6 +22,12 @@ class GitPushUI:
         self.create_widgets()
         self.load_config_to_ui()
 
+    def on_back(self):
+        if self.is_pushing:
+            if not messagebox.askyesno("Task Running", "Git operation is running. Do you really want to go back and cancel/background it?"):
+                return
+        self.original_switch_callback()
+
     def create_widgets(self):
         for widget in self.parent.winfo_children():
             widget.destroy()
@@ -32,7 +38,10 @@ class GitPushUI:
         title_frame = ttk.Frame(main_frame)
         title_frame.pack(fill=tk.X, pady=(0, 15))
         
-        back_button = ttk.Button(title_frame, text="← Back", command=self.switch_to_main_callback)
+        if self.switch_to_main_callback:
+            self.original_switch_callback = self.switch_to_main_callback
+
+        back_button = ttk.Button(title_frame, text="← Back", command=self.on_back)
         back_button.pack(side=tk.LEFT, padx=(0, 10))
         
         title_label = ttk.Label(title_frame, text="Git Push Tool", font=("Arial", 18, "bold"))

@@ -4,6 +4,8 @@ import threading
 import os
 import subprocess
 from .manager import FilebinManager
+import qrcode
+from PIL import Image, ImageTk
 
 class FilebinUI:
     def __init__(self, parent, switch_to_main_callback, config_manager):
@@ -23,6 +25,12 @@ class FilebinUI:
         self.create_widgets()
         self.load_config_to_ui()
 
+    def on_back(self):
+        if self.is_processing:
+            if not messagebox.askyesno("Task Running", "A task is currently running. Do you really want to go back and cancel it?"):
+                return
+        self.original_switch_callback()
+
     def create_widgets(self):
         for widget in self.parent.winfo_children():
             widget.destroy()
@@ -34,7 +42,10 @@ class FilebinUI:
         title_frame = ttk.Frame(main_frame)
         title_frame.pack(fill=tk.X, pady=(0, 15))
         
-        back_button = ttk.Button(title_frame, text="← Back", command=self.switch_to_main_callback)
+        if self.switch_to_main_callback:
+             self.original_switch_callback = self.switch_to_main_callback
+        
+        back_button = ttk.Button(title_frame, text="← Back", command=self.on_back)
         back_button.pack(side=tk.LEFT, padx=(0, 10))
         
         title_label = ttk.Label(title_frame, text="Temp Sharing Service", font=("Arial", 18, "bold"))
@@ -131,6 +142,7 @@ class FilebinUI:
         ttk.Button(btn_frame, text="Copy Link", command=self.copy_selected_bin_link).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="Delete Bin", command=self.delete_selected_bin).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="Download All Files", command=self.download_selected_bin).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Generate QR", command=self.generate_qr_code_ui).pack(side=tk.LEFT, padx=5)
 
     def browse_upload_file(self):
         path = filedialog.askopenfilename()
@@ -236,6 +248,7 @@ class FilebinUI:
         self.start_upload_thread(path, actual_name, friendly_name, is_new=False)
 
     def start_upload_thread(self, path, bin_name, friendly_name, is_new=True):
+        self.is_processing = True
         threading.Thread(target=self._upload_process, args=(path, bin_name, friendly_name, is_new), daemon=True).start()
 
     def _upload_process(self, path, bin_name, friendly_name, is_new):
@@ -297,6 +310,7 @@ class FilebinUI:
                 self.parent.after(0, self.refresh_bins_list)
         else:
             self.log("Upload failed.")
+        self.is_processing = False
 
     def copy_selected_bin_link(self):
         selected_item = self.bins_tree.selection()
@@ -312,7 +326,17 @@ class FilebinUI:
         if not selected_item: return
         friendly_name = self.bins_tree.item(selected_item[0])['values'][0]
         
-        if messagebox.askyesno("Delete", f"Are you sure you want to delete bin '{friendly_name}'?"):
+        if messagebox.askyesno("Delete", f"Are you sure you want to delete bin '{friendly_name}'? (Both Local and Online)"):
+            actual_name = self.manager.config["saved_bins"][friendly_name]["actual_name"]
+            
+            # Delete online
+            if self.manager.delete_bin(actual_name):
+                self.log(f"Deleted online bin: {friendly_name}")
+            else:
+                self.log(f"Failed to delete online bin or already deleted: {friendly_name}")
+                if not messagebox.askyesno("Error", "Failed to delete online bin (or connection error). Delete from local list anyway?"):
+                    return
+
             del self.manager.config["saved_bins"][friendly_name]
             # Clean mapping if exists
             if friendly_name in self.manager.config.get("bin_mapping", {}):
@@ -332,6 +356,7 @@ class FilebinUI:
              messagebox.showwarning("Missing Path", "Please set a Download Path first.")
              return
 
+        self.is_processing = True
         threading.Thread(target=self._download_archive_process, args=(actual_name, save_path, friendly_name), daemon=True).start()
 
     def _download_archive_process(self, bin_id, save_dir, friendly_name=None):
@@ -354,6 +379,7 @@ class FilebinUI:
                 self.log(f"Error writing file: {e}")
         else:
             self.log("Failed to download archive. Bin might be expired or empty.")
+        self.is_processing = False
 
     def download_files_ui(self):
         """Open UI to download files from saved bins"""
@@ -568,6 +594,7 @@ class FilebinUI:
             ttk.Button(row_frame, text="Copy Link", command=copy_cmd, width=10).pack(side=tk.LEFT, padx=5)
 
     def start_bulk_download(self, bin_name, filenames, save_path):
+        self.is_processing = True
         threading.Thread(target=self._bulk_download_process, args=(bin_name, filenames, save_path), daemon=True).start()
 
     def _bulk_download_process(self, bin_name, filenames, save_path):
@@ -582,6 +609,7 @@ class FilebinUI:
                 self.log(f"Failed to download {fname}")
         
         self.log(f"Bulk download finished. {success_count}/{len(filenames)} successful.")
+        self.is_processing = False
 
     def start_single_download(self, bin_name, filename):
         save_path_root = self.download_path_var.get()
@@ -590,6 +618,7 @@ class FilebinUI:
             return
         
         full_path = os.path.join(save_path_root, filename)
+        self.is_processing = True
         threading.Thread(target=self._single_download_process, args=(bin_name, filename, full_path), daemon=True).start()
         
     def _single_download_process(self, bin_name, filename, full_path):
@@ -598,6 +627,7 @@ class FilebinUI:
             self.log(f"Successfully downloaded {filename}")
         else:
             self.log(f"Failed to download {filename}")
+        self.is_processing = False
 
     def copy_file_link(self, bin_name, filename):
         link = self.manager.get_direct_link(bin_name, filename)
@@ -605,6 +635,7 @@ class FilebinUI:
         self.log(f"Copied link for {filename}")
 
     def start_bulk_delete(self, friendly_name, bin_name, filenames):
+        self.is_processing = True
         threading.Thread(target=self._bulk_delete_process, args=(friendly_name, bin_name, filenames), daemon=True).start()
 
     def _bulk_delete_process(self, friendly_name, bin_name, filenames):
@@ -623,6 +654,44 @@ class FilebinUI:
         
         self.manager.save_config()
         
+        
         # Scheduled UI update
         self.parent.after(0, self.refresh_bins_list)
         self.log(f"Deleted {deleted_count} files.")
+        self.is_processing = False
+
+    def generate_qr_code_ui(self):
+        selected_item = self.bins_tree.selection()
+        if not selected_item: return
+        friendly_name = self.bins_tree.item(selected_item[0])['values'][0]
+        saved_bins = self.manager.config.get("saved_bins", {})
+        link = saved_bins[friendly_name]["link"]
+
+        # Generate QR
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(link)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # UI
+        window = tk.Toplevel(self.parent)
+        window.title(f"QR Code: {friendly_name}")
+        window.geometry("400x500")
+        window.configure(bg=self.bg_color)
+        
+        # Convert to PhotoImage
+        self.qr_photo = ImageTk.PhotoImage(img) # Keep reference
+        
+        lbl = ttk.Label(window, image=self.qr_photo)
+        lbl.pack(pady=20)
+        
+        btn_frame = ttk.Frame(window)
+        btn_frame.pack(fill=tk.X, pady=10)
+        
+        def save_qr():
+            save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG", "*.png")])
+            if save_path:
+                img.save(save_path)
+                messagebox.showinfo("Saved", f"QR Code saved to {save_path}")
+                
+        ttk.Button(btn_frame, text="Download / Save Image", command=save_qr).pack()

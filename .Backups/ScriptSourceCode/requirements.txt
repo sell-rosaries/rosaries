@@ -5,3 +5,4 @@ rembg
 pillow
 google-genai
 rich
+qrcode

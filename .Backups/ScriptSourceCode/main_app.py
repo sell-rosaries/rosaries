@@ -35,8 +35,23 @@ class ScriptLauncher:
         self.accent_color = "#4a90e2"
         self.root.configure(bg=self.bg_color)
         
+        self.current_ui = None
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.create_main_ui()
         
+    def on_closing(self):
+        is_busy = False
+        if self.current_ui:
+            if getattr(self.current_ui, 'is_processing', False):
+                is_busy = True
+            elif getattr(self.current_ui, 'is_pushing', False):
+                is_busy = True
+                
+        if is_busy:
+            if not messagebox.askyesno("Task Running", "A task is currently running. Do you really want to exit and kill the task?"):
+                return
+        self.root.destroy()
+
     def load_scripts(self):
         if os.path.exists(self.config_file):
             try: 
@@ -56,6 +71,7 @@ class ScriptLauncher:
         self.save_scripts()
     
     def create_main_ui(self):
+        self.current_ui = None
         for widget in self.root.winfo_children():
             widget.destroy()
             
@@ -177,21 +193,27 @@ class ScriptLauncher:
     
     def launch_git_push_ui(self):
         self.git_push_ui = GitPushUI(self.root, self.create_main_ui, self.app_config_manager)
+        self.current_ui = self.git_push_ui
     
     def launch_nano_banana_ui(self):
         self.nano_banana_ui = NanoBananaUI(self.root, self.create_main_ui, self.app_config_manager)
+        self.current_ui = self.nano_banana_ui
     
     def launch_bg_remover_ui(self):
         self.bg_remover_ui = BackgroundRemoverUI(self.root, self.create_main_ui, self.app_config_manager)
+        self.current_ui = self.bg_remover_ui
 
     def launch_image_renamer_ui(self):
         self.image_renamer_ui = ImageRenamerUI(self.root, self.create_main_ui, self.app_config_manager)
+        self.current_ui = self.image_renamer_ui
 
     def launch_apk_updater_ui(self):
         self.apk_updater_ui = APKUpdaterUI(self.root, self.create_main_ui, self.app_config_manager)
+        self.current_ui = self.apk_updater_ui
         
     def launch_filebin_ui(self):
         self.filebin_ui = FilebinUI(self.root, self.create_main_ui, self.app_config_manager)
+        self.current_ui = self.filebin_ui
 
 def main():
     root = tk.Tk()
