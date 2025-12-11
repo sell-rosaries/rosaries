@@ -4,6 +4,7 @@ from PIL import Image
 import google.generativeai as genai
 import tkinter as tk
 from tkinter import messagebox
+import concurrent.futures
 
 class ImageRenamerManager:
     def __init__(self, parent, config_manager):
@@ -22,20 +23,17 @@ class ImageRenamerManager:
         self.stop_processing_flag.set()
 
     def sanitize_filename(self, text):
-        # --- EDIT START ---
         # Keep only alphanumeric characters (letters and numbers).
-        # This will remove spaces, underscores, hyphens, and all other symbols.
         return "".join(c for c in text if c.isalnum())
-        # --- EDIT END ---
 
-    def process_and_rename_images(self, api_key, folder_path, prompt, excluded_words, log_callback):
-        log_callback("=== Starting Image Renamer Process ===")
+    def process_and_rename_images(self, api_key, folder_path, prompt, excluded_words, log_callback, batch_size=1, model_id='gemini-2.5-flash'):
+        log_callback(f"=== Starting Image Renamer Process (Batch Size: {batch_size}, Model: {model_id}) ===")
         self.stop_processing_flag.clear()
 
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-2.5-flash')
-            log_callback("   AI Model configured successfully.")
+            model = genai.GenerativeModel(model_id)
+            log_callback(f"   AI Model ({model_id}) configured successfully.")
         except Exception as e:
             log_callback(f"   CRITICAL ERROR: Failed to configure AI model: {str(e)}")
             self.parent.after(0, lambda: messagebox.showerror("AI Error", f"Failed to configure AI model. Check API key.\n{str(e)}"))
@@ -56,54 +54,23 @@ class ImageRenamerManager:
 
         log_callback(f"   Found {len(files_to_process)} images to process.")
 
-        for i, filename in enumerate(files_to_process):
-            if self.stop_processing_flag.is_set():
-                log_callback("\n!!! STOP REQUESTED: Halting image processing. !!!")
-                break
+        # Use ThreadPoolExecutor for concurrent processing
+        with concurrent.futures.ThreadPoolExecutor(max_workers=batch_size) as executor:
+            futures = {
+                executor.submit(self._process_single_image, model, folder_path, filename, prompt, excluded_words, log_callback): filename 
+                for filename in files_to_process
+            }
 
-            try:
-                log_callback(f"\n-> Processing {filename} ({i+1}/{len(files_to_process)})...")
-                image_path = os.path.join(folder_path, filename)
+            for future in concurrent.futures.as_completed(futures):
+                filename = futures[future]
+                if self.stop_processing_flag.is_set():
+                    # We continue to drain the queue but logic inside _process_single_image will return early
+                    pass
                 
-                with Image.open(image_path) as image_file:
-                    image = image_file.copy()
-
-                full_prompt = prompt
-                if excluded_words:
-                    full_prompt += "\nDo not use these words: " + ", ".join(excluded_words)
-
-                response = model.generate_content([full_prompt, image])
-
-                if response.text:
-                    sanitized_caption = self.sanitize_filename(response.text)
-                    if not sanitized_caption:
-                        log_callback(f"   ✗ Failed: AI output was empty after sanitizing for {filename}")
-                        continue # Skip to the next file
-
-                    _, ext = os.path.splitext(filename)
-                    # --- EDIT START ---
-                    # Removed the "_4,6,8" suffix from the new filename.
-                    new_filename = f"{sanitized_caption}{ext}"
-                    # --- EDIT END ---
-                    old_path = os.path.join(folder_path, filename)
-                    new_path = os.path.join(folder_path, new_filename)
-
-                    counter = 1
-                    while os.path.exists(new_path):
-                        # --- EDIT START ---
-                        # Updated the duplicate handling to append a simple underscore and counter.
-                        new_filename = f"{sanitized_caption}_{counter}{ext}"
-                        # --- EDIT END ---
-                        new_path = os.path.join(folder_path, new_filename)
-                        counter += 1
-                    
-                    os.rename(old_path, new_path)
-                    log_callback(f"   ✓ Renamed '{filename}' to '{new_filename}'")
-                else:
-                    log_callback(f"   ✗ Failed: No caption generated for {filename}")
-
-            except Exception as e:
-                log_callback(f"   ✗ Error processing {filename}: {str(e)}")
+                try:
+                    future.result() # Check for exceptions
+                except Exception as e:
+                     log_callback(f"   ✗ Error in thread for {filename}: {str(e)}")
 
         if self.stop_processing_flag.is_set():
             log_callback("\n" + "!" * 60)
@@ -115,3 +82,54 @@ class ImageRenamerManager:
             log_callback("✓ Processing complete!")
             log_callback("=" * 60)
             self.parent.after(0, lambda: messagebox.showinfo("Success", "Image renaming complete!"))
+
+    def _process_single_image(self, model, folder_path, filename, prompt, excluded_words, log_callback):
+        # Check stop flag at the start
+        if self.stop_processing_flag.is_set():
+            return
+
+        try:
+            log_callback(f"-> Processing {filename}...")
+            image_path = os.path.join(folder_path, filename)
+            
+            with Image.open(image_path) as image_file:
+                image = image_file.copy()
+
+            full_prompt = prompt
+            if excluded_words:
+                full_prompt += "\nDo not use these words: " + ", ".join(excluded_words)
+
+            # Check stop flag before API call
+            if self.stop_processing_flag.is_set():
+                return
+
+            response = model.generate_content([full_prompt, image])
+
+            if self.stop_processing_flag.is_set():
+                return
+
+            if response.text:
+                sanitized_caption = self.sanitize_filename(response.text)
+                if not sanitized_caption:
+                    log_callback(f"   ✗ Failed: AI output was empty after sanitizing for {filename}")
+                    return
+
+                _, ext = os.path.splitext(filename)
+                new_filename = f"{sanitized_caption}{ext}"
+                old_path = os.path.join(folder_path, filename)
+                new_path = os.path.join(folder_path, new_filename)
+
+                counter = 1
+                while os.path.exists(new_path):
+                    new_filename = f"{sanitized_caption}_{counter}{ext}"
+                    new_path = os.path.join(folder_path, new_filename)
+                    counter += 1
+                
+                os.rename(old_path, new_path)
+                log_callback(f"   ✓ Renamed '{filename}' to '{new_filename}'")
+            else:
+                log_callback(f"   ✗ Failed: No caption generated for {filename}")
+
+        except Exception as e:
+            log_callback(f"   ✗ Error processing {filename}: {str(e)}")
+            raise e

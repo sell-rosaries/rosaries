@@ -67,8 +67,33 @@ class ImageRenamerUI:
         ttk.Label(config_frame, text="Excluded Words (comma-separated):").grid(row=3, column=0, sticky=tk.W, pady=8)
         self.excluded_words_var = tk.StringVar()
         ttk.Entry(config_frame, textvariable=self.excluded_words_var, width=60).grid(row=3, column=1, columnspan=2, sticky=tk.EW, pady=8, padx=(5, 0))
+
+        ttk.Label(config_frame, text="Batch Size (1-5):").grid(row=4, column=0, sticky=tk.W, pady=8)
+        self.batch_size_var = tk.IntVar(value=1)
+        spin = ttk.Spinbox(config_frame, from_=1, to=5, textvariable=self.batch_size_var, width=5)
+        spin.grid(row=4, column=1, sticky=tk.W, pady=8, padx=(5,0))
         
-        ttk.Button(config_frame, text="Save Configuration", command=self.save_config).grid(row=4, column=0, columnspan=3, pady=15)
+        ttk.Label(config_frame, text="Batch Size (1-5):").grid(row=4, column=0, sticky=tk.W, pady=8)
+        self.batch_size_var = tk.IntVar(value=1)
+        spin = ttk.Spinbox(config_frame, from_=1, to=5, textvariable=self.batch_size_var, width=5)
+        spin.grid(row=4, column=1, sticky=tk.W, pady=8, padx=(5,0))
+
+        # Model Selection
+        ttk.Label(config_frame, text="Model:").grid(row=5, column=0, sticky=tk.W, pady=8)
+        self.model_name_var = tk.StringVar(value="gemini-2.5-flash")
+        
+        self.model_map = {
+            "Gemini 2.5 Flash (Current)": "gemini-2.5-flash",
+            "Gemini 2.5 Pro": "gemini-2.5-pro", 
+            "Gemini 3 Pro Preview": "gemini-3-pro-preview"
+        }
+        self.rev_model_map = {v: k for k, v in self.model_map.items()}
+        
+        self.model_display_var = tk.StringVar(value="Gemini 2.5 Flash (Current)")
+        model_dropdown = ttk.Combobox(config_frame, textvariable=self.model_display_var, values=list(self.model_map.keys()), state="readonly", width=30)
+        model_dropdown.grid(row=5, column=1, columnspan=2, sticky=tk.W, pady=8, padx=(5,0))
+        
+        ttk.Button(config_frame, text="Save Configuration", command=self.save_config).grid(row=6, column=0, columnspan=3, pady=15)
         config_frame.columnconfigure(1, weight=1)
 
         action_frame = ttk.Frame(parent); action_frame.pack(fill=tk.X, padx=10, pady=10)
@@ -93,15 +118,26 @@ class ImageRenamerUI:
         config = self.renamer_manager.config
         self.api_key_var.set(config.get('api_key', ''))
         self.folder_path_var.set(config.get('folder_path', ''))
+        self.batch_size_var.set(config.get('batch_size', 1)) 
+        
+        saved_model_id = config.get('model_id', 'gemini-2.5-flash')
+        # Default to flash if unknown
+        self.model_display_var.set(self.rev_model_map.get(saved_model_id, "Gemini 2.5 Flash (Current)"))
+        
         self.prompt_text.delete("1.0", tk.END)
         self.prompt_text.insert("1.0", config.get('default_prompt', 'Describe this image in a short filename-friendly phrase.'))
         self.excluded_words_var.set(config.get('excluded_words', ''))
         self.log_message("Configuration loaded.")
     
     def save_config(self):
+        selected_display = self.model_display_var.get()
+        model_id = self.model_map.get(selected_display, "gemini-2.5-flash")
+        
         config_data = {
             'api_key': self.api_key_var.get(),
             'folder_path': self.folder_path_var.get(),
+            'batch_size': self.batch_size_var.get(),
+            'model_id': model_id,
             'default_prompt': self.prompt_text.get("1.0", "end-1c"),
             'excluded_words': self.excluded_words_var.get()
         }
@@ -118,6 +154,10 @@ class ImageRenamerUI:
             return
         prompt_text = self.prompt_text.get("1.0", "end-1c")
         excluded_words = [w.strip() for w in self.excluded_words_var.get().split(',') if w.strip()]
+        
+        selected_display = self.model_display_var.get()
+        model_id = self.model_map.get(selected_display, "gemini-2.5-flash")
+        
         if not all([self.api_key_var.get(), self.folder_path_var.get(), prompt_text]):
             messagebox.showwarning("Missing Information", "Please complete all configuration fields.")
             return
@@ -133,7 +173,9 @@ class ImageRenamerUI:
                 self.folder_path_var.get(),
                 prompt_text,
                 excluded_words,
-                self.log_message
+                self.log_message,
+                self.batch_size_var.get(),
+                model_id
             ),
             daemon=True
         )
@@ -142,7 +184,7 @@ class ImageRenamerUI:
     
     def stop_process(self):
         self.renamer_manager.stop_process()
-        self.log_message("Stop request sent. Waiting for current image to finish...")
+        self.log_message("Stop request sent. Waiting for active threads to finish...")
         self.stop_button.config(state=tk.DISABLED)
     
     def check_thread(self, thread):
@@ -155,11 +197,12 @@ class ImageRenamerUI:
             self.log_message("\nOperation finished.")
     
     def log_message(self, message):
-        self.log_text.config(state=tk.NORMAL)
-        self.log_text.insert(tk.END, message + "\n")
-        self.log_text.see(tk.END)
-        self.log_text.config(state=tk.DISABLED)
-        self.parent.update_idletasks()
+        def _log():
+            self.log_text.config(state=tk.NORMAL)
+            self.log_text.insert(tk.END, message + "\n")
+            self.log_text.see(tk.END)
+            self.log_text.config(state=tk.DISABLED)
+        self.parent.after(0, _log)
     
     def clear_log(self):
         self.log_text.config(state=tk.NORMAL)

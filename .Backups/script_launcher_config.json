@@ -5,6 +5,8 @@
     "image_renamer": {
         "api_key": "",
         "folder_path": "",
+        "batch_size": ,
+        "model_id": "",
         "default_prompt": "",
         "excluded_words": ""
     },
@@ -37,5 +39,15 @@
             }
         },
         "last_profile": ""
+    },
+    "filebin": {
+        "saved_bins": {},
+        "bin_mapping": {},
+        "preferences": {
+            "auto_copy_links": ,
+            "show_progress": ,
+            "default_download_path": "",
+            "upload_path": ""
+        }
     }
 }

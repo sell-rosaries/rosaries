@@ -11,12 +11,13 @@ from nano_banana.ui import NanoBananaUI
 from bg_remover.ui import BackgroundRemoverUI
 from image_renamer.ui import ImageRenamerUI
 from apk_updater.ui import APKUpdaterUI
+from filebin.ui import FilebinUI
 
 class ScriptLauncher:
     def __init__(self, root):
         self.root = root
         self.root.title("Script Launcher")
-        self.root.geometry("800x600")
+        self.root.geometry("800x650")
         
         self.config_file = os.path.join(os.path.expanduser("~"), "launcher_config.json")
         self.scripts = self.load_scripts()
@@ -64,8 +65,9 @@ class ScriptLauncher:
         title_label = ttk.Label(main_frame, text="Script Launcher", font=("Arial", 20, "bold"))
         title_label.pack(pady=(0, 20))
         
+        # List of scripts
         list_frame = ttk.Frame(main_frame)
-        list_frame.pack(fill=tk.BOTH, expand=True)
+        list_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
         list_frame.configure(relief=tk.SUNKEN, borderwidth=1)
         
         scrollbar = ttk.Scrollbar(list_frame)
@@ -88,27 +90,38 @@ class ScriptLauncher:
         
         self.refresh_script_list()
         
-        buttons_frame = ttk.Frame(main_frame)
-        buttons_frame.pack(fill=tk.X, pady=(20, 0))
-        self.style.configure("Accent.TButton", font=("Arial", 10))
+        # Bottom controls area
+        controls_frame = ttk.Frame(main_frame)
+        controls_frame.pack(fill=tk.X)
+        self.style.configure("Accent.TButton", font=("Arial", 10, "bold"))
+        self.style.configure("Regular.TButton", font=("Arial", 10))
         
-        # First row: Script management buttons
-        row1_frame = ttk.Frame(buttons_frame)
-        row1_frame.pack(fill=tk.X, pady=(0, 5))
+        # Group 1: Script Management (Add, Remove, Run)
+        mgmt_group = ttk.LabelFrame(controls_frame, text="Script Management", padding="10")
+        mgmt_group.pack(fill=tk.X, pady=(0, 15))
         
-        ttk.Button(row1_frame, text="Add New Script", command=self.add_script).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(row1_frame, text="Remove Selected", command=self.remove_script).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(row1_frame, text="Run Selected", command=self.run_script).pack(side=tk.LEFT)
+        ttk.Button(mgmt_group, text="▶ Run Selected", command=self.run_script, style="Accent.TButton").pack(side=tk.LEFT, padx=(0, 10), fill=tk.X, expand=True)
+        ttk.Button(mgmt_group, text="+ Add New", command=self.add_script, style="Regular.TButton").pack(side=tk.LEFT, padx=(0, 10), fill=tk.X, expand=True)
+        ttk.Button(mgmt_group, text="- Remove", command=self.remove_script, style="Regular.TButton").pack(side=tk.LEFT, fill=tk.X, expand=True)
         
-        # Second row: Tool buttons
-        row2_frame = ttk.Frame(buttons_frame)
-        row2_frame.pack(fill=tk.X)
+        # Group 2: Built-in Tools
+        tools_group = ttk.LabelFrame(controls_frame, text="Project Tools", padding="10")
+        tools_group.pack(fill=tk.X)
         
-        ttk.Button(row2_frame, text="Git Push Tool", command=self.launch_git_push_ui, style="Accent.TButton").pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(row2_frame, text="APK Updater", command=self.launch_apk_updater_ui, style="Accent.TButton").pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(row2_frame, text="Nano Banana", command=self.launch_nano_banana_ui, style="Accent.TButton").pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(row2_frame, text="Background Remover", command=self.launch_bg_remover_ui, style="Accent.TButton").pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(row2_frame, text="Image Renamer", command=self.launch_image_renamer_ui, style="Accent.TButton").pack(side=tk.LEFT)
+        # Grid layout for tools
+        tools_group.columnconfigure(0, weight=1)
+        tools_group.columnconfigure(1, weight=1)
+        tools_group.columnconfigure(2, weight=1)
+        
+        # Row 1
+        ttk.Button(tools_group, text="Git Push Tool", command=self.launch_git_push_ui).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+        ttk.Button(tools_group, text="APK Updater", command=self.launch_apk_updater_ui).grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        ttk.Button(tools_group, text="Nano Banana", command=self.launch_nano_banana_ui).grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+        
+        # Row 2
+        ttk.Button(tools_group, text="Background Remover", command=self.launch_bg_remover_ui).grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+        ttk.Button(tools_group, text="Image Renamer", command=self.launch_image_renamer_ui).grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+        ttk.Button(tools_group, text="Temp Sharing Service", command=self.launch_filebin_ui, style="Accent.TButton").grid(row=1, column=2, padx=5, pady=5, sticky="ew")
 
     def refresh_script_list(self):
         self.script_listbox.delete(0, tk.END)
@@ -176,6 +189,9 @@ class ScriptLauncher:
 
     def launch_apk_updater_ui(self):
         self.apk_updater_ui = APKUpdaterUI(self.root, self.create_main_ui, self.app_config_manager)
+        
+    def launch_filebin_ui(self):
+        self.filebin_ui = FilebinUI(self.root, self.create_main_ui, self.app_config_manager)
 
 def main():
     root = tk.Tk()
