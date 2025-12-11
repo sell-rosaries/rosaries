@@ -23,6 +23,9 @@ if (typeof window.translations !== 'undefined') {
         'gallery-no-images-converted': 'Warning: None of the selected images could be converted for email sending.\n\nThe email will be sent but will not contain images.\n\nPlease check your internet connection and try again.',
         'gallery-send-success': 'Gallery request sent successfully!\n\nYour selected designs have been sent. We will contact you soon!',
         'gallery-send-failed': 'Failed to send gallery request.\n\nPlease try again or contact us directly.',
+        'gallery-download-btn': 'Download Selected',
+        'gallery-download-message': 'Starting downloads...',
+        'gallery-download-started': 'Download started!',
 
         // Email Send Module
         'email-send-success': 'Design sent successfully!\n\nYour design has been sent. We will contact you soon!',
@@ -51,6 +54,9 @@ if (typeof window.translations !== 'undefined') {
         'gallery-no-images-converted': 'تحذير: لم يتم تحويل أي من الصور المحددة لإرسال البريد الإلكتروني.\n\nسيتم إرسال البريد الإلكتروني ولكن لن يحتوي على صور.\n\nيرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.',
         'gallery-send-success': 'تم إرسال طلب المعرض بنجاح!\n\nتم إرسال تصاميمك المحددة. سنتواصل معك قريباً!',
         'gallery-send-failed': 'فشل في إرسال طلب المعرض.\n\nيرجى المحاولة مرة أخرى أو الاتصال بنا مباشرة.',
+        'gallery-download-btn': 'تحميل المحدد',
+        'gallery-download-message': 'جاري بدء التحميل...',
+        'gallery-download-started': 'بدأ التحميل!',
 
         // Email Send Module
         'email-send-success': 'تم إرسال التصميم بنجاح!\n\nتم إرسال تصميمك. سنتواصل معك قريباً!',
@@ -72,6 +78,7 @@ if (typeof LanguageManager !== 'undefined') {
             // Gallery
             '.gallery-panel h2': langData['design-gallery'],
             '#send-selected-btn .btn-text': langData['send-selected'],
+            '#download-selected-btn .btn-text': langData['gallery-download-btn'],
 
             // Gallery Email Modal
             '#gallery-email-modal h2': langData['send-selected-designs-title'],

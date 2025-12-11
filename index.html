@@ -36,11 +36,11 @@
     <!-- Header -->
     <header id="header">
         <div class="crt-wrapper">
-          <div class="crt-title">
-            <span id="crt-text"></span><span class="crt-cursor"></span>
-          </div>
-          <div class="crt-eraser" id="crt-eraser"></div>
-          <div class="crt-measure" id="crt-measure"></div>
+            <div class="crt-title">
+                <span id="crt-text"></span><span class="crt-cursor"></span>
+            </div>
+            <div class="crt-eraser" id="crt-eraser"></div>
+            <div class="crt-measure" id="crt-measure"></div>
         </div>
 
         <div class="header-info">
@@ -430,12 +430,26 @@
                 </button>
             </div>
 
-            <button class="btn-send-selected" id="send-selected-btn" style="display: none;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                </svg>
-                <span class="btn-text">Send Selected</span>
-            </button>
+            <div class="gallery-actions-container">
+                <div class="gallery-action-group">
+                    <button class="btn-download-selected" id="download-selected-btn" style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span class="btn-text">Download Selected</span>
+                    </button>
+                    <button class="btn-send-selected" id="send-selected-btn" style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path>
+                        </svg>
+                        <span class="btn-text">Send Selected</span>
+                    </button>
+                </div>
+            </div>
 
             <!-- Gallery Category Grid -->
             <div class="gallery-category-grid" id="gallery-category-grid">
@@ -557,7 +571,8 @@
 
                 <div class="settings-row">
                     <span class="settings-label" data-translate="settings-theme">Theme</span>
-                    <button id="theme-toggle-btn" class="btn-secondary" style="width: auto; height: 32px; min-height: 0; padding: 0 16px; font-size: 12px;">
+                    <button id="theme-toggle-btn" class="btn-secondary"
+                        style="width: auto; height: 32px; min-height: 0; padding: 0 16px; font-size: 12px;">
                         ☀️ Light Mode
                     </button>
                 </div>

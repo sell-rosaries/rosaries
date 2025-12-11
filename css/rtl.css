@@ -66,14 +66,14 @@
 .rtl .modal-content,
 .rtl .form-group,
 .rtl .modal-actions,
-.rtl .reset-option-btn,
-.rtl .btn-send-selected {
+.rtl .reset-option-btn {
     direction: rtl;
 }
 
 /* Bottom toolbar buttons should maintain consistent sizing and layout in RTL */
 .rtl .toolbar-btn {
-    direction: ltr; /* Keep toolbar buttons layout consistent */
+    direction: ltr;
+    /* Keep toolbar buttons layout consistent */
 }
 
 /* Keep SVG icons aligned correctly */
@@ -93,7 +93,8 @@
 .rtl input[type="tel"],
 .rtl textarea {
     text-align: left;
-    direction: ltr; /* Keep input values in their natural direction */
+    direction: ltr;
+    /* Keep input values in their natural direction */
 }
 
 /* Modal actions button alignment */
@@ -113,7 +114,8 @@
 .rtl #header,
 .rtl .bottom-toolbar,
 .rtl .canvas-zoom-controls {
-    direction: ltr; /* Keep UI elements in LTR for layout consistency */
+    direction: ltr;
+    /* Keep UI elements in LTR for layout consistency */
 }
 
 /* Screen reader only text */
@@ -220,13 +222,16 @@
 .rtl .modal-compact h3 {
     /* Perfect centering - override any positioning that breaks centering */
     margin-top: 0;
-    margin-bottom: var(--space-6) !important; /* Force spacing in RTL */
-    text-align: center !important; /* Force centering for both languages */
+    margin-bottom: var(--space-6) !important;
+    /* Force spacing in RTL */
+    text-align: center !important;
+    /* Force centering for both languages */
     line-height: 1.2;
     margin-left: auto !important;
     margin-right: auto !important;
     display: block !important;
-    width: 100%; /* Ensure full width for proper centering */
+    width: 100%;
+    /* Ensure full width for proper centering */
 }
 
 /* Specific RTL rule for reset menu title spacing - override any conflicting rules */
@@ -243,7 +248,8 @@
 .rtl .saved-actions .btn-text {
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: clip; /* Use clip instead of ellipsis for Arabic */
+    text-overflow: clip;
+    /* Use clip instead of ellipsis for Arabic */
     text-align: center;
     line-height: 1.2;
     /* Standard font size for most buttons */
@@ -252,11 +258,13 @@
 
 /* Specifically make import button (2nd child) smaller */
 .rtl .saved-action-btn:nth-child(2) .btn-text {
-    font-size: 10px; /* Much smaller for 'استيراد' */
+    font-size: 10px;
+    /* Much smaller for 'استيراد' */
 }
 
 .rtl .saved-action-btn {
-    min-height: 48px; /* Keep same height as English mode */
+    min-height: 48px;
+    /* Keep same height as English mode */
 }
 
 /* ==================== PERFECT CENTERING OVERRIDES ==================== */
@@ -284,11 +292,13 @@
 
 /* Fix import confirmation dialog close button positioning in RTL */
 .rtl #import-confirm-modal {
-    direction: ltr; /* Keep container LTR to prevent positioning issues */
+    direction: ltr;
+    /* Keep container LTR to prevent positioning issues */
 }
 
 .rtl #import-confirm-modal .modal-content {
-    direction: rtl; /* Only text content is RTL */
+    direction: rtl;
+    /* Only text content is RTL */
 }
 
 .rtl #import-confirm-modal .btn-close-modal {
@@ -361,16 +371,4 @@
     left: auto !important;
     right: var(--space-4) !important;
     top: var(--space-4) !important;
-}
-    position: relative !important;
-    right: auto !important;
-    left: auto !important;
-    top: var(--space-4) !important;
-    margin: 0 !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0 !important;
 }

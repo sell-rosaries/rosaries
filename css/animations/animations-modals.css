@@ -91,25 +91,76 @@
     min-height: calc(100vh - 40px) !important;
 }
 
-.gallery-panel .btn-send-selected {
+.gallery-panel .gallery-actions-container {
     position: absolute;
     bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: var(--space-2);
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    padding: 12px 20px;
-    font-size: var(--font-size-body-sm);
-    font-weight: var(--font-weight-semibold);
-    cursor: pointer;
-    transition: all var(--duration-base) var(--easing-smooth);
-    box-shadow: var(--shadow-sm);
     z-index: 10;
+    pointer-events: none;
+    direction: ltr !important;
+    /* Prevent RTL from breaking layout */
+}
+
+.gallery-action-group {
+    display: inline-flex;
+    flex-direction: row;
+    gap: 8px;
+    pointer-events: auto;
+    background: white;
+    padding: 6px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Both buttons share the SAME primary gradient style */
+.gallery-panel .btn-send-selected,
+.gallery-panel .btn-download-selected {
+    /* Force relative positioning to prevent overlap */
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 8px;
+    padding: 0 16px;
+    height: 40px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    /* Force identical blue styling */
+    background: var(--gradient-primary) !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3) !important;
+}
+
+.gallery-panel .btn-send-selected:hover,
+.gallery-panel .btn-download-selected:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.4);
+}
+
+/* Dark Mode - slightly adjust container background */
+[data-theme^='dark'] .gallery-action-group {
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .gallery-panel .btn-send-selected:hover {
@@ -276,12 +327,12 @@
     transition: transform 0.2s ease;
 }
 
-#gallery-panel .gallery-checkbox:checked + .gallery-checkbox-label {
+#gallery-panel .gallery-checkbox:checked+.gallery-checkbox-label {
     border-color: #10b981;
     background: #10b981;
 }
 
-#gallery-panel .gallery-checkbox:checked + .gallery-checkbox-label::after {
+#gallery-panel .gallery-checkbox:checked+.gallery-checkbox-label::after {
     transform: translate(-50%, -50%) scale(1);
 }
 
@@ -323,12 +374,12 @@
     transform: scale(1.1);
 }
 
-#gallery-panel .gallery-checkbox:checked + .gallery-checkbox-label {
+#gallery-panel .gallery-checkbox:checked+.gallery-checkbox-label {
     background: var(--gradient-primary);
     border-color: var(--primary-500);
 }
 
-#gallery-panel .gallery-checkbox:checked + .gallery-checkbox-label::after {
+#gallery-panel .gallery-checkbox:checked+.gallery-checkbox-label::after {
     content: '✓';
     color: white;
     font-size: 16px;

@@ -108,6 +108,12 @@ function initGalleryEventListeners() {
         sendSelectedBtn.addEventListener('click', openGalleryEmailModal);
     }
 
+    // Download selected button
+    const downloadSelectedBtn = document.getElementById('download-selected-btn');
+    if (downloadSelectedBtn) {
+        downloadSelectedBtn.addEventListener('click', downloadGalleryImages);
+    }
+
     // Gallery email form submission
     const galleryEmailForm = document.getElementById('gallery-email-form');
     if (galleryEmailForm) {
@@ -446,13 +452,44 @@ async function sendGalleryEmail(event) {
 /**
  * Update send button visibility
  */
+/**
+ * Update send/download button visibility
+ */
 function updateSendButton() {
     const sendBtn = document.getElementById('send-selected-btn');
+    const downloadBtn = document.getElementById('download-selected-btn');
+
+    // Get translations for button text
+    const sendText = (typeof window.getTranslation === 'function' ? window.getTranslation('send-selected') : 'Send Selected');
+    const downloadText = (typeof window.getTranslation === 'function' ? window.getTranslation('gallery-download-btn') : 'Download Selected');
+
     if (selectedGalleryImages.size > 0) {
-        sendBtn.style.display = 'flex';
-        sendBtn.textContent = `Send Selected (${selectedGalleryImages.size})`;
+        // Update Send Button
+        if (sendBtn) {
+            sendBtn.style.display = 'flex';
+            // Find text span if it exists to preserve icon
+            const textSpan = sendBtn.querySelector('.btn-text');
+            if (textSpan) {
+                textSpan.textContent = `${sendText} (${selectedGalleryImages.size})`;
+            } else {
+                sendBtn.textContent = `${sendText} (${selectedGalleryImages.size})`;
+            }
+        }
+
+        // Update Download Button
+        if (downloadBtn) {
+            downloadBtn.style.display = 'flex';
+            // Find text span if it exists to preserve icon
+            const textSpan = downloadBtn.querySelector('.btn-text');
+            if (textSpan) {
+                textSpan.textContent = `${downloadText} (${selectedGalleryImages.size})`;
+            } else {
+                downloadBtn.textContent = `${downloadText} (${selectedGalleryImages.size})`;
+            }
+        }
     } else {
-        sendBtn.style.display = 'none';
+        if (sendBtn) sendBtn.style.display = 'none';
+        if (downloadBtn) downloadBtn.style.display = 'none';
     }
 }
 
@@ -606,9 +643,96 @@ function convertImagesToBase64(imagePaths) {
     });
 }
 
+/**
+ * Download selected gallery images
+ * Supports both Website (browser download) and APK (Android DownloadManager)
+ */
+function downloadGalleryImages() {
+    if (selectedGalleryImages.size === 0) {
+        showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-select-at-least-one') : null) || 'Please select at least one design to download', 'warning');
+        return;
+    }
+
+    // Get selected items
+    const allItems = getGalleryItemsByCategory('all');
+    const selectedItems = allItems.filter(item => selectedGalleryImages.has(item.id));
+
+    // Check if running in APK
+    const isApk = typeof window.Android !== 'undefined' && typeof window.Android.downloadUrl === 'function';
+
+    if (isApk) {
+        // APK Download Logic
+        selectedItems.forEach(item => {
+            // Construct full URL using current location as base
+            try {
+                // Determine base URL - if we are in file:// android asset, this works relative to it
+                // If we are on website, this works too.
+                const fullUrl = new URL(item.image, window.location.href).href;
+
+                // Create a nice filename
+                const ext = item.image.split('.').pop() || 'png';
+                const filename = `Rosary_${item.name.replace(/\s+/g, '_')}_${item.id}.${ext}`;
+
+                // Trigger Android native download
+                window.Android.downloadUrl(fullUrl, filename);
+            } catch (e) {
+                console.error('Error constructing download URL:', e);
+                // Fallback to original path if URL construction fails
+                window.Android.downloadUrl(item.image, item.name);
+            }
+        });
+
+        showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-download-message') : null) || 'Starting downloads...', 'success');
+
+    } else {
+        // Website Browser Download Logic
+        // Use fetch + blob to ensure browser downloads the image instead of opening it
+        selectedItems.forEach((item, index) => {
+            setTimeout(async () => {
+                try {
+                    const response = await fetch(item.image);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+
+                    const link = document.createElement('a');
+                    link.style.display = 'none';
+                    link.href = url;
+
+                    // improved filename
+                    const ext = item.image.split('.').pop() || 'png';
+                    link.download = `Rosary_${item.name.replace(/\s+/g, '_')}_${item.id}.${ext}`;
+
+                    document.body.appendChild(link);
+                    link.click();
+
+                    // Cleanup
+                    setTimeout(() => {
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(link);
+                    }, 100);
+
+                } catch (e) {
+                    console.error('Download failed, using fallback:', e);
+                    // Fallback to simple link click if fetch fails (e.g. cross-origin)
+                    const link = document.createElement('a');
+                    link.href = item.image;
+                    link.download = `Rosary_${item.name.replace(/\s+/g, '_')}`;
+                    link.target = '_blank';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }, index * 500); // Stagger downloads
+        });
+
+        showCustomAlert((typeof window.getTranslation === 'function' ? window.getTranslation('gallery-download-started') : null) || 'Download started!', 'success');
+    }
+}
+
 // Make all gallery functions globally available
 window.initGalleryEventListeners = initGalleryEventListeners;
 window.toggleGallerySelection = toggleGallerySelection;
 window.openGalleryEmailModal = openGalleryEmailModal;
 window.closeGalleryEmailModal = closeGalleryEmailModal;
 window.sendGalleryEmail = sendGalleryEmail;
+window.downloadGalleryImages = downloadGalleryImages;
