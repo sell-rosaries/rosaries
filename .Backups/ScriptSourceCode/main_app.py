@@ -46,6 +46,9 @@ class ScriptLauncher:
                 is_busy = True
             elif getattr(self.current_ui, 'is_pushing', False):
                 is_busy = True
+            # Kill host server if it's running
+            if hasattr(self.current_ui, 'manager') and hasattr(self.current_ui.manager, 'kill_all_servers'):
+                self.current_ui.manager.kill_all_servers()
                 
         if is_busy:
             if not messagebox.askyesno("Task Running", "A task is currently running. Do you really want to exit and kill the task?"):
@@ -120,24 +123,32 @@ class ScriptLauncher:
         ttk.Button(mgmt_group, text="+ Add New", command=self.add_script, style="Regular.TButton").pack(side=tk.LEFT, padx=(0, 10), fill=tk.X, expand=True)
         ttk.Button(mgmt_group, text="- Remove", command=self.remove_script, style="Regular.TButton").pack(side=tk.LEFT, fill=tk.X, expand=True)
         
-        # Group 2: Built-in Tools
+        # Group 2: Built-in Tools (Dynamic Grid)
         tools_group = ttk.LabelFrame(controls_frame, text="Project Tools", padding="10")
         tools_group.pack(fill=tk.X)
         
-        # Grid layout for tools
-        tools_group.columnconfigure(0, weight=1)
-        tools_group.columnconfigure(1, weight=1)
-        tools_group.columnconfigure(2, weight=1)
+        # Define tools as a list - easy to add more in the future
+        tools = [
+            ("Git Push Tool", self.launch_git_push_ui),
+            ("APK Updater", self.launch_apk_updater_ui),
+            ("Nano Banana", self.launch_nano_banana_ui),
+            ("Background Remover", self.launch_bg_remover_ui),
+            ("Image Renamer", self.launch_image_renamer_ui),
+            ("Temp Sharing Service", self.launch_filebin_ui),
+            ("Local Host Server", self.launch_host_server_ui),
+        ]
         
-        # Row 1
-        ttk.Button(tools_group, text="Git Push Tool", command=self.launch_git_push_ui).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
-        ttk.Button(tools_group, text="APK Updater", command=self.launch_apk_updater_ui).grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-        ttk.Button(tools_group, text="Nano Banana", command=self.launch_nano_banana_ui).grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+        # Dynamic grid layout - 3 columns
+        columns = 3
+        for i in range(columns):
+            tools_group.columnconfigure(i, weight=1)
         
-        # Row 2
-        ttk.Button(tools_group, text="Background Remover", command=self.launch_bg_remover_ui).grid(row=1, column=0, padx=5, pady=5, sticky="ew")
-        ttk.Button(tools_group, text="Image Renamer", command=self.launch_image_renamer_ui).grid(row=1, column=1, padx=5, pady=5, sticky="ew")
-        ttk.Button(tools_group, text="Temp Sharing Service", command=self.launch_filebin_ui, style="Accent.TButton").grid(row=1, column=2, padx=5, pady=5, sticky="ew")
+        for idx, (name, callback) in enumerate(tools):
+            row = idx // columns
+            col = idx % columns
+            ttk.Button(tools_group, text=name, command=callback).grid(
+                row=row, column=col, padx=5, pady=5, sticky="ew"
+            )
 
     def refresh_script_list(self):
         self.script_listbox.delete(0, tk.END)
@@ -214,6 +225,11 @@ class ScriptLauncher:
     def launch_filebin_ui(self):
         self.filebin_ui = FilebinUI(self.root, self.create_main_ui, self.app_config_manager)
         self.current_ui = self.filebin_ui
+    
+    def launch_host_server_ui(self):
+        from host.ui import HostServerUI
+        self.host_server_ui = HostServerUI(self.root, self.create_main_ui, self.app_config_manager)
+        self.current_ui = self.host_server_ui
 
 def main():
     root = tk.Tk()
