@@ -26,8 +26,10 @@ class AppConfigManager:
             return False
 
     def get_tool_config(self, tool_name):
+        self.config = self.load_all() # Refresh from disk
         return self.config.get(tool_name, {})
 
     def set_tool_config(self, tool_name, config_data):
+        self.config = self.load_all() # Refresh to get latest changes
         self.config[tool_name] = config_data
         return self.save_all()
