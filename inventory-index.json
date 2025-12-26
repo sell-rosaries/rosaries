@@ -1,0 +1,634 @@
+{
+  "lastUpdated": "2025-12-26T01:02:37Z",
+  "categories": [
+    {
+      "name": "Beads",
+      "path": "Jularies/Beads/",
+      "objects": [
+        "AgateOrb.png"
+,
+        "AmberCrystal.png"
+,
+        "AmberOrb.png"
+,
+        "AmethystOrb.png"
+,
+        "AmethystSunstone.png"
+,
+        "CreamRose.png"
+,
+        "CrimsonVortex.png"
+,
+        "CrystalSwirl.png"
+,
+        "DragonOrb.png"
+,
+        "GildedOrb.png"
+,
+        "GildedOrb_1.png"
+,
+        "GoldenOrb.png"
+,
+        "MagmaOrb.png"
+,
+        "MalachiteOrb.png"
+,
+        "MoonOrb.png"
+,
+        "PewterOrb.png"
+,
+        "RegalOrb.png"
+,
+        "RubyCross.png"
+,
+        "RubySun.png"
+,
+        "SacredOrb.png"
+,
+        "SapphireOrb.png"
+,
+        "SilverRose.png"
+,
+        "StardustRose.png"
+,
+        "SwirlRope.png"
+,
+        "TigerEye.png"
+,
+        "VolleyCharm.png"
+,
+        "AgateSphere.webp"
+,
+        "AmberOrb.webp"
+,
+        "AmberOrb_1.webp"
+,
+        "AmberOrb_2.webp"
+,
+        "AmberOrb_3.webp"
+,
+        "AmethystGold.webp"
+,
+        "AquaCharm.webp"
+,
+        "AquaCrystal.webp"
+,
+        "AquaGlimmer.webp"
+,
+        "AquaOrb.webp"
+,
+        "AquaOrb_1.webp"
+,
+        "AuraGem.webp"
+,
+        "AuroraBloom.webp"
+,
+        "AuroraBloom_1.webp"
+,
+        "AuroraCrystal.webp"
+,
+        "AuroraCube.webp"
+,
+        "AuroraHeart.webp"
+,
+        "AurumDrop.webp"
+,
+        "AzureGold.webp"
+,
+        "AzureOrb.webp"
+,
+        "BloodAgate.webp"
+,
+        "CandyRose.webp"
+,
+        "CandyRose_1.webp"
+,
+        "CandySwirl.webp"
+,
+        "CandySwirl_1.webp"
+,
+        "CandySwirl_2.webp"
+,
+        "CaramelAgate.webp"
+,
+        "CelestialOrb.webp"
+,
+        "CherryFragment.webp"
+,
+        "ChromeOrb.webp"
+,
+        "CitrineCrystal.webp"
+,
+        "CitrineCrystal_1.webp"
+,
+        "CitrineGem.webp"
+,
+        "CoffeeAgate.webp"
+,
+        "CosmicGold.webp"
+,
+        "CosmicOrb.webp"
+,
+        "CosmicOrb_1.webp"
+,
+        "CrossOrb.webp"
+,
+        "CrossOrb_1.webp"
+,
+        "CrystalFacet.webp"
+,
+        "CrystalOrb.webp"
+,
+        "CrystalSapphire.webp"
+,
+        "CyanGlyph.webp"
+,
+        "DeepEye.webp"
+,
+        "EbonyEye.webp"
+,
+        "EbonyJewel.webp"
+,
+        "EmberOrb.webp"
+,
+        "EmeraldCharm.webp"
+,
+        "EmeraldCrystal.webp"
+,
+        "EmeraldOrb.webp"
+,
+        "FaithOrb.webp"
+,
+        "GalaxyDust.webp"
+,
+        "GalaxyGold.webp"
+,
+        "GalaxySphere.webp"
+,
+        "GemHeart.webp"
+,
+        "GildedAzure.webp"
+,
+        "GildedColumn.webp"
+,
+        "GildedGem.webp"
+,
+        "GildedOrb.webp"
+,
+        "GildedRose.webp"
+,
+        "GlassGilt.webp"
+,
+        "GoldPrism.webp"
+,
+        "GoldSphere.webp"
+,
+        "GoldenJade.webp"
+,
+        "GoldenOrb.webp"
+,
+        "GoldenPrism.webp"
+,
+        "GoldenSpacer.webp"
+,
+        "HammeredOrb.webp"
+,
+        "HematiteSphere.webp"
+,
+        "HolyOrb.webp"
+,
+        "HolyOrb_1.webp"
+,
+        "JadeOrb.webp"
+,
+        "LatteSphere.webp"
+,
+        "LemonCrystal.webp"
+,
+        "LemonDrop.webp"
+,
+        "LimeOrb.webp"
+,
+        "LoveCharm.webp"
+,
+        "LoveToken.webp"
+,
+        "LumenSphere.webp"
+,
+        "MalachiteOrb.webp"
+,
+        "MarbleSwirl.webp"
+,
+        "MarbleSwirl_1.webp"
+,
+        "MidnightGem.webp"
+,
+        "MintSwirl.webp"
+,
+        "MokaSphere.webp"
+,
+        "OceanSpeckle.webp"
+,
+        "OnyxCross.webp"
+,
+        "OnyxGold.webp"
+,
+        "OpalInk.webp"
+,
+        "PearlHeart.webp"
+,
+        "PearlRose.webp"
+,
+        "PearlSphere.webp"
+,
+        "PinkStardust.webp"
+,
+        "PlanetDust.webp"
+,
+        "PlusOrb.webp"
+,
+        "PrismHeart.webp"
+,
+        "PrismOrb.webp"
+,
+        "PurpleCross.webp"
+,
+        "PurpleCross_1.webp"
+,
+        "RainbowPrism.webp"
+,
+        "RegalGem.webp"
+,
+        "RoseCrystal.webp"
+,
+        "RosePearl.webp"
+,
+        "RoyalCapsule.webp"
+,
+        "RoyalOrb.webp"
+,
+        "RubyCapsule.webp"
+,
+        "RubyCross.webp"
+,
+        "RubyCross_1.webp"
+,
+        "RubyCrystal.webp"
+,
+        "RubyGem.webp"
+,
+        "RubyHeart.webp"
+,
+        "RubyHeart_1.webp"
+,
+        "RubyHeart_2.webp"
+,
+        "RubyOrb.webp"
+,
+        "RubySphere.webp"
+,
+        "SacredOrb.webp"
+,
+        "SapphireGlow.webp"
+,
+        "SilverCross.webp"
+,
+        "SkySwirl.webp"
+,
+        "SolarGlow.webp"
+,
+        "StellarOrb.webp"
+,
+        "StormGlobe.webp"
+,
+        "SunstoneOrb.webp"
+,
+        "VerdantOrb.webp"
+,
+        "VolleyBall.webp"
+,
+        "VolleyBall_1.webp"
+,
+        "VolleyCharm.webp"
+,
+        "VolleyCharm_1.webp"
+,
+        "VolleyOrb.webp"
+,
+        "YellowCross.webp"
+,
+        "YellowSwirl.webp"
+,
+        "YinYangOrb.webp"
+      ]
+    }
+,
+    {
+      "name": "Connectors",
+      "path": "Jularies/Connectors/",
+      "objects": [
+        "CelticKnot.png"
+,
+        "CrownFinial.png"
+,
+        "GoldScroll.png"
+,
+        "GoldenQuatrefoil.png"
+,
+        "IronRelic.png"
+,
+        "OrnateFinial.png"
+,
+        "SacredHeart.png"
+,
+        "SilverBloom_1.png"
+,
+        "SilverBlossom.png"
+,
+        "SilverLantern.png"
+,
+        "VikingKnot.png"
+,
+        "AmethystOrnament.webp"
+,
+        "AncientSpire.webp"
+,
+        "AngelWing.webp"
+,
+        "AngelWing_1.webp"
+,
+        "AntiqueLantern.webp"
+,
+        "ArgentWeave.webp"
+,
+        "AzureCrest.webp"
+,
+        "CelestialCharm.webp"
+,
+        "CelticCharm.webp"
+,
+        "CelticOrb.webp"
+,
+        "CrescentSpire.webp"
+,
+        "FestivalCharm.webp"
+,
+        "FlameFringe.webp"
+,
+        "FlowerCharm.webp"
+,
+        "ForestCharm.webp"
+,
+        "GoldOrb.webp"
+,
+        "GoldRuby.webp"
+,
+        "GoldScroll.webp"
+,
+        "GoldenKnot.webp"
+,
+        "KnotCrest.webp"
+,
+        "LoveLink.webp"
+,
+        "MochaPlume.webp"
+,
+        "OliveTassel.webp"
+,
+        "OnyxCharm.webp"
+,
+        "OrnateCharm.webp"
+,
+        "OrnateCharm_1.webp"
+,
+        "OrnatePillar.webp"
+,
+        "OrnateTassel.webp"
+,
+        "PewterSwirl.webp"
+,
+        "RegalR.webp"
+,
+        "SilverCrescent.webp"
+,
+        "SilverFringe.webp"
+,
+        "SkyGold.webp"
+,
+        "WingedCross.webp"
+      ]
+    }
+,
+    {
+      "name": "Crosses",
+      "path": "Jularies/Crosses/",
+      "objects": [
+        "AquaOpal.png"
+,
+        "CrystalCross.png"
+,
+        "AngelCross.webp"
+,
+        "ChristRising.webp"
+,
+        "CrystalCharm.webp"
+,
+        "CrystalCross.webp"
+,
+        "DivineLight.webp"
+,
+        "FaithCharm.webp"
+,
+        "GiltCross.webp"
+,
+        "GoldCross.webp"
+,
+        "GoldCrucifix.webp"
+,
+        "GoldenCross.webp"
+,
+        "GoldenRadiance.webp"
+,
+        "HolyCharm.webp"
+,
+        "HolyCross.webp"
+,
+        "OrnateCross.webp"
+,
+        "PearlCross.webp"
+,
+        "PewterCross.webp"
+,
+        "SacredHeart.webp"
+,
+        "SacredSavior.webp"
+,
+        "SilverCross.webp"
+,
+        "WhiteCross.webp"
+      ]
+    }
+,
+    {
+      "name": "Letters",
+      "path": "Jularies/Letters/",
+      "objects": [
+        "A-Black.webp"
+,
+        "A-Gold.webp"
+,
+        "A-White.webp"
+,
+        "B-Black.webp"
+,
+        "B-Gold.webp"
+,
+        "B-White.webp"
+,
+        "C-Black.webp"
+,
+        "C-Gold.webp"
+,
+        "C-White.webp"
+,
+        "D-Black.webp"
+,
+        "D-Gold.webp"
+,
+        "D-White.webp"
+,
+        "E-Black.webp"
+,
+        "E-Gold.webp"
+,
+        "E-White.webp"
+,
+        "F-Black.webp"
+,
+        "F-Gold.webp"
+,
+        "F-White.webp"
+,
+        "G-Black.webp"
+,
+        "G-Gold.webp"
+,
+        "G-White.webp"
+,
+        "H-Black.webp"
+,
+        "H-Gold.webp"
+,
+        "H-White.webp"
+,
+        "I-Black.webp"
+,
+        "I-Gold.webp"
+,
+        "I-White.webp"
+,
+        "J-Black.webp"
+,
+        "J-Gold.webp"
+,
+        "J-White.webp"
+,
+        "K-Black.webp"
+,
+        "K-Gold.webp"
+,
+        "K-White.webp"
+,
+        "L-Black.webp"
+,
+        "L-Gold.webp"
+,
+        "L-White.webp"
+,
+        "M-Black.webp"
+,
+        "M-Gold.webp"
+,
+        "M-White.webp"
+,
+        "N-Black.webp"
+,
+        "N-Gold.webp"
+,
+        "N-White.webp"
+,
+        "O-Black.webp"
+,
+        "O-Gold.webp"
+,
+        "O-White.webp"
+,
+        "P-Black.webp"
+,
+        "P-Gold.webp"
+,
+        "P-White.webp"
+,
+        "Q-Black.webp"
+,
+        "Q-Gold.webp"
+,
+        "Q-White.webp"
+,
+        "R-Black.webp"
+,
+        "R-Gold.webp"
+,
+        "R-White.webp"
+,
+        "S-Black.webp"
+,
+        "S-Gold.webp"
+,
+        "S-White.webp"
+,
+        "T-Black.webp"
+,
+        "T-Gold.webp"
+,
+        "T-White.webp"
+,
+        "U-Black.webp"
+,
+        "U-Gold.webp"
+,
+        "U-White.webp"
+,
+        "V-Black.webp"
+,
+        "V-Gold.webp"
+,
+        "V-White.webp"
+,
+        "W-Black.webp"
+,
+        "W-Gold.webp"
+,
+        "W-White.webp"
+,
+        "X-Black.webp"
+,
+        "X-Gold.webp"
+,
+        "X-White.webp"
+,
+        "Y-Black.webp"
+,
+        "Y-Gold.webp"
+,
+        "Y-White.webp"
+,
+        "Z-Black.webp"
+,
+        "Z-Gold.webp"
+,
+        "Z-White.webp"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Restricted</title>
+    <!-- Fonts: Space Grotesk (Tech/English) and Cairo (Arabic) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;800&family=Space+Grotesk:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-purple: #bc13fe;
+            --bg-color: #080808;
+            --glass-surface: rgba(20, 20, 20, 0.7);
+            --text-main: #ffffff;
+            --text-dim: #bbbbbb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Space Grotesk', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            position: relative;
+        }
+
+        /* --- CANVAS (The Living Background) --- */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            /* Behind content */
+        }
+
+        /* --- MAIN CARD (Desktop Optimized) --- */
+        .glass-terminal {
+            position: relative;
+            z-index: 10;
+            /* Above canvas */
+            width: 90%;
+            /* Responsive width */
+            max-width: 1000px;
+            /* Max width for desktop */
+            min-height: 450px;
+            background: var(--glass-surface);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        /* Mobile Desktop Mode - Compressed Menu */
+        .mobile-desktop-mode .glass-terminal {
+            /* Reduced width by 7% from 92% to 85.6% */
+            width: 85.6% !important;
+            max-width: none !important;
+        }
+
+        .mobile-desktop-mode .terminal-header {
+            /* Compress header padding by 12% */
+            padding: 1.32rem 2.2rem !important; /* Reduced from 1.5rem 2.5rem */
+        }
+
+        .mobile-desktop-mode .content-body {
+            /* Compress content padding by 12% */
+            padding: 2.64rem 3.52rem !important; /* Reduced from 3rem 4rem */
+        }
+
+        .mobile-desktop-mode .animated-icon {
+            /* Reduce icon size by 12% */
+            font-size: 3.08rem !important; /* Reduced from 3.5rem */
+            margin-bottom: 1.32rem !important; /* Reduced from 1.5rem */
+        }
+
+        .mobile-desktop-mode h1 {
+            /* Reduce heading size by 12% */
+            font-size: 2.64rem !important; /* Reduced from 3rem */
+            margin-bottom: 0.88rem !important; /* Reduced from 1rem */
+        }
+
+        .mobile-desktop-mode p {
+            /* Reduce paragraph spacing by 12% */
+            margin-bottom: 2.64rem !important; /* Reduced from 3rem */
+            font-size: 1rem !important; /* Keep original size */
+        }
+
+        .mobile-desktop-mode .devices-row {
+            /* Compress device badges spacing by 12% */
+            gap: 18px !important; /* Reduced from 20px */
+        }
+
+        .mobile-desktop-mode .device-badge {
+            /* Reduce device badge padding by 12% */
+            padding: 11px 21px !important; /* Reduced from 12px 24px */
+            font-size: 0.9rem !important; /* Keep original size */
+        }
+
+        .glass-terminal:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 80px rgba(0, 243, 255, 0.1);
+        }
+
+        /* Top Bar */
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .status-light {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            color: var(--neon-pink);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--neon-pink);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-pink);
+            animation: blink 1s infinite;
+        }
+
+        /* Language Toggle */
+        .lang-switch {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 6px 14px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+        }
+
+        /* Main Content */
+        .content-body {
+            flex: 1;
+            padding: 3rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .animated-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 15px var(--neon-cyan));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #fff 0%, var(--text-dim) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+        }
+
+        /* Blocked Devices Section */
+        .devices-row {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+            /* Allow wrapping on small screens */
+        }
+
+        .device-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: rgba(255, 0, 85, 0.08);
+            border: 1px solid rgba(255, 0, 85, 0.3);
+            color: #ff4d6d;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+        .device-badge.success {
+            background: rgba(0, 255, 136, 0.08);
+            /* Green tint */
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+
+        .device-badge.success:hover {
+            background: rgba(0, 255, 136, 0.15);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.1);
+        }
+
+        .device-badge:hover {
+            background: rgba(255, 0, 85, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 85, 0.1);
+        }
+
+        /* --- ARABIC MODE --- */
+        body.rtl {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body.rtl .glass-terminal {
+            direction: rtl;
+        }
+
+        body.rtl .lang-btn,
+        body.rtl h1,
+        body.rtl p,
+        body.rtl .status-light,
+        body.rtl .device-badge {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body.rtl h1 {
+            letter-spacing: 0;
+        }
+
+        body.rtl .status-light {
+            flex-direction: row;
+        }
+
+        /* Keep dot aligned */
+
+        /* --- KEYFRAME ANIMATIONS --- */
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+    </style>
+</head>
+
+<body id="main-body">
+
+    <canvas id="boid-canvas"></canvas>
+
+    <div class="glass-terminal">
+        <div class="terminal-header">
+            <div class="status-light">
+                <div class="dot"></div>
+                <span id="txt-status">System Locked</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="lang-btn" id="btn-admin-toggle" onclick="toggleAdminPanel()" aria-label="Admin Access"
+                    style="padding: 6px 10px;">
+                    🔑
+                </button>
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+                    <button class="lang-btn" id="btn-ar" onclick="setLang('ar')">عربي</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <div class="animated-icon">📱</div> <!-- Simple Emoji with cool CSS effects -->
+
+            <h1 id="txt-title">Mobile Access Only</h1>
+            <p id="txt-desc">
+                This experience is exclusive to mobile devices.
+                Access via Desktop/Laptop browsers or "Request Desktop Site"
+                configuration is strictly prohibited.
+            </p>
+
+            <div class="devices-row">
+                <div class="device-badge">
+                    <span>&#10005;</span> <span id="txt-pc">PC Browser</span>
+                </div>
+                <div class="device-badge">
+                    <span>&#10005;</span> <span id="txt-desktop">Desktop Mode</span>
+                </div>
+                <div class="device-badge success">
+                    <span>&#10003;</span> <span id="txt-mobile">Mobile Browser</span>
+                </div>
+            </div>
+        </div>
+        <!-- Admin Panel (Hidden by default) -->
+        <div id="admin-panel"
+            style="display: none; margin-top: 2rem; width: 100%; max-width: 300px; animation: fadeIn 0.3s ease;">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="password" id="admin-pass" placeholder="Enter Admin Password"
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; font-family: 'Space Grotesk'; outline: none;">
+
+                <button onclick="verifyAdmin()"
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--neon-cyan); color: black; font-weight: bold; font-family: 'Space Grotesk'; cursor: pointer; transition: 0.3s;">
+                    UNLOCK SYSTEM
+                </button>
+                <p id="admin-error" style="color: var(--neon-pink); font-size: 0.9rem; display: none;">Invalid Password
+                </p>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        /**
+         * ------------------------------------------------
+         * PART 1: LANGUAGE HANDLER
+         * ------------------------------------------------
+         */
+        const translations = {
+            en: {
+                status: "System Locked",
+                title: "Mobile Access Only",
+                desc: "This experience is exclusive to mobile devices. Access via Desktop/Laptop browsers or 'Request Desktop Site' configuration is strictly prohibited.",
+                pc: "PC Browser",
+                desktop: "Desktop Mode",
+                mobile: "Mobile Browser"
+            },
+            ar: {
+                status: "النظام مغلق",
+                title: "مخصص للجوال فقط",
+                desc: "هذا الموقع مصمم حصرياً للهواتف المحمولة. يمنع الدخول باستخدام متصفحات الكمبيوتر أو تفعيل خيار 'طلب موقع سطح المكتب'.",
+                pc: "الكمبيوتر",
+                desktop: "وضع سطح المكتب",
+                mobile: "متصفح الجوال"
+            }
+        };
+
+        function setLang(lang) {
+            const body = document.getElementById('main-body');
+
+            // Text Updates
+            document.getElementById('txt-status').innerText = translations[lang].status;
+            document.getElementById('txt-title').innerText = translations[lang].title;
+            document.getElementById('txt-desc').innerText = translations[lang].desc;
+            document.getElementById('txt-pc').innerText = translations[lang].pc;
+            document.getElementById('txt-desktop').innerText = translations[lang].desktop;
+            document.getElementById('txt-mobile').innerText = translations[lang].mobile;
+
+            // Visual Updates (RTL & Buttons)
+            if (lang === 'ar') {
+                body.classList.add('rtl');
+                document.getElementById('btn-ar').classList.add('active');
+                document.getElementById('btn-en').classList.remove('active');
+            } else {
+                body.classList.remove('rtl');
+                document.getElementById('btn-en').classList.add('active');
+                document.getElementById('btn-ar').classList.remove('active');
+            }
+        }
+
+        /**
+         * ------------------------------------------------
+         * PART 2: "LIVELY" ANIMAL FLOCKING ANIMATION (BOIDS)
+         * Creates cyber-fish/birds that swim around.
+         * ------------------------------------------------
+         */
+        const canvas = document.getElementById('boid-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let boids = [];
+        const numBoids = 60; // How many animals
+        const visualRange = 100;
+
+        // Resize Event
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Mouse Tracker
+        let mouseX = -1000;
+        let mouseY = -1000;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // The "Animal" Class
+        class Boid {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = Math.random() * 4 - 2;
+                this.vy = Math.random() * 4 - 2;
+                // Randomly assign a "Species" color (Cyan or Purple)
+                this.isSpecial = Math.random() > 0.8;
+                this.color = this.isSpecial ? '#bc13fe' : '#00f3ff';
+                this.history = []; // For the trail effect
+            }
+
+            update() {
+                // 1. Move
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // 2. Wrap around screen (Pacman style)
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+
+                // 3. Mouse Avoidance (Predator effect)
+                const dx = this.x - mouseX;
+                const dy = this.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 150) {
+                    this.vx += dx / dist * 0.5;
+                    this.vy += dy / dist * 0.5;
+                }
+
+                // Speed Limit
+                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (speed > 4) {
+                    this.vx = (this.vx / speed) * 4;
+                    this.vy = (this.vy / speed) * 4;
+                }
+
+                // Trail History
+                this.history.push({ x: this.x, y: this.y });
+                if (this.history.length > 10) this.history.shift();
+            }
+
+            draw() {
+                // Draw Trail
+                ctx.beginPath();
+                for (let i = 0; i < this.history.length; i++) {
+                    const pos = this.history[i];
+                    ctx.lineTo(pos.x, pos.y);
+                }
+                ctx.strokeStyle = this.color;
+                ctx.globalAlpha = 0.3;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.globalAlpha = 1.0;
+
+                // Draw Head (Triangle)
+                const angle = Math.atan2(this.vy, this.vx);
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(angle);
+
+                ctx.beginPath();
+                ctx.moveTo(10, 0);
+                ctx.lineTo(-6, 5);
+                ctx.lineTo(-6, -5);
+                ctx.closePath();
+
+                ctx.fillStyle = this.color;
+                ctx.fill();
+
+                // Glow effect
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.restore();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function initBoids() {
+            boids = [];
+            for (let i = 0; i < numBoids; i++) {
+                boids.push(new Boid());
+            }
+        }
+        initBoids();
+
+        function animate() {
+            // Semi-transparent clear for motion blur trail effect
+            ctx.fillStyle = 'rgba(8, 8, 8, 0.2)';
+            ctx.fillRect(0, 0, width, height);
+
+            for (let boid of boids) {
+                boid.update();
+                boid.draw();
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        /**
+         * ------------------------------------------------
+         * PART 3: RESPONSIVE OPTIMIZATION
+         * 
+         * If the screen "physical" size is small (phone), but current
+         * view is wide (Desktop Mode), we might want to adjust scaling.
+         * ------------------------------------------------
+         */
+        function checkResponsive() {
+            // Physical screen check (Mobile/Tablet hardware)
+            const isMobileHardware = window.screen.width < 900;
+
+            if (isMobileHardware) {
+                const terminal = document.querySelector('.glass-terminal');
+                const ratio = window.innerWidth / window.screen.width;
+
+                // If the browser thinks it's a wide desktop (Request Desktop Site),
+                // the ratio will be > 1.1 (e.g., 980 / 390 ≈ 2.5)
+                if (ratio > 1.1) {
+                    document.body.classList.add('mobile-desktop-mode');
+
+                    // Use CSS custom properties for better control
+                    document.documentElement.style.setProperty('--compression-ratio', ratio);
+
+                    // 1. Scale typography slightly less aggressively to fit vertical space
+                    // Using 12.5px base instead of 16px to keep things tighter
+                    document.documentElement.style.fontSize = (12.5 * ratio) + "px";
+
+                    // 2. Adjust container to use the compressed width (85.6%)
+                    terminal.style.width = "85.6%";
+                    terminal.style.maxWidth = "none"; // Remove the max-width limit
+
+                    // 3. Ensure height works
+                    terminal.style.minHeight = "auto";
+
+                } else {
+                    // Normal Mobile View (or DevTools mobile view)
+                    // Remove mobile-desktop-mode class to use default styles
+                    document.body.classList.remove('mobile-desktop-mode');
+                    document.documentElement.style.fontSize = "16px";
+
+                    terminal.style.width = "95%";
+                    terminal.style.maxWidth = "500px"; // Cap it nicely for mobile
+                }
+            }
+        }
+        /**
+         * ------------------------------------------------
+         * PART 4: ADMIN BYPASS LOGIC
+         * ------------------------------------------------
+         */
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function verifyAdmin() {
+            const pass = document.getElementById('admin-pass').value;
+            const errorMsg = document.getElementById('admin-error');
+
+            // Verify Admin Hash
+            const targetHash = "1e28b2651a6d1b2486987925a85576dce1f8713e46acab058d9b200e409e4887";
+
+            try {
+                // Encode the password as a Uint8Array
+                const msgBuffer = new TextEncoder().encode(pass);
+                // Hash the password
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                // Convert ArrayBuffer to Array
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                // Convert bytes to hex string
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                if (hashHex === targetHash) {
+                    // Success!
+                    errorMsg.style.display = 'none';
+                    // Set flag in sessionStorage (cleared when browser closes)
+                    sessionStorage.setItem('valid_admin_access', 'true');
+                    // Redirect back to main site
+                    window.location.replace("index.html");
+                } else {
+                    // Fail
+                    errorMsg.style.display = 'block';
+                    errorMsg.innerText = "Access Denied";
+
+                    // Shake effect
+                    const input = document.getElementById('admin-pass');
+                    input.style.borderColor = "var(--neon-pink)";
+                    setTimeout(() => input.style.borderColor = "rgba(255,255,255,0.1)", 500);
+                }
+            } catch (e) {
+                console.error("Crypto Error:", e);
+                // The Web Crypto API (crypto.subtle) requires a Secure Context (HTTPS or localhost).
+                // It will fail if you open the file directly (file://).
+                // Since you requested 100% security, we removed the insecure fallback.
+
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = "Error: Admin Access requires HTTPS hosting.";
+            }
+        }
+
+        // Allow "Enter" key to submit
+        document.getElementById('admin-pass').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                verifyAdmin();
+            }
+        });
+
+        window.addEventListener('resize', checkResponsive);
+        // Run immediately
+        checkResponsive();
+
+    </script>
+
+    <script>
+        // Clear browser warnings (Permissions-Policy etc) visually
+        console.clear();
+    </script>
+</body>
+
+</html>

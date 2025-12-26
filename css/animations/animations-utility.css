@@ -1,0 +1,110 @@
+/* ==================== UTILITY CLASSES ==================== */
+.hidden {
+    display: none !important;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Selected Bead Preview */
+.selected-bead-preview {
+    background: var(--glass-light);
+    backdrop-filter: var(--backdrop-light);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
+    box-shadow: var(--shadow-glass);
+    width: 64px;
+    height: 64px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.selected-bead-preview.active {
+    display: flex;
+}
+
+.selected-bead-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+}
+
+
+/* ==================== LANGUAGE TOGGLE ==================== */
+.lang-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 6px 12px;
+    font-size: var(--font-size-body-sm);
+    font-weight: var(--font-weight-semibold);
+    color: white;
+    cursor: pointer;
+    transition: all var(--duration-base) var(--easing-smooth);
+    backdrop-filter: blur(10px);
+    min-width: 48px;
+}
+
+.lang-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.lang-toggle:active {
+    transform: scale(0.95);
+}
+
+.lang-label {
+    letter-spacing: 0.05em;
+}
+
+/* ==================== SAVED TOGGLE ==================== */
+.saved-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 6px 12px;
+    font-size: var(--font-size-body-sm);
+    font-weight: var(--font-weight-semibold);
+    color: white;
+    cursor: pointer;
+    transition: all var(--duration-base) var(--easing-smooth);
+    backdrop-filter: blur(10px);
+    min-width: 48px;
+}
+
+.saved-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.saved-toggle:active {
+    transform: scale(0.95);
+}
+
+.saved-toggle svg {
+    flex-shrink: 0;
+}
+
+.saved-label {
+    letter-spacing: 0.05em;
+}

@@ -1,0 +1,224 @@
+/* ========================================
+   ROSARY BEAD DESIGNER - MOBILE-FIRST
+   Modern Design Tool (Gradient Depth + Glassmorphism)
+   ======================================== */
+
+/* ==================== CSS CUSTOM PROPERTIES ==================== */
+:root {
+    /* Colors - Primary Gradient */
+    --primary-50: #EFF3FF;
+    --primary-500: #667EEA;
+    --primary-600: #5468D9;
+    --gradient-primary: linear-gradient(135deg, #667EEA 0%, #3B82F6 100%);
+    --gradient-primary-hover: linear-gradient(135deg, #7C8EF7 0%, #4B92FF 100%);
+    
+    /* Colors - Secondary */
+    --secondary-500: #06B6D4;
+    --gradient-secondary: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+    
+    /* Colors - Neutral */
+    --neutral-50: #FAFBFC;
+    --neutral-100: #F4F5F7;
+    --neutral-200: #E5E7EB;
+    --neutral-300: #D1D5DB;
+    --neutral-400: #9CA3AF;
+    --neutral-600: #4B5563;
+    --neutral-700: #374151;
+    --neutral-800: #1F2937;
+    --neutral-900: #111827;
+    
+    /* Colors - Glass Surfaces */
+    --glass-light: rgba(255, 255, 255, 0.4);
+    --glass-medium: rgba(255, 255, 255, 0.25);
+    --glass-subtle: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    
+    /* Colors - Semantic */
+    --success: #10B981;
+    --error: #EF4444;
+    --warning: #F59E0B;
+    --info: #3B82F6;
+    
+    /* Colors - Backgrounds */
+    --bg-app: #FAFBFC;
+    --bg-canvas: #FFFFFF; /* Pure White for Light Mode */
+    --bg-modal: rgba(0, 0, 0, 0.4);
+    --bg-card: #FFFFFF;
+    --bg-button: #FAFBFC; 
+
+    /* Typography */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-size-heading-lg: 28px;
+    --font-size-heading-md: 24px;
+    --font-size-heading-sm: 20px;
+    --font-size-body-lg: 18px;
+    --font-size-body: 16px;
+    --font-size-body-sm: 14px;
+    --font-size-caption: 12px;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.6;
+    
+    /* Spacing (8-point grid) */
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+    --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.08);
+    --shadow-gradient: 0 6px 20px rgba(102, 126, 234, 0.3), 0 3px 10px rgba(59, 130, 246, 0.2);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    
+    /* Animation */
+    --duration-fast: 150ms;
+    --duration-base: 250ms;
+    --duration-smooth: 350ms;
+    --duration-slow: 500ms;
+    --easing-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
+    
+    /* Backdrop Filters */
+    --backdrop-light: blur(20px) saturate(150%);
+    --backdrop-medium: blur(30px) saturate(160%);
+    --backdrop-heavy: blur(40px) saturate(170%);
+    
+    /* Component Sizes */
+    --fab-size: 64px;
+    --toolbar-height: 72px;
+    --toolbar-btn-size: 48px;
+    --header-height: 56px;
+    --button-height-mobile: 48px;
+    --input-height: 48px;
+}
+
+/* ==================== DARK MODE THEMES ==================== */
+/* 
+   UNIFIED CANVAS BACKGROUND FOR ALL DARK MODES 
+   Color: #444444 (Deep Dark Grey)
+   - Much darker than previous silver (#AAAAAA)
+   - Not pure black, so black strings are still somewhat visible
+*/
+
+/* Theme 1: Standard Material Dark (Grey) - "Classic" */
+[data-theme='dark-classic'] {
+    --primary-50: #1a1a1a;
+    --primary-500: #818cf8;
+    --primary-600: #6366f1;
+    --gradient-primary: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
+    
+    --neutral-50: #121212;
+    --neutral-100: #1e1e1e;
+    --neutral-200: #a0a0a0;
+    --neutral-300: #b0b0b0;
+    --neutral-400: #cccccc;
+    --neutral-600: #e5e5e5;
+    --neutral-700: #f5f5f5;
+    --neutral-800: #ffffff;
+    --neutral-900: #ffffff;
+    
+    --bg-app: #121212;
+    --bg-canvas: #444444; /* Unified Dark Mode Canvas */
+    --bg-card: #1e1e1e;
+    --bg-button: #2d2d2d; 
+    --bg-modal: rgba(0, 0, 0, 0.7);
+    
+    --glass-light: rgba(30, 30, 30, 0.9);
+    --glass-medium: rgba(30, 30, 30, 0.7);
+    --glass-subtle: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.5);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.5);
+    --shadow-xl: 0 20px 25px rgba(0,0,0,0.6);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Theme 2: OLED Pure Black - "Midnight" */
+[data-theme='dark-oled'] {
+    --primary-50: #000000;
+    --primary-500: #60a5fa; 
+    --primary-600: #3b82f6;
+    --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    
+    --neutral-50: #000000;
+    --neutral-100: #000000;
+    --neutral-200: #a0a0a0;
+    --neutral-300: #c0c0c0;
+    --neutral-400: #d4d4d4;
+    --neutral-600: #e5e5e5;
+    --neutral-700: #ffffff;
+    --neutral-800: #ffffff;
+    --neutral-900: #ffffff;
+    
+    --bg-app: #000000;
+    --bg-canvas: #444444; /* Unified Dark Mode Canvas */
+    --bg-card: #000000;
+    --bg-button: #1a1a1a; 
+    --bg-modal: rgba(0, 0, 0, 0.9);
+    
+    --glass-light: rgba(0, 0, 0, 0.9);
+    --glass-medium: rgba(0, 0, 0, 0.8);
+    --glass-subtle: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    
+    --shadow-sm: none;
+    --shadow-md: 0 0 0 1px #333; 
+    --shadow-lg: 0 0 0 1px #333;
+    --shadow-xl: 0 0 0 1px #333;
+    --shadow-glass: 0 0 0 1px #333;
+}
+
+/* Theme 3: Deep Navy Blue - "Ocean" */
+[data-theme='dark-blue'] {
+    --primary-50: #0f172a;
+    --primary-500: #38bdf8;
+    --primary-600: #0ea5e9;
+    --gradient-primary: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%);
+    
+    --neutral-50: #020617; 
+    --neutral-100: #0f172a; 
+    --neutral-200: #94a3b8; 
+    --neutral-300: #cbd5e1;
+    --neutral-400: #e2e8f0;
+    --neutral-600: #f1f5f9;
+    --neutral-700: #f8fafc;
+    --neutral-800: #f8fafc;
+    --neutral-900: #ffffff;
+    
+    --bg-app: #020617;
+    --bg-canvas: #444444; /* Unified Dark Mode Canvas */
+    --bg-card: #0f172a;
+    --bg-button: #1e293b; 
+    --bg-modal: rgba(2, 6, 23, 0.8);
+    
+    --glass-light: rgba(15, 23, 42, 0.9);
+    --glass-medium: rgba(15, 23, 42, 0.7);
+    --glass-subtle: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.5);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.5);
+    --shadow-xl: 0 20px 25px rgba(0,0,0,0.6);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.5);
+}

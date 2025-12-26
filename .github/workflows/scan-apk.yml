@@ -1,0 +1,64 @@
+name: Scan APK Files
+
+on:
+  push:
+    paths:
+      - 'apk/**'
+  workflow_dispatch:
+
+jobs:
+  scan-apks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Generate APK Index
+        run: |
+          echo "{" > apk-index.json
+          echo "  \"latest\": []," >> apk-index.json
+          echo "  \"old\": []" >> apk-index.json
+          echo "}" >> apk-index.json
+
+          # Function to get files from a directory and format as JSON array
+          get_files() {
+            local dir=$1
+            local files=""
+            if [ -d "$dir" ]; then
+              for file in "$dir"/*;
+              do
+                if [ -f "$file" ]; then
+                  filename=$(basename "$file")
+                  if [ -z "$files" ]; then
+                    files="\"$filename\""
+                  else
+                    files="$files, \"$filename\""
+                  fi
+                fi
+              done
+            fi
+            echo "$files"
+          }
+
+          # Get files for latest and old directories
+          LATEST_FILES=$(get_files "apk/latest")
+          OLD_FILES=$(get_files "apk/old")
+
+          # Construct the final JSON
+          echo "{" > apk-index.json
+          echo "  \"latest\": [$LATEST_FILES]," >> apk-index.json
+          echo "  \"old\": [$OLD_FILES]," >> apk-index.json
+          echo "  \"lastUpdated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"" >> apk-index.json
+          echo "}" >> apk-index.json
+
+          cat apk-index.json
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add apk-index.json
+          git commit -m "Update apk-index.json" || echo "No changes to commit"
+          git push

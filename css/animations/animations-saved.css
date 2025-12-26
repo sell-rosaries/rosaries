@@ -1,0 +1,303 @@
+/* ==================== SAVED MODAL STYLES ==================== */
+.saved-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+}
+
+/* Fix title centering in both English and Arabic modes */
+#saved-modal h3 {
+    text-align: center !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    position: relative !important;
+}
+
+/* Saved Modal Specific Styles - No Scrolling */
+#saved-modal .modal-content {
+    /* Ensure proper structure and prevent overflow */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-height: 700px; /* Increased to prevent bottom cutoff */
+    height: auto; /* Allow natural height calculation */
+    overflow: visible; /* Ensure bottom buttons are visible */
+    padding-bottom: var(--space-6); /* Extra bottom padding */
+}
+
+#saved-modal .modal-subtitle {
+    margin-bottom: var(--space-3);
+    flex-shrink: 0;
+}
+
+#saved-modal .saved-designs-grid {
+    /* Central section - fixed height for exactly 6 items */
+    flex-shrink: 0;
+}
+
+#saved-modal .saved-actions-bottom {
+    /* Bottom section - always visible */
+    flex-shrink: 0;
+    margin-top: var(--space-1);
+}
+
+#saved-modal .saved-modal-header {
+    flex-shrink: 0;
+}
+
+/* Empty State Styles (Keep for fallback) */
+.saved-empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--neutral-400);
+    padding: var(--space-8);
+    font-size: var(--font-size-body);
+}
+
+.saved-modal-header h3 {
+    margin: 0;
+    font-size: var(--font-size-h4);
+    font-weight: var(--font-weight-semibold);
+    color: var(--neutral-900);
+}
+
+/* RTL-specific positioning - now works with centered title */
+.rtl .saved-modal-header {
+    position: relative;
+}
+
+.rtl #saved-modal h3 {
+    /* Keep center alignment in RTL mode too */
+    text-align: center !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+}
+
+.saved-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+.saved-actions-bottom {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* REMOVED DUPLICATE .saved-action-btn STYLES THAT WERE CONFLICTING WITH MODALS.CSS */
+.saved-action-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-2);
+    background: var(--bg-button); /* Updated for Theme Support */
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--duration-base);
+    text-align: center;
+    /* Ensure text fits properly */
+    min-height: 48px;
+    box-sizing: border-box;
+}
+
+.saved-action-btn:hover {
+    border-color: var(--primary-500);
+    background: var(--primary-50);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.saved-action-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.saved-action-btn svg {
+    color: var(--primary-500);
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.saved-action-btn .btn-text {
+    font-size: var(--font-size-body-sm);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--neutral-800); /* Updated for Theme Support */
+}
+
+.saved-action-btn:hover svg {
+    color: var(--primary-600);
+}
+
+/* Saved Designs Grid - Static layout for exactly 6 items (2x3 grid) */
+.saved-designs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-top: 1px solid var(--neutral-200);
+    border-bottom: 1px solid var(--neutral-200);
+    overflow: hidden; /* No scrolling needed - static height for 6 items */
+    box-sizing: border-box;
+    width: 100%;
+    /* Fixed height to accommodate exactly 6 items in 2x3 grid */
+    height: 480px; /* 3 rows × 160px per row = 480px total */
+}
+
+/* Empty slot styling */
+.saved-design-empty {
+    background: var(--neutral-50);
+    border: 2px dashed var(--neutral-300);
+}
+
+.saved-design-empty:hover {
+    background: var(--neutral-100);
+    border-color: var(--neutral-400);
+}
+
+.empty-slot-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--neutral-400);
+}
+
+.empty-slot-icon {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--neutral-300);
+    margin-bottom: var(--space-2);
+}
+
+.empty-slot-text {
+    font-size: var(--font-size-body-xs);
+    color: var(--neutral-500);
+    text-align: center;
+}
+
+/* Populated slot styling */
+.saved-design-populated {
+    background: white;
+    border: 2px solid var(--neutral-200);
+}
+
+.saved-design-populated:hover {
+    border-color: var(--primary-500);
+}
+
+.saved-design-card {
+    width: 100%; /* Use full available space in grid */
+    height: 140px; /* Fixed height for consistent grid */
+    max-width: 140px; /* But cap it to prevent overflow */
+    margin: 0 auto; /* Center the card if there's extra space */
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--duration-base);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.saved-design-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--primary-500);
+}
+
+.saved-design-card:active {
+    transform: scale(0.98);
+}
+
+.saved-design-preview {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4/3; /* Maintain consistent 4:3 ratio for previews */
+    background: var(--neutral-50);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.saved-design-preview canvas,
+.saved-design-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.saved-design-overlay {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    border: none;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0;
+}
+
+.saved-design-card:hover .saved-design-overlay {
+    opacity: 1;
+}
+
+.saved-design-overlay:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+.saved-design-overlay svg {
+    width: 16px;
+    height: 16px;
+    color: var(--error);
+}
+
+/* Empty State for Saved Designs */
+.saved-empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--neutral-400);
+    padding: var(--space-8);
+    font-size: var(--font-size-body);
+}
+
+/* Scrollbar styling for saved designs grid */
+.saved-designs-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.saved-designs-grid::-webkit-scrollbar-thumb {
+    background: var(--neutral-300);
+    border-radius: 3px;
+}
+
+.saved-designs-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--neutral-400);
+}

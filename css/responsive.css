@@ -1,0 +1,47 @@
+/* ==================== LAYOUT RESPONSIVE STYLES ==================== */
+
+/* ==================== RESPONSIVE - TABLET ==================== */
+@media (min-width: 768px) {
+    :root {
+        --header-height: 64px;
+        --toolbar-height: 80px;
+    }
+    
+    #header h1 {
+        font-size: var(--font-size-heading-md);
+    }
+    
+    .fab {
+        width: 72px;
+        height: 72px;
+    }
+    
+    .fab svg {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .bead-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .panel-content {
+        padding: var(--space-8);
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        height: 56px;
+    }
+}
+
+/* ==================== RESPONSIVE - DESKTOP ==================== */
+@media (min-width: 1024px) {
+    .bead-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    
+    .modal-content {
+        max-width: 500px;
+    }
+}

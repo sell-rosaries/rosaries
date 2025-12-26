@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="js/device-lock.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Design custom rosaries with our mobile-first bead designer tool">
+    <meta name="theme-color" content="#667EEA">
+    <title>Rosary Bead Designer</title>
+    <link rel="icon" href="data:,">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/beads.css">
+    <link rel="stylesheet" href="css/rotation.css">
+    <link rel="stylesheet" href="css/rtl.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Animation CSS Modules -->
+    <link rel="stylesheet" href="css/animations/animations-utility.css">
+    <link rel="stylesheet" href="css/animations/animations-saved.css">
+    <link rel="stylesheet" href="css/animations/animations-designs.css">
+    <link rel="stylesheet" href="css/animations/animations-modals.css">
+    <link rel="stylesheet" href="css/animations/animations-responsive.css">
+    <link rel="stylesheet" href="css/title.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="crt-wrapper">
+            <div class="crt-title">
+                <span id="crt-text"></span><span class="crt-cursor"></span>
+            </div>
+            <div class="crt-eraser" id="crt-eraser"></div>
+            <div class="crt-measure" id="crt-measure"></div>
+        </div>
+
+        <div class="header-info">
+            <button class="saved-toggle" id="saved-toggle" aria-label="Saved Designs">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+                <span class="saved-label">Saved</span>
+            </button>
+
+            <button class="bead-count-badge" id="bead-count-badge" aria-label="View Bead Details">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" />
+                </svg>
+                <span id="header-bead-count">0</span>
+            </button>
+
+            <button class="settings-toggle" id="settings-toggle" aria-label="Settings">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Zoom Controls (floating in canvas) -->
+    <div class="canvas-zoom-controls" id="canvas-zoom-controls">
+        <button class="canvas-zoom-btn" id="zoom-in-btn" aria-label="Zoom In">
+            <span style="font-size: 18px; font-weight: bold; color: inherit;">+</span>
+        </button>
+        <button class="canvas-zoom-btn" id="zoom-out-btn" aria-label="Zoom Out">
+            <span style="font-size: 18px; font-weight: bold; color: inherit;">−</span>
+        </button>
+        <button class="canvas-zoom-btn import-presets-btn" id="import-presets-btn" style="display: none;" aria-label="Import Presets">
+            <span class="import-text">import</span>
+            <span class="presets-text">presets</span>
+        </button>
+        <button class="canvas-zoom-btn" id="generate-btn" aria-label="Generate Shape" style="display: none;">
+            <span style="font-size: 20px;">✎</span>
+        </button>
+        <button class="canvas-zoom-btn" id="magic-btn" aria-label="Magic Perfection" style="display: none;">
+            <span style="font-size: 20px;">✨</span>
+        </button>
+    </div>
+
+    <!-- Main Canvas Container -->
+    <div id="canvas-container">
+        <!-- Canvas info overlay -->
+        <div id="canvas-info">
+            <div class="selected-bead-preview" id="selected-bead-preview">
+                <img id="selected-bead-img" src="" alt="Selected bead">
+            </div>
+        </div>
+
+        <!-- Rotation Control (shown when bead selected) -->
+        <div id="rotation-control" style="display: none;">
+            <div class="rotation-dial">
+                <div class="rotation-track"></div>
+                <div class="rotation-handle" id="rotation-handle"></div>
+                <div class="rotation-value" id="rotation-value">0°</div>
+            </div>
+            <button class="btn-close-rotation" id="close-rotation-btn">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Floating Action Button (FAB) - Bead Inventory -->
+    <button id="fab" class="fab" aria-label="Open Bead Library">
+        <div class="fab-orb-container">
+            <div class="fab-glass-orb"></div>
+            <div class="fab-bead fab-bead-1"></div>
+            <div class="fab-bead fab-bead-2"></div>
+            <div class="fab-bead fab-bead-3"></div>
+            <div class="fab-glow"></div>
+        </div>
+    </button>
+
+    <!-- Bottom Toolbar -->
+    <nav id="bottom-toolbar" class="bottom-toolbar">
+        <button class="toolbar-btn" id="undo-btn" aria-label="Undo" disabled>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 7v6h6M3 13a9 9 0 1 0 3-6.3" />
+            </svg>
+            <span class="toolbar-label">Undo</span>
+        </button>
+
+        <button class="toolbar-btn" id="redo-btn" aria-label="Redo" disabled>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 7v6h-6M21 13a9 9 0 1 1-3-6.3" />
+            </svg>
+            <span class="toolbar-label">Redo</span>
+        </button>
+
+        <button class="toolbar-btn" id="reset-button" aria-label="Reset">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 4v6h6M23 20v-6h-6" />
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+            </svg>
+            <span class="toolbar-label">Reset</span>
+        </button>
+
+        <div class="toolbar-btn-wrapper">
+            <div id="pen-options-menu" class="pen-options-menu">
+                <!-- Eraser -->
+                <button class="pen-option-btn" id="eraser-btn" aria-label="Eraser">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M18 13.5L20.5 16L16 20.5L13.5 18M7 21H12M13.5 18L4 8.5C3.17157 7.67157 3.17157 6.32843 4 5.5L6.5 3C7.32843 2.17157 8.67157 2.17157 9.5 3L19 12.5" />
+                    </svg>
+                </button>
+
+            </div>
+            <button class="toolbar-btn" id="draw-string-btn" aria-label="Draw String">
+                <svg class="draw-icon-normal" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z" />
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+                    <path d="M2 2l7.586 7.586" />
+                    <circle cx="11" cy="11" r="2" />
+                </svg>
+                <svg class="draw-icon-eraser" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="display: none;">
+                    <path
+                        d="M18 13.5L20.5 16L16 20.5L13.5 18M7 21H12M13.5 18L4 8.5C3.17157 7.67157 3.17157 6.32843 4 5.5L6.5 3C7.32843 2.17157 8.67157 2.17157 9.5 3L19 12.5" />
+                </svg>
+                <span class="toolbar-label">Draw</span>
+            </button>
+        </div>
+
+        <button class="toolbar-btn" id="library-btn" aria-label="Design Gallery">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21,15 16,10 5,21" />
+            </svg>
+            <span class="toolbar-label">Gallery</span>
+        </button>
+
+        <button class="toolbar-btn" id="email-btn" aria-label="Send Design">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+            <span class="toolbar-label">Send</span>
+        </button>
+    </nav>
+
+    <!-- Bead Library Panel (Bottom Sheet) -->
+    <div id="bead-library-panel" class="bead-library-panel">
+        <div class="panel-backdrop" id="panel-backdrop"></div>
+        <div class="panel-content">
+            <div class="panel-handle"></div>
+            <div class="panel-header">
+                <h2>Bead Library</h2>
+                <button class="btn-close-panel" id="close-library-btn" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Tool Card -->
+            <div class="tool-section">
+                <div class="tool-card" id="string-tool">
+                    <div class="tool-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9-4.03 9-9 9-9-4.03-9-9z"
+                                stroke-dasharray="2 4" />
+                        </svg>
+                    </div>
+                    <div class="tool-info">
+                        <div class="tool-name">Draw String</div>
+                        <div class="tool-desc">Click and drag to draw a path</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="category-tabs" id="category-tabs">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Bead Grid -->
+            <div class="bead-grid" id="bead-selection">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="email-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeEmailModal()"></div>
+        <div class="modal-content">
+            <button class="btn-close-modal" onclick="closeEmailModal()" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="modal-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+            </div>
+
+            <h2>Send Your Design</h2>
+            <p class="modal-subtitle">Fill in your information below.<br>Your design will be sent to us!</p>
+
+            <form id="email-form">
+                <div class="form-group">
+                    <label for="customer-name">Name</label>
+                    <input type="text" id="customer-name" placeholder="Your name (optional)" autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="customer-email">
+                        Email Address
+                        <span class="required">*</span>
+                    </label>
+                    <input type="email" id="customer-email" placeholder="your@email.com" autocomplete="email"
+                        pattern="[a-zA-Z]+([.\-_][a-zA-Z]+)*@(gmail\.com|yahoo\.com|hotmail\.com|proton\.me)"
+                        title="Enter a valid email with Gmail, Yahoo, Hotmail, or Proton domain" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="customer-phone">
+                        Phone
+                        <span class="required">*</span>
+                    </label>
+                    <input type="tel" id="customer-phone" placeholder="+1 (555) 123-4567" autocomplete="tel"
+                        pattern="[0-9()+\-\s]{7,}" title="Enter a valid phone number with 7-13 digits" required>
+                </div>
+
+                <p class="form-note">* Both Email and Phone Number are required</p>
+
+                <div class="form-group">
+                    <label for="customer-notes">Questions or Notes</label>
+                    <textarea id="customer-notes" rows="4"
+                        placeholder="Any questions or special requests? (optional)"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary" id="send-email-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                        </svg>
+                        <span class="btn-text">Send Design</span>
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeEmailModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Menu Modal -->
+    <div id="reset-menu" class="modal">
+        <div class="modal-backdrop" onclick="closeResetMenu()"></div>
+        <div class="modal-content modal-compact">
+            <div class="modal-header-flex">
+                <button class="btn-close-modal-flex" onclick="closeResetMenu()" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <h3>Reset Options</h3>
+
+            <button class="reset-option-btn" id="reset-all-btn">
+                <span class="option-icon">🔄</span>
+                <div class="option-text">
+                    <div class="option-title">Reset All</div>
+                    <div class="option-desc">Delete everything (string and objects)</div>
+                </div>
+            </button>
+
+            <button class="reset-option-btn" id="delete-objects-btn">
+                <span class="option-icon">🗑️</span>
+                <div class="option-text">
+                    <div class="option-title">Clear Objects</div>
+                    <div class="option-desc">Delete all objects but keep string</div>
+                </div>
+            </button>
+
+            <button class="reset-option-btn" id="delete-individual-btn">
+                <span class="option-icon">✖️</span>
+                <div class="option-text">
+                    <div class="option-title">Delete Individually</div>
+                    <div class="option-desc">Click X on objects to delete them</div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Size Selection Modal -->
+    <div id="size-selection-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeSizeSelectionModal()"></div>
+        <div class="modal-content modal-compact">
+            <button class="btn-close-modal" onclick="closeSizeSelectionModal()" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+
+            <h3>Select Bead Size</h3>
+            <p class="modal-subtitle" id="size-modal-bead-name"></p>
+
+            <div class="size-selection-grid" id="size-selection-grid">
+                <!-- Sizes 4, 6, 8, 10, 12, 14 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Presets Modal -->
+    <div id="import-presets-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeImportPresetsModal()"></div>
+        <div class="modal-content modal-compact">
+            <!-- Content will be populated by populateImportPresetsModal() -->
+            <div style="text-align: center; padding: 2rem; color: var(--neutral-400);">
+                Loading presets...
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Designs Modal -->
+    <div id="saved-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeSavedModal()"></div>
+        <div class="modal-content modal-compact">
+            <!-- Content will be populated dynamically by saved-core.js -->
+
+            <h3>Saved Designs</h3>
+            <p class="modal-subtitle">Save, import, or delete your rosary designs</p>
+
+            <!-- Action Buttons -->
+            <div class="saved-actions">
+                <button class="saved-action-btn" id="save-design-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                    </svg>
+                    <span class="btn-text">${window.getTranslation ? window.getTranslation('save-design') : 'Save
+                        Design'}</span>
+                </button>
+
+                <button class="saved-action-btn" id="import-design-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7,10 12,15 17,10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    <span class="btn-text">${currentLanguage === 'ar' ? 'استيراد' : 'Import Design'}</span>
+                </button>
+
+                <button class="saved-action-btn" id="delete-design-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3,6 5,6 21,6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    <span class="btn-text">${window.getTranslation ? window.getTranslation('delete-design') : 'Delete
+                        Design'}</span>
+                </button>
+            </div>
+
+            <!-- Saved Designs Grid -->
+            <div class="saved-designs-grid" id="saved-designs-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="gallery-panel" class="gallery-panel">
+        <div class="panel-backdrop" id="gallery-panel-backdrop"></div>
+        <div class="panel-content">
+            <div class="panel-handle"></div>
+            <div class="panel-header">
+                <h2>Design Gallery</h2>
+                <button class="btn-close-panel" id="close-gallery-btn" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="gallery-actions-container">
+                <div class="gallery-action-group">
+                    <button class="btn-download-selected" id="download-selected-btn" style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span class="btn-text">Download Selected</span>
+                    </button>
+                    <button class="btn-send-selected" id="send-selected-btn" style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path>
+                        </svg>
+                        <span class="btn-text">Send Selected</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gallery Category Grid -->
+            <div class="gallery-category-grid" id="gallery-category-grid">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Gallery Grid -->
+            <div class="gallery-grid" id="gallery-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Modal -->
+    <div id="fullscreen-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeFullscreenModal()"></div>
+        <div class="modal-content modal-fullscreen">
+            <button class="btn-close-modal" onclick="closeFullscreenModal()" aria-label="Close"
+                style="background: rgba(255, 255, 255, 0.2) !important; backdrop-filter: blur(8px) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; color: white !important; filter: drop-shadow(0 0 3px rgba(0,0,0,0.8));">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    style="filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+            <img id="fullscreen-image" src="" alt="Fullscreen view">
+        </div>
+    </div>
+
+    <!-- Gallery Email Modal -->
+    <div id="gallery-email-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeGalleryEmailModal()"></div>
+        <div class="modal-content">
+            <button class="btn-close-modal" onclick="closeGalleryEmailModal()" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="modal-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+            </div>
+
+            <h2>Send Selected Designs</h2>
+            <p class="modal-subtitle">Fill in your information below.<br>Selected designs will be sent!</p>
+
+            <form id="gallery-email-form">
+                <div class="form-group">
+                    <label for="gallery-customer-name">Name</label>
+                    <input type="text" id="gallery-customer-name" placeholder="Your name (optional)"
+                        autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="gallery-customer-email">
+                        Email Address
+                        <span class="required">*</span>
+                    </label>
+                    <input type="email" id="gallery-customer-email" placeholder="your@email.com" autocomplete="email"
+                        pattern="[a-zA-Z]+([.\-_][a-zA-Z]+)*@(gmail\.com|yahoo\.com|hotmail\.com|proton\.me)"
+                        title="Enter a valid email with Gmail, Yahoo, Hotmail, or Proton domain" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="gallery-customer-phone">
+                        Phone
+                        <span class="required">*</span>
+                    </label>
+                    <input type="tel" id="gallery-customer-phone" placeholder="+1 (555) 123-4567" autocomplete="tel"
+                        pattern="[0-9()+\-\s]{7,}" title="Enter a valid phone number with 7-13 digits" required>
+                </div>
+
+                <p class="form-note">* Both Email and Phone Number are required</p>
+
+                <div class="form-group">
+                    <label for="gallery-customer-notes">Questions or Notes</label>
+                    <textarea id="gallery-customer-notes" rows="4"
+                        placeholder="Any questions or special requests? (optional)"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary" id="send-gallery-email-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                        </svg>
+                        <span class="btn-text">Send Selected</span>
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeGalleryEmailModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeSettingsModal()"></div>
+        <div class="modal-content modal-compact">
+            <div class="modal-header-flex">
+                <button class="btn-close-modal-flex" onclick="closeSettingsModal()" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <h3 data-translate="settings-title">Settings</h3>
+
+            <!-- General Section -->
+            <div class="settings-section">
+                <h4 class="settings-section-title" data-translate="settings-general">General</h4>
+
+                <div class="settings-row">
+                    <span class="settings-label" data-translate="settings-language">Language</span>
+                    <div class="lang-btn-group">
+                        <button class="lang-btn active" id="lang-en" aria-label="English">EN</button>
+                        <button class="lang-btn" id="lang-ar" aria-label="Arabic">AR</button>
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <span class="settings-label" data-translate="settings-theme">Theme</span>
+                    <button id="theme-toggle-btn" class="btn-secondary"
+                        style="width: auto; height: 32px; min-height: 0; padding: 0 16px; font-size: 12px;">
+                        ☀️ Light Mode
+                    </button>
+                </div>
+            </div>
+
+            <!-- Share Section -->
+            <div class="settings-section">
+                <h4 class="settings-section-title" data-translate="share-title">Share</h4>
+                <div class="settings-row">
+                    <span class="settings-label" data-translate="settings-socials">Socials</span>
+                    <button class="social-btn" onclick="handleInstagramInteraction()" aria-label="Instagram">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg"
+                            alt="Instagram" width="18" height="18" style="display: block;">
+                        <span class="social-text" data-translate="social-instagram">Instagram</span>
+                    </button>
+                </div>
+                <div class="settings-btn-grid">
+                    <button class="settings-action-btn" onclick="copyWebsiteLink()" id="share-website-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        <span data-translate="share-website">Share Website</span>
+                    </button>
+                    <button class="settings-action-btn" onclick="copyApkLink()" id="share-apk-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5" />
+                        </svg>
+                        <span data-translate="share-app">Share App</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="settings-section">
+                <h4 class="settings-section-title" data-translate="contact-title">Contact</h4>
+                <p class="settings-desc" data-translate="contact-desc">Have feedback or questions? Let us know!</p>
+                <button class="btn-secondary full-width" onclick="openContactModal()">
+                    <span data-translate="contact-us-btn">Contact Us</span>
+                </button>
+            </div>
+
+            <!-- App Downloads Section -->
+            <div class="settings-section">
+                <h4 class="settings-section-title" data-translate="settings-downloads">App Downloads</h4>
+                <p class="settings-desc" data-translate="settings-downloads-desc">Download the Android app to use offline.</p>
+
+                <div class="apk-download-container" id="apk-download-container">
+                    <!-- Loading state that disappears when APK is ready -->
+                    <div id="apk-loading-state" style="text-align: center; padding: 10px; color: var(--neutral-400); font-size: 13px;">
+                        <span data-translate="settings-loading">Checking for updates...</span>
+                    </div>
+
+                    <button id="download-apk-btn" class="btn-primary full-width" style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span class="btn-text" data-translate="settings-download-btn">Download APK</span>
+                    </button>
+                    <p id="apk-filename-display" class="apk-filename-display" style="text-align: center; margin-top: 8px; font-size: 12px; opacity: 0.7;"></p>
+                    
+                    <!-- Hidden select for compatibility with existing JS logic -->
+                    <select id="apk-version-select" style="display: none;"></select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bead Details Modal -->
+    <div id="bead-details-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeBeadDetailsModal()"></div>
+        <div class="modal-content modal-compact">
+            <div class="modal-header-flex">
+                <button class="btn-close-modal-flex" onclick="closeBeadDetailsModal()" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <h3 data-translate="bead-details-title">Bead Details</h3>
+            <p class="modal-subtitle" id="bead-details-subtitle" data-translate="bead-details-subtitle">Total beads in
+                your design</p>
+
+            <!-- Bead List Container -->
+            <div class="bead-details-list" id="bead-details-list">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Us Modal -->
+    <div id="contact-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeContactModal()"></div>
+        <div class="modal-content modal-compact">
+            <div class="modal-header-flex">
+                <button class="btn-close-modal-flex" onclick="closeContactModal()" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    style="color: var(--primary-500);">
+                    <path
+                        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+            </div>
+
+            <h3 data-translate="contact-modal-title">Contact Us</h3>
+            <p class="modal-subtitle" data-translate="contact-modal-desc">Send us your feedback or questions</p>
+
+            <form id="contact-form" novalidate>
+                <div class="form-group">
+                    <label for="contact-email" data-translate="contact-email-label">Email Address <span
+                            class="required">*</span></label>
+                    <input type="email" id="contact-email" placeholder="your@email.com" autocomplete="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact-message" data-translate="contact-message-label">Message <span
+                            class="required">*</span></label>
+                    <textarea id="contact-message" placeholder="How can we help?" maxlength="500" required></textarea>
+                    <div class="contact-form-note"
+                        style="font-size: var(--font-size-caption); color: var(--neutral-400); margin: calc(var(--space-3) * -1) 0 var(--space-4);">
+                        <span id="contact-char-count">0</span>/500
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">
+                        <span class="btn-text" data-translate="send-message">Send Message</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Generate Shape Modal -->
+    <div id="generate-modal" class="modal">
+        <div class="modal-backdrop no-blur" onclick="closeGenerateModal()" style="background: rgba(0,0,0,0.05);"></div>
+        <div class="modal-content" style="max-width: 320px; padding: var(--space-4); border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--neutral-200); height: auto; min-height: 0;">
+            <div class="modal-header-flex" style="margin-bottom: var(--space-2); display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn-close-modal-flex" id="generate-info-btn" type="button" style="background: var(--primary-50); color: var(--primary-600); font-weight: bold; border-radius: 8px;">
+                    !
+                </button>
+                <button class="btn-close-modal-flex" onclick="closeGenerateModal()" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Main Input View -->
+            <div id="generate-main-view">
+                <form id="generate-form">
+                    <div class="form-group" style="margin-bottom: var(--space-3); text-align: left;">
+                        <label style="font-size: 11px; font-weight: bold; color: var(--neutral-500); margin-bottom: 4px; display: block;" data-translate="generate-label-text">Word/Letters:</label>
+                        <input type="text" id="generate-input-text" 
+                            placeholder="e.g. 'You', '10'..." 
+                            data-translate-placeholder="generate-placeholder-text"
+                            autocomplete="off"
+                            style="text-align: center; font-size: 0.9rem; padding: 8px; border-radius: 8px; border: 1px solid var(--neutral-200); background: var(--neutral-50);">
+                    </div>
+                    <div class="form-group" style="margin-bottom: var(--space-4); text-align: left;">
+                        <label style="font-size: 11px; font-weight: bold; color: var(--neutral-500); margin-bottom: 4px; display: block;" data-translate="generate-label-shapes">Shapes/Concepts:</label>
+                        <input type="text" id="generate-input-shapes" 
+                            placeholder="e.g. 'Star', 'Heart'..." 
+                            data-translate-placeholder="generate-placeholder-shapes"
+                            autocomplete="off"
+                            style="text-align: center; font-size: 0.9rem; padding: 8px; border-radius: 8px; border: 1px solid var(--neutral-200); background: var(--neutral-50);">
+                    </div>
+                    <button type="submit" class="btn-primary" style="height: 40px; font-size: 14px;" data-translate="generate-btn-text">
+                        Generate
+                    </button>
+                </form>
+            </div>
+
+            <!-- Info View (Hidden by default) -->
+            <div id="generate-info-view" style="display: none; padding-top: var(--space-2);">
+                <h4 style="margin-bottom: var(--space-3); color: var(--neutral-800); text-align: center; font-size: 14px;" data-translate="generate-info-title">Supported Offline</h4>
+                <div style="font-size: 12px; color: var(--neutral-600); line-height: 1.6;">
+                    <p data-translate="generate-info-common"><strong>Common:</strong> Circle, Triangle, Square, Pentagon, Hexagon, Octagon, Diamond, Star, Heart, Cross, Crescent.</p>
+                    <p style="margin-top: 8px;" data-translate="generate-info-text"><strong>Text:</strong> Any letters, numbers, or symbols (up to 12 chars) like "You", "10", "A&B", "❤️".</p>
+                    <p style="margin-top: 8px; font-style: italic; opacity: 0.8;" class="generate-ai-mention" data-translate="generate-info-ai">Anything else uses AI fallback.</p>
+                </div>
+                <button class="btn-secondary" type="button" id="generate-back-btn" style="height: 32px; font-size: 12px; margin-top: var(--space-4);" data-translate="generate-back">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- Sandbox String Type Tracker (for testing) -->
+    <script src="js/sandboxStringType.js"></script>
+
+    <!-- Application scripts - load in order -->
+    <script src="js/globals.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/scene.js"></script>
+    <script src="js/string.js"></script>
+    <script src="js/beads.js"></script>
+    <script src="js/auto-fit-system.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/rotation.js"></script>
+    <script src="js/ai-config.js"></script>
+    <script src="js/generate.js"></script>
+    <script bh-id="magic-script" src="js/magic.js"></script>
+    <!-- Tools -->
+    <script src="js/tools/eraser-tool.js"></script>
+    <script src="js/tools.js"></script>
+    <script src="js/reset.js"></script>
+    <script src="js/email/modal.js"></script>
+    <script src="js/email/capture.js"></script>
+    <script src="js/email/validation.js"></script>
+    <script src="js/email/send.js"></script>
+    <script src="js/gallery/data.js"></script>
+    <script src="js/gallery/ui.js"></script>
+    <script src="js/gallery/selection.js"></script>
+    <script src="js/gallery/email.js"></script>
+    <script src="js/ui/panel.js"></script>
+    <script src="js/ui/beads.js"></script>
+    <script src="js/ui/preferences.js"></script>
+    <script src="js/ui/preview.js"></script>
+    <script src="js/ui/settings.js"></script>
+    <script src="js/interactions/mouse.js"></script>
+    <script src="js/interactions/touch.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui/custom-alert.js"></script>
+    <!-- Language Management Modular Scripts -->
+    <script src="js/language/language-core.js"></script>
+    <script src="js/language/language-ui-core.js"></script>
+    <script src="js/language/language-saved.js"></script>
+    <script src="js/language/language-email.js"></script>
+    <script src="js/language/language-gallery.js"></script>
+    <script src="js/language/language-behaviors.js"></script>
+    <script src="js/language/language-system.js"></script>
+    <script src="js/importPresets.js"></script>
+    <!-- Saved Designs Modular Scripts -->
+    <script src="js/saved/saved-core.js"></script>
+    <script src="js/saved/saved-ui.js"></script>
+    <script src="js/saved/saved-delete.js"></script>
+    <script src="js/saved/saved-preview.js"></script>
+    <script src="js/auto-fit-system.js"></script>
+    <script src="js/saved/saved-capture.js"></script>
+    <script src="js/saved/saved-import.js"></script>
+    <script src="js/saved/saved-styles.js"></script>
+    <script src="js/manualFit.js"></script>
+    <script src="js/stringSize.js"></script>
+    <script src="js/beads_modal.js"></script>
+    <script src="js/init.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/title.js"></script>
+    <script src="js/admin-feature.js"></script>
+
+    <!-- Console Message & Cleanup -->
+    <script>
+        console.clear();
+        console.log(
+            "%c JULARIES %c Rosary Designer Active",
+            "color: #bc13fe; font-weight: bold; font-size: 20px; background: #080808; padding: 10px; border: 1px solid #bc13fe; border-radius: 5px;",
+            "color: #00f3ff; font-weight: bold; font-size: 14px; padding: 5px;"
+        );
+    </script>
+</body>
+
+</html>
