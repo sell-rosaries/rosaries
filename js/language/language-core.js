@@ -55,6 +55,7 @@ const translations = {
         'social-instagram': 'Instagram',
         'share-website': 'Share Website',
         'share-app': 'Share App',
+        'share-click-hint': 'Click QR code to expand',
 
         // Contact
         'contact-title': 'Contact',
@@ -141,6 +142,7 @@ const translations = {
         'social-instagram': 'إنستغرام',
         'share-website': 'مشاركة الموقع',
         'share-app': 'مشاركة التطبيق',
+        'share-click-hint': 'انقر على الرمز للتكبير',
 
         // Contact
         'contact-title': 'تواصل معنا',
@@ -180,12 +182,12 @@ const translations = {
 };
 
 // Current language state
-let currentLanguage = 'en';
+let currentLanguage = 'ar';
 
 // Language Manager class
 class LanguageManager {
     constructor() {
-        this.currentLanguage = localStorage.getItem('app-language') || 'en'; // Load from storage
+        this.currentLanguage = localStorage.getItem('app-language') || 'ar'; // Load from storage
         currentLanguage = this.currentLanguage; // Initialize global variable too
         this.rtlLanguages = ['ar']; // Arabic and other RTL languages
         this.saveTimeout = null; // Timeout for debounced saving

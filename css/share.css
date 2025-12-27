@@ -1,0 +1,109 @@
+/* SHARE MODAL */
+.share-modal-content {
+    text-align: center;
+    max-width: 300px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    /* For absolute close button */
+    /* Ensure it's visible above share sheet (approx bottom 20-30% usually) */
+    /* We'll center it on screen, which is standard and safe */
+}
+
+/* Ensure Share Modal is above Settings Modal */
+#share-modal {
+    z-index: 1500;
+    /* Settings modal is usually 300-1000 */
+}
+
+.share-msg {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    margin-bottom: 15px;
+    opacity: 0.8;
+}
+
+#qrcode-container {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px auto;
+    cursor: pointer;
+    transition: transform 0.2s;
+    width: fit-content;
+}
+
+#qrcode-container img {
+    display: block;
+    /* Remove gap */
+}
+
+#qrcode-container:active {
+    transform: scale(0.98);
+}
+
+.share-hint {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+/* Fix close button position on mini modal */
+.share-modal-content .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    color: var(--neutral-600);
+}
+
+/* FULLSCREEN QR CODE */
+.fullscreen-qr {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.fullscreen-qr img {
+    max-width: 90%;
+    max-height: 80%;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.fullscreen-close {
+    color: white;
+    font-size: 2rem;
+    position: absolute;
+    /* Standard Top Right */
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    margin-top: 0;
+    /* Override previous margin */
+}
+
+.fullscreen-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}

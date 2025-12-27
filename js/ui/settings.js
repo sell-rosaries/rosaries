@@ -353,7 +353,7 @@ function copyToClipboard(text, type) {
         textarea.select();
         try {
             document.execCommand('copy');
-            showShareSuccess(type);
+            showShareSuccess(type, text);
         } catch (err) {
             const isArabic = (typeof languageManager !== 'undefined' && languageManager.currentLanguage === 'ar') ||
                 (typeof currentLanguage !== 'undefined' && currentLanguage === 'ar');
@@ -364,7 +364,7 @@ function copyToClipboard(text, type) {
     }
 
     navigator.clipboard.writeText(text).then(() => {
-        showShareSuccess(type);
+        showShareSuccess(type, text);
     }).catch(err => {
         const isArabic = (typeof languageManager !== 'undefined' && languageManager.currentLanguage === 'ar') ||
             (typeof currentLanguage !== 'undefined' && currentLanguage === 'ar');
@@ -372,229 +372,102 @@ function copyToClipboard(text, type) {
     });
 }
 
-function showShareSuccess(type) {
+function showShareSuccess(type, url) {
     const isArabic = (typeof languageManager !== 'undefined' && languageManager.currentLanguage === 'ar') ||
         (typeof currentLanguage !== 'undefined' && currentLanguage === 'ar');
 
-    let msg = 'Link copied! Paste it anywhere to share.';
+    let msg = 'Link copied!';
+
     if (type === 'website') {
-        msg = isArabic ? 'تم نسخ رابط الموقع! الصقه في أي مكان للمشاركة.' : 'Website link copied! Paste it anywhere to share.';
+        msg = isArabic ? 'تم نسخ رابط الموقع!' : 'Website link copied!';
+        if (!url) url = 'https://sell-rosaries.github.io/rosaries/';
     } else if (type === 'app') {
-        msg = isArabic ? 'تم نسخ رابط التطبيق! الصقه في أي مكان للمشاركة.' : 'App download link copied! Paste it anywhere to share.';
+        msg = isArabic ? 'تم نسخ رابط التطبيق!' : 'App link copied!';
     } else if (type === 'instagram') {
         msg = isArabic ? 'تم نسخ رابط انستغرام!' : 'Instagram link copied!';
+        if (!url) url = 'https://www.instagram.com/taleenaccesorios/';
     }
 
-    if (typeof showCustomAlert === 'function') {
-        showCustomAlert(msg, 'success');
+    // Use new Share Modal with QR Code
+    openShareModal(url, msg);
+
+    // Also show small alert for feedback if needed, but modal is better
+    // showCustomAlert(msg, 'success'); 
+}
+
+function openShareModal(url, msg) {
+    const modal = document.getElementById('share-modal');
+    const container = document.getElementById('qrcode-container');
+    const msgEl = document.getElementById('share-msg');
+
+    if (!modal || !container) return;
+
+    // Clear previous QR
+    container.innerHTML = '';
+
+    if (msgEl && msg) msgEl.textContent = msg;
+
+    // Generate QR
+    if (typeof QRCode !== 'undefined') {
+        new QRCode(container, {
+            text: url,
+            width: 150,
+            height: 150,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // Setup click to expand
+        container.onclick = () => showFullscreenQR(url);
     } else {
-        alert(msg);
+        container.textContent = "QR Lib missing";
     }
+
+    modal.classList.add('active');
 }
 
-// ==========================================
-// CONTACT FEATURES
-// ==========================================
-
-function openContactModal() {
-    const modal = document.getElementById('contact-modal');
-    if (modal) {
-        modal.classList.add('active');
-
-        const msgInput = document.getElementById('contact-message');
-        if (msgInput) {
-            // Reset form
-            const form = document.getElementById('contact-form');
-            if (form) form.reset();
-
-            // Remove any leftover highlights
-            const inputs = form.querySelectorAll('input, textarea');
-            inputs.forEach(input => {
-                input.classList.remove('error-highlight');
-                input.classList.remove('success-highlight');
-            });
-
-            // Update count
-            updateContactCharCount();
-
-            // Add input listener
-            msgInput.addEventListener('input', updateContactCharCount);
-
-            // Add email validation listener for live feedback
-            const emailInput = document.getElementById('contact-email');
-            if (emailInput) {
-                // Clear errors on input
-                emailInput.addEventListener('input', function () {
-                    if (typeof clearFieldError === 'function') {
-                        clearFieldError(this);
-                    } else {
-                        this.classList.remove('error-highlight');
-                        this.classList.remove('success-highlight');
-                    }
-                });
-
-                // Validate on blur
-                emailInput.addEventListener('blur', function () {
-                    const val = this.value.trim();
-                    if (val) {
-                        if (typeof validateEmail === 'function') {
-                            const validation = validateEmail(val);
-                            if (!validation.valid) {
-                                if (typeof setFieldError === 'function') {
-                                    setFieldError(this, validation.message);
-                                } else {
-                                    this.classList.add('error-highlight');
-                                }
-                            } else {
-                                if (typeof setFieldSuccess === 'function') {
-                                    setFieldSuccess(this);
-                                } else {
-                                    this.classList.remove('error-highlight');
-                                    this.classList.add('success-highlight');
-                                }
-                            }
-                        }
-                    } else {
-                        if (typeof clearFieldError === 'function') {
-                            clearFieldError(this);
-                        }
-                    }
-                });
-            }
-        }
-
-        const form = document.getElementById('contact-form');
-        if (form) {
-            form.onsubmit = (e) => {
-                e.preventDefault();
-                sendContactEmail();
-            };
-        }
-
-        updateSettingsLanguage(); // Update translations for modal
-    }
-}
-
-function closeContactModal() {
-    const modal = document.getElementById('contact-modal');
+function closeShareModal() {
+    const modal = document.getElementById('share-modal');
     if (modal) modal.classList.remove('active');
 }
 
-function updateContactCharCount() {
-    const msgInput = document.getElementById('contact-message');
-    const countDisplay = document.getElementById('contact-char-count');
-    if (msgInput && countDisplay) {
-        const len = msgInput.value.length;
-        countDisplay.textContent = len;
-        if (len >= 500) {
-            countDisplay.style.color = 'var(--error)';
-        } else {
-            countDisplay.style.color = '';
-        }
-    }
-}
+function showFullscreenQR(text) {
+    let overlay = document.getElementById('fullscreen-qr-overlay');
 
-function sendContactEmail() {
-    const emailInput = document.getElementById('contact-email');
-    const messageInput = document.getElementById('contact-message');
-    const btn = document.querySelector('#contact-form button[type="submit"]');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'fullscreen-qr-overlay';
+        overlay.className = 'fullscreen-qr';
+        overlay.innerHTML = `
+            <div id="fs-qr-target"></div>
+            <div class="fullscreen-close" onclick="document.getElementById('fullscreen-qr-overlay').style.display='none'">&times;</div>
+        `;
+        document.body.appendChild(overlay);
 
-    if (!emailInput || !messageInput) return;
-
-    const email = emailInput.value.trim();
-    const message = messageInput.value.trim();
-
-    // 1. Validation
-    if (!email || !message) {
-        showCustomAlert(window.getTranslation ? window.getTranslation('validation-both-required') || 'Please fill in all required fields' : 'Please fill in all required fields', 'error');
-        if (!email) {
-            if (typeof setFieldError === 'function') setFieldError(emailInput, 'Email is required');
-            else emailInput.classList.add('error-highlight');
-        }
-        if (!message) messageInput.classList.add('error-highlight');
-        return;
-    }
-
-    // Use global validator if available - EMAIL ONLY
-    if (typeof validateEmail === 'function') {
-        const validation = validateEmail(email);
-        if (!validation.valid) {
-            if (typeof setFieldError === 'function') {
-                setFieldError(emailInput, validation.message);
-            } else {
-                emailInput.classList.add('error-highlight');
-            }
-
-            // Add shake effect
-            const modalContent = document.querySelector('#contact-modal .modal-content');
-            if (modalContent) {
-                modalContent.classList.add('shake');
-                setTimeout(() => modalContent.classList.remove('shake'), 500);
-            }
-            return;
-        } else {
-            if (typeof setFieldSuccess === 'function') setFieldSuccess(emailInput);
-        }
-    }
-
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> ' + (window.getTranslation ? window.getTranslation('sending') || 'Sending...' : 'Sending...');
-
-    // 2. Prepare Data
-    const scriptURL = window.GOOGLE_SCRIPT_URL;
-
-    if (!scriptURL) {
-        showCustomAlert(window.getTranslation ? window.getTranslation('gallery-script-not-configured') : 'System error: Email service not configured', 'error');
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-        return;
-    }
-
-    const emailData = {
-        type: 'contact',
-        name: 'Contact Form User',
-        email: email,
-        phone: 'Not provided',
-        notes: message,
-    };
-
-    // 3. Send Request
-    fetch(scriptURL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'text/plain',
-        },
-        body: JSON.stringify(emailData)
-    })
-        .then(async response => {
-            const resultText = await response.text();
-            let resultData;
-            try {
-                resultData = JSON.parse(resultText);
-            } catch (e) {
-                console.warn('Backend response was not JSON', resultText);
-                if (!response.ok) throw new Error('Network response was not ok');
-            }
-
-            if (resultData && resultData.success === false) {
-                // Backend returns 'error' or 'message' depending on version
-                throw new Error(resultData.message || resultData.error || 'Server reported failure');
-            }
-
-            showCustomAlert(window.getTranslation ? window.getTranslation('contact-sent-success') : 'Message sent successfully!', 'success');
-            closeContactModal();
-            document.getElementById('contact-form').reset();
-            if (typeof clearFieldError === 'function') clearFieldError(document.getElementById('contact-email'));
-        })
-        .catch(error => {
-            console.error('Email error:', error);
-            showCustomAlert((window.getTranslation ? window.getTranslation('contact-sent-failed') : 'Failed to send message') + (error.message ? ': ' + error.message : ''), 'error');
-        })
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.style.display = 'none';
         });
+    }
+
+    const target = overlay.querySelector('#fs-qr-target');
+    target.innerHTML = '';
+    target.style.background = 'white';
+    target.style.padding = '20px';
+    target.style.borderRadius = '8px';
+
+    if (typeof QRCode !== 'undefined') {
+        new QRCode(target, {
+            text: text,
+            width: 300,
+            height: 300,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+
+    overlay.style.display = 'flex';
 }
 
 // Export functions
@@ -608,3 +481,5 @@ window.openContactModal = openContactModal;
 window.closeContactModal = closeContactModal;
 window.sendContactEmail = sendContactEmail;
 window.handleInstagramInteraction = handleInstagramInteraction;
+window.closeShareModal = closeShareModal;
+

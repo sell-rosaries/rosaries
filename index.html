@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="css/rtl.css">
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/settings.css">
+    <link rel="stylesheet" href="css/share.css">
     <link rel="stylesheet" href="css/responsive.css">
     <!-- Animation CSS Modules -->
     <link rel="stylesheet" href="css/animations/animations-utility.css">
@@ -79,7 +80,8 @@
         <button class="canvas-zoom-btn" id="zoom-out-btn" aria-label="Zoom Out">
             <span style="font-size: 18px; font-weight: bold; color: inherit;">−</span>
         </button>
-        <button class="canvas-zoom-btn import-presets-btn" id="import-presets-btn" style="display: none;" aria-label="Import Presets">
+        <button class="canvas-zoom-btn import-presets-btn" id="import-presets-btn" style="display: none;"
+            aria-label="Import Presets">
             <span class="import-text">import</span>
             <span class="presets-text">presets</span>
         </button>
@@ -551,6 +553,16 @@
         </div>
     </div>
 
+    <!-- Share Success Modal -->
+    <div id="share-modal" class="modal">
+        <div class="modal-content share-modal-content">
+            <span class="close-modal" onclick="closeShareModal()">&times;</span>
+            <p id="share-msg" class="share-msg">Link copied!</p>
+            <div id="qrcode-container" title="Click to expand"></div>
+            <p class="share-hint" data-translate="share-click-hint">Click QR code to expand</p>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal">
         <div class="modal-backdrop" onclick="closeSettingsModal()"></div>
@@ -626,24 +638,28 @@
             <!-- App Downloads Section -->
             <div class="settings-section">
                 <h4 class="settings-section-title" data-translate="settings-downloads">App Downloads</h4>
-                <p class="settings-desc" data-translate="settings-downloads-desc">Download the Android app to use offline.</p>
+                <p class="settings-desc" data-translate="settings-downloads-desc">Download the Android app to use
+                    offline.</p>
 
                 <div class="apk-download-container" id="apk-download-container">
                     <!-- Loading state that disappears when APK is ready -->
-                    <div id="apk-loading-state" style="text-align: center; padding: 10px; color: var(--neutral-400); font-size: 13px;">
+                    <div id="apk-loading-state"
+                        style="text-align: center; padding: 10px; color: var(--neutral-400); font-size: 13px;">
                         <span data-translate="settings-loading">Checking for updates...</span>
                     </div>
 
                     <button id="download-apk-btn" class="btn-primary full-width" style="display: none;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="7,10 12,15 17,10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
                         <span class="btn-text" data-translate="settings-download-btn">Download APK</span>
                     </button>
-                    <p id="apk-filename-display" class="apk-filename-display" style="text-align: center; margin-top: 8px; font-size: 12px; opacity: 0.7;"></p>
-                    
+                    <p id="apk-filename-display" class="apk-filename-display"
+                        style="text-align: center; margin-top: 8px; font-size: 12px; opacity: 0.7;"></p>
+
                     <!-- Hidden select for compatibility with existing JS logic -->
                     <select id="apk-version-select" style="display: none;"></select>
                 </div>
@@ -730,9 +746,12 @@
     <!-- Generate Shape Modal -->
     <div id="generate-modal" class="modal">
         <div class="modal-backdrop no-blur" onclick="closeGenerateModal()" style="background: rgba(0,0,0,0.05);"></div>
-        <div class="modal-content" style="max-width: 320px; padding: var(--space-4); border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--neutral-200); height: auto; min-height: 0;">
-            <div class="modal-header-flex" style="margin-bottom: var(--space-2); display: flex; justify-content: space-between; align-items: center;">
-                <button class="btn-close-modal-flex" id="generate-info-btn" type="button" style="background: var(--primary-50); color: var(--primary-600); font-weight: bold; border-radius: 8px;">
+        <div class="modal-content"
+            style="max-width: 320px; padding: var(--space-4); border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--neutral-200); height: auto; min-height: 0;">
+            <div class="modal-header-flex"
+                style="margin-bottom: var(--space-2); display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn-close-modal-flex" id="generate-info-btn" type="button"
+                    style="background: var(--primary-50); color: var(--primary-600); font-weight: bold; border-radius: 8px;">
                     !
                 </button>
                 <button class="btn-close-modal-flex" onclick="closeGenerateModal()" aria-label="Close">
@@ -746,22 +765,23 @@
             <div id="generate-main-view">
                 <form id="generate-form">
                     <div class="form-group" style="margin-bottom: var(--space-3); text-align: left;">
-                        <label style="font-size: 11px; font-weight: bold; color: var(--neutral-500); margin-bottom: 4px; display: block;" data-translate="generate-label-text">Word/Letters:</label>
-                        <input type="text" id="generate-input-text" 
-                            placeholder="e.g. 'You', '10'..." 
-                            data-translate-placeholder="generate-placeholder-text"
-                            autocomplete="off"
+                        <label
+                            style="font-size: 11px; font-weight: bold; color: var(--neutral-500); margin-bottom: 4px; display: block;"
+                            data-translate="generate-label-text">Word/Letters:</label>
+                        <input type="text" id="generate-input-text" placeholder="e.g. 'You', '10'..."
+                            data-translate-placeholder="generate-placeholder-text" autocomplete="off"
                             style="text-align: center; font-size: 0.9rem; padding: 8px; border-radius: 8px; border: 1px solid var(--neutral-200); background: var(--neutral-50);">
                     </div>
                     <div class="form-group" style="margin-bottom: var(--space-4); text-align: left;">
-                        <label style="font-size: 11px; font-weight: bold; color: var(--neutral-500); margin-bottom: 4px; display: block;" data-translate="generate-label-shapes">Shapes/Concepts:</label>
-                        <input type="text" id="generate-input-shapes" 
-                            placeholder="e.g. 'Star', 'Heart'..." 
-                            data-translate-placeholder="generate-placeholder-shapes"
-                            autocomplete="off"
+                        <label
+                            style="font-size: 11px; font-weight: bold; color: var(--neutral-500); margin-bottom: 4px; display: block;"
+                            data-translate="generate-label-shapes">Shapes/Concepts:</label>
+                        <input type="text" id="generate-input-shapes" placeholder="e.g. 'Star', 'Heart'..."
+                            data-translate-placeholder="generate-placeholder-shapes" autocomplete="off"
                             style="text-align: center; font-size: 0.9rem; padding: 8px; border-radius: 8px; border: 1px solid var(--neutral-200); background: var(--neutral-50);">
                     </div>
-                    <button type="submit" class="btn-primary" style="height: 40px; font-size: 14px;" data-translate="generate-btn-text">
+                    <button type="submit" class="btn-primary" style="height: 40px; font-size: 14px;"
+                        data-translate="generate-btn-text">
                         Generate
                     </button>
                 </form>
@@ -769,13 +789,19 @@
 
             <!-- Info View (Hidden by default) -->
             <div id="generate-info-view" style="display: none; padding-top: var(--space-2);">
-                <h4 style="margin-bottom: var(--space-3); color: var(--neutral-800); text-align: center; font-size: 14px;" data-translate="generate-info-title">Supported Offline</h4>
+                <h4 style="margin-bottom: var(--space-3); color: var(--neutral-800); text-align: center; font-size: 14px;"
+                    data-translate="generate-info-title">Supported Offline</h4>
                 <div style="font-size: 12px; color: var(--neutral-600); line-height: 1.6;">
-                    <p data-translate="generate-info-common"><strong>Common:</strong> Circle, Triangle, Square, Pentagon, Hexagon, Octagon, Diamond, Star, Heart, Cross, Crescent.</p>
-                    <p style="margin-top: 8px;" data-translate="generate-info-text"><strong>Text:</strong> Any letters, numbers, or symbols (up to 12 chars) like "You", "10", "A&B", "❤️".</p>
-                    <p style="margin-top: 8px; font-style: italic; opacity: 0.8;" class="generate-ai-mention" data-translate="generate-info-ai">Anything else uses AI fallback.</p>
+                    <p data-translate="generate-info-common"><strong>Common:</strong> Circle, Triangle, Square,
+                        Pentagon, Hexagon, Octagon, Diamond, Star, Heart, Cross, Crescent.</p>
+                    <p style="margin-top: 8px;" data-translate="generate-info-text"><strong>Text:</strong> Any letters,
+                        numbers, or symbols (up to 12 chars) like "You", "10", "A&B", "❤️".</p>
+                    <p style="margin-top: 8px; font-style: italic; opacity: 0.8;" class="generate-ai-mention"
+                        data-translate="generate-info-ai">Anything else uses AI fallback.</p>
                 </div>
-                <button class="btn-secondary" type="button" id="generate-back-btn" style="height: 32px; font-size: 12px; margin-top: var(--space-4);" data-translate="generate-back">Back</button>
+                <button class="btn-secondary" type="button" id="generate-back-btn"
+                    style="height: 32px; font-size: 12px; margin-top: var(--space-4);"
+                    data-translate="generate-back">Back</button>
             </div>
         </div>
     </div>
@@ -784,8 +810,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
+
     <!-- Sandbox String Type Tracker (for testing) -->
     <script src="js/sandboxStringType.js"></script>
+
+    <!-- Libs -->
+    <script src="js/tools/qrcode.min.js"></script>
 
     <!-- Application scripts - load in order -->
     <script src="js/globals.js"></script>
